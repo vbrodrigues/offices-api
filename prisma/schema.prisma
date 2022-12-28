@@ -1,0 +1,103 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Office {
+  id                 String   @id @default(uuid())
+  name               String
+  owner_email        String
+  owner_phone_number String?
+  logo               String?
+  created_at         DateTime @default(now())
+
+  clients Client[]
+}
+
+model Client {
+  id           String    @id @default(uuid())
+  office_id    String
+  name         String
+  email        String
+  phone_number String?
+  created_at   DateTime  @default(now())
+  updated_at   DateTime?
+
+  office   Office    @relation(fields: [office_id], references: [id])
+  projects Project[]
+}
+
+model Role {
+  id         String   @id @default(uuid())
+  label      String
+  created_at DateTime @default(now())
+
+  employees Employee[]
+}
+
+model Employee {
+  id           String    @id @default(uuid())
+  role_id      String
+  name         String
+  email        String
+  phone_number String?
+  created_at   DateTime  @default(now())
+  updated_at   DateTime?
+
+  role              Role              @relation(fields: [role_id], references: [id])
+  project_files     ProjectFile[]
+  project_schedules ProjectSchedule[]
+}
+
+model ProjectType {
+  id         String   @id @default(uuid())
+  name       String
+  created_at DateTime @default(now())
+
+  projects Project[]
+}
+
+model Project {
+  id              String   @id @default(uuid())
+  client_id       String
+  project_type_id String
+  name            String
+  created_at      DateTime @default(now())
+
+  client    Client            @relation(fields: [client_id], references: [id])
+  type      ProjectType       @relation(fields: [project_type_id], references: [id])
+  files     ProjectFile[]
+  schedules ProjectSchedule[]
+}
+
+model ProjectFile {
+  id            String    @id @default(uuid())
+  project_id    String
+  created_by_id String
+  path          String
+  created_at    DateTime  @default(now())
+  updated_at    DateTime?
+
+  project    Project  @relation(fields: [project_id], references: [id])
+  created_by Employee @relation(fields: [created_by_id], references: [id])
+}
+
+model ProjectSchedule {
+  id                   String    @id @default(uuid())
+  project_id           String
+  assigned_employee_id String
+  start_date           DateTime
+  end_date             DateTime
+  created_at           DateTime  @default(now())
+  updated_at           DateTime?
+
+  project           Project  @relation(fields: [project_id], references: [id])
+  assigned_employee Employee @relation(fields: [assigned_employee_id], references: [id])
+}
