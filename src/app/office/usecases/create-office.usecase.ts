@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { BadRequestException } from '@nestjs/common/exceptions';
 import { Office } from '@prisma/client';
-import { OfficesRepository } from '../database/offices-repository';
+import { OfficesRepository } from '../office.repository';
 import { CreateOfficeDTO } from '../dtos/create-office-dto';
 
 @Injectable()

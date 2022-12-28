@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { Office } from '@prisma/client';
-import { OfficesRepository } from '../database/offices-repository';
+import { OfficesRepository } from '../office.repository';
 
 @Injectable()
 export class FindOfficeUsecase {

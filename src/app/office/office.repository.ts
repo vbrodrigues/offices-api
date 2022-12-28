@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { Office } from '@prisma/client';
 import { PrismaService } from 'src/database/prisma-service';
-import { CreateOfficeDTO } from '../dtos/create-office-dto';
+import { CreateOfficeDTO } from './dtos/create-office-dto';
 
 export abstract class OfficesRepository {
   abstract add(data: CreateOfficeDTO): Promise<Office>;
