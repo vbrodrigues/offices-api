@@ -18,7 +18,8 @@ model Office {
   logo               String?
   created_at         DateTime @default(now())
 
-  clients Client[]
+  clients   Client[]
+  employees Employee[]
 }
 
 model Client {
@@ -44,6 +45,7 @@ model Role {
 
 model Employee {
   id           String    @id @default(uuid())
+  office_id    String
   role_id      String
   name         String
   email        String
@@ -51,6 +53,7 @@ model Employee {
   created_at   DateTime  @default(now())
   updated_at   DateTime?
 
+  office            Office            @relation(fields: [office_id], references: [id])
   role              Role              @relation(fields: [role_id], references: [id])
   project_files     ProjectFile[]
   project_schedules ProjectSchedule[]

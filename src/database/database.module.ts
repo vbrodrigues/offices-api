@@ -4,6 +4,10 @@ import {
   ClientsRepositorySQL,
 } from 'src/app/client/client.repository';
 import {
+  EmployeesRepository,
+  EmployeesRepositorySQL,
+} from 'src/app/employee/employee.repository';
+import {
   OfficesRepository,
   OfficesRepositorySQL,
 } from 'src/app/office/office.repository';
@@ -28,7 +32,16 @@ import { PrismaService } from './prisma-service';
       provide: RolesRepository,
       useClass: RolesRepositorySQL,
     },
+    {
+      provide: EmployeesRepository,
+      useClass: EmployeesRepositorySQL,
+    },
   ],
-  exports: [OfficesRepository, ClientsRepository, RolesRepository],
+  exports: [
+    OfficesRepository,
+    ClientsRepository,
+    RolesRepository,
+    EmployeesRepository,
+  ],
 })
 export class DatabaseModule {}
