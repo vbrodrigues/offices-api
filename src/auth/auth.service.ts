@@ -1,11 +1,15 @@
 import { Injectable } from '@nestjs/common';
+import { JwtService } from '@nestjs/jwt';
 import { Employee } from '@prisma/client';
 import { validatePassword } from 'src/app/common/utils/hash-password';
 import { EmployeesRepository } from 'src/app/employee/employee.repository';
 
 @Injectable()
 export class AuthService {
-  constructor(private employeesRepository: EmployeesRepository) {}
+  constructor(
+    private employeesRepository: EmployeesRepository,
+    private jwtService: JwtService,
+  ) {}
 
   async validateEmployee(
     email: string,
@@ -32,5 +36,10 @@ export class AuthService {
     }
 
     return employee;
+  }
+
+  async login(employee: Employee) {
+    const payload = { email: employee.email, sub: employee.id };
+    return { access_token: this.jwtService.sign(payload) };
   }
 }
