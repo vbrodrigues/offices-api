@@ -2,11 +2,13 @@ import { Injectable } from '@nestjs/common';
 import { Office } from '@prisma/client';
 import { PrismaService } from 'src/database/prisma-service';
 import { CreateOfficeDTO } from './dtos/create-office-dto';
+import { UpdateOfficeDTO } from './dtos/update-office-dto';
 
 export abstract class OfficesRepository {
   abstract add(data: CreateOfficeDTO): Promise<Office>;
   abstract findByName(name: string): Promise<Office | null>;
   abstract findById(office_id: string): Promise<Office | null>;
+  abstract update(office_id: string, data: UpdateOfficeDTO): Promise<void>;
 }
 
 @Injectable()
@@ -25,5 +27,14 @@ export class OfficesRepositorySQL implements OfficesRepository {
 
   async findById(office_id: string): Promise<Office | null> {
     return await this.prisma.office.findUnique({ where: { id: office_id } });
+  }
+
+  async update(office_id: string, data: UpdateOfficeDTO): Promise<void> {
+    await this.prisma.office.update({
+      where: {
+        id: office_id,
+      },
+      data: data,
+    });
   }
 }
