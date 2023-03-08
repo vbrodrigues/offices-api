@@ -7,6 +7,10 @@ import {
   OfficesRepository,
   OfficesRepositorySQL,
 } from 'src/app/office/office.repository';
+import {
+  RolesRepository,
+  RolesRepositorySQL,
+} from 'src/app/role/role.repository';
 import { PrismaService } from './prisma-service';
 
 @Module({
@@ -20,7 +24,11 @@ import { PrismaService } from './prisma-service';
       provide: ClientsRepository,
       useClass: ClientsRepositorySQL,
     },
+    {
+      provide: RolesRepository,
+      useClass: RolesRepositorySQL,
+    },
   ],
-  exports: [OfficesRepository, ClientsRepository],
+  exports: [OfficesRepository, ClientsRepository, RolesRepository],
 })
 export class DatabaseModule {}
