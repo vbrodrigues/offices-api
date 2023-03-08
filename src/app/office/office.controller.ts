@@ -1,6 +1,9 @@
-import { Controller } from '@nestjs/common';
+import { Controller, UnauthorizedException } from '@nestjs/common';
 import { Body, Get, Param, Post, Put } from '@nestjs/common/decorators';
+import { UseGuards } from '@nestjs/common/decorators/core/use-guards.decorator';
+import { Request } from '@nestjs/common/decorators/http/route-params.decorator';
 import { Client, Office } from '@prisma/client';
+import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import { BaseResponse } from '../common/dtos/responses';
 import { CreateOfficeDTO } from './dtos/create-office-dto';
 import { UpdateOfficeDTO } from './dtos/update-office-dto';
@@ -34,12 +37,18 @@ export class OfficeController {
     return await this.listOfficeClients.execute(id);
   }
 
+  @UseGuards(JwtAuthGuard)
   @Put(':id')
   async update(
     @Param('id') id: string,
-    @Body() request: UpdateOfficeDTO,
+    @Body() data: UpdateOfficeDTO,
+    @Request() request,
   ): Promise<BaseResponse> {
-    await this.editOffice.execute(id, request);
+    if (request.user.office_id !== id) {
+      throw new UnauthorizedException();
+    }
+
+    await this.editOffice.execute(id, data);
     return { success: true, message: 'Office edited.' };
   }
 }
