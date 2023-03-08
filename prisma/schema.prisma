@@ -49,6 +49,7 @@ model Employee {
   role_id      String
   name         String
   email        String
+  password     String
   phone_number String?
   created_at   DateTime  @default(now())
   updated_at   DateTime?

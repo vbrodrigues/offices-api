@@ -1,4 +1,4 @@
-import { IsNotEmpty } from 'class-validator';
+import { IsNotEmpty, Length } from 'class-validator';
 
 export class CreateEmployeeDTO {
   @IsNotEmpty()
@@ -12,6 +12,10 @@ export class CreateEmployeeDTO {
 
   @IsNotEmpty()
   email: string;
+
+  @IsNotEmpty()
+  @Length(6)
+  password: string;
 
   phone_number?: string | null;
 }
