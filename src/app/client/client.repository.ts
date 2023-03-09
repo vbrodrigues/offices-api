@@ -45,11 +45,12 @@ export class ClientsRepositorySQL implements ClientsRepository {
   }
 
   async update(client_id: string, data: UpdateClientDTO): Promise<void> {
+    const raw = { ...data, updated_at: new Date() };
     await this.prisma.client.update({
       where: {
         id: client_id,
       },
-      data: data,
+      data: raw,
     });
   }
 }
