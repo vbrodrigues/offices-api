@@ -3,6 +3,7 @@ import { Client } from '@prisma/client';
 import { PrismaService } from 'src/database/prisma-service';
 import { CreateClientDTO } from './dtos/create-client.dto';
 import { FindByEmailAndOfficeIdDTO } from './dtos/find-by-email-and-office-id.dto';
+import { UpdateClientDTO } from './dtos/update-client.dto';
 
 export abstract class ClientsRepository {
   abstract add(data: CreateClientDTO): Promise<Client>;
@@ -11,6 +12,7 @@ export abstract class ClientsRepository {
   ): Promise<Client | null>;
   abstract findById(client_id: string): Promise<Client | null>;
   abstract listByOfficeId(office_id: string): Promise<Client[]>;
+  abstract update(client_id: string, data: UpdateClientDTO): Promise<void>;
 }
 
 @Injectable()
@@ -40,5 +42,14 @@ export class ClientsRepositorySQL implements ClientsRepository {
 
   async listByOfficeId(office_id: string): Promise<Client[]> {
     return await this.prisma.client.findMany({ where: { office_id } });
+  }
+
+  async update(client_id: string, data: UpdateClientDTO): Promise<void> {
+    await this.prisma.client.update({
+      where: {
+        id: client_id,
+      },
+      data: data,
+    });
   }
 }

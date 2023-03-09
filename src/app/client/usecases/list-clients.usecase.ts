@@ -1,9 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { Client } from '@prisma/client';
-import { ClientsRepository } from '../../client/client.repository';
+import { ClientsRepository } from '../client.repository';
 
 @Injectable()
-export class ListOfficeClientsUsecase {
+export class ListClientsUsecase {
   constructor(private clientsRepository: ClientsRepository) {}
 
   async execute(office_id: string): Promise<Client[]> {

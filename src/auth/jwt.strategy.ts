@@ -20,8 +20,8 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       }
     }
 
-    if (request.params.id) {
-      if (request.params.id !== payload.office_id) {
+    if (request.params.office_id) {
+      if (request.params.office_id !== payload.office_id) {
         throw new UnauthorizedException();
       }
     }
