@@ -6,6 +6,7 @@ import { CreateRoleDTO } from './dtos/create-role-dto';
 export abstract class RolesRepository {
   abstract add(data: CreateRoleDTO): Promise<Role>;
   abstract findByLabel(label: string): Promise<Role | null>;
+  abstract list(): Promise<Role[]>;
 }
 
 @Injectable()
@@ -19,5 +20,9 @@ export class RolesRepositorySQL implements RolesRepository {
 
   async findByLabel(label: string): Promise<Role> {
     return await this.prisma.role.findFirst({ where: { label: label } });
+  }
+
+  async list(): Promise<Role[]> {
+    return await this.prisma.role.findMany();
   }
 }
