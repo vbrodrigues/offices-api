@@ -4,6 +4,7 @@ import { ClientController } from './client.controller';
 import { CreateClientUsecase } from './usecases/create-client.usecase';
 import { EditClientUsecase } from './usecases/edit-client.usecase';
 import { FindClientUsecase } from './usecases/find-client.usecase';
+import { InactivateClientUsecase } from './usecases/inactivate-client.usecase';
 import { ListClientsUsecase } from './usecases/list-clients.usecase';
 
 @Module({
@@ -14,6 +15,7 @@ import { ListClientsUsecase } from './usecases/list-clients.usecase';
     FindClientUsecase,
     ListClientsUsecase,
     EditClientUsecase,
+    InactivateClientUsecase,
   ],
 })
 export class ClientModule {}

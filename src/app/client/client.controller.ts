@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   Param,
   Post,
@@ -16,6 +17,8 @@ import { ListClientsUsecase } from './usecases/list-clients.usecase';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import { EditClientUsecase } from './usecases/edit-client.usecase';
 import { UpdateClientDTO } from './dtos/update-client.dto';
+import { BaseResponse } from '../common/dtos/responses';
+import { InactivateClientUsecase } from './usecases/inactivate-client.usecase';
 
 @Controller('/clients')
 export class ClientController {
@@ -24,6 +27,7 @@ export class ClientController {
     private findClient: FindClientUsecase,
     private listClients: ListClientsUsecase,
     private editClient: EditClientUsecase,
+    private inactivateClient: InactivateClientUsecase,
   ) {}
 
   @UseGuards(JwtAuthGuard)
@@ -50,11 +54,18 @@ export class ClientController {
     @Param('client_id') client_id: string,
     @Body() data: UpdateClientDTO,
     @Request() request,
-  ): Promise<void> {
-    return await this.editClient.execute(
-      client_id,
-      request.user.office_id,
-      data,
-    );
+  ): Promise<BaseResponse> {
+    await this.editClient.execute(client_id, request.user.office_id, data);
+    return { success: true, message: 'Client edited.' };
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Delete(':client_id')
+  async delete(
+    @Param('client_id') client_id: string,
+    @Request() request,
+  ): Promise<BaseResponse> {
+    await this.inactivateClient.execute(client_id, request.user.office_id);
+    return { success: true, message: 'Client inactivated.' };
   }
 }
