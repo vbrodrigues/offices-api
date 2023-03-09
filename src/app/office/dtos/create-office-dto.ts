@@ -1,4 +1,4 @@
-import { IsNotEmpty } from 'class-validator';
+import { IsNotEmpty, IsStrongPassword } from 'class-validator';
 
 export class CreateOfficeDTO {
   @IsNotEmpty()
@@ -6,6 +6,10 @@ export class CreateOfficeDTO {
 
   @IsNotEmpty()
   owner_email: string;
+
+  @IsNotEmpty()
+  @IsStrongPassword()
+  owner_password: string;
 
   owner_phone_number?: string | null;
   logo?: string | null;

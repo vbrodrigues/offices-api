@@ -42,12 +42,7 @@ export class OfficeController {
   async update(
     @Param('id') id: string,
     @Body() data: UpdateOfficeDTO,
-    @Request() request,
   ): Promise<BaseResponse> {
-    if (request.user.office_id !== id) {
-      throw new UnauthorizedException();
-    }
-
     await this.editOffice.execute(id, data);
     return { success: true, message: 'Office edited.' };
   }
