@@ -3,6 +3,7 @@ import { Employee } from '@prisma/client';
 import { PrismaService } from 'src/database/prisma-service';
 import { hashPassword } from '../common/utils/hash-password';
 import { CreateEmployeeDTO } from './dtos/create-employee-dto';
+import { UpdateEmployeeDTO } from './dtos/update-employee.dto';
 
 export abstract class EmployeesRepository {
   abstract add(data: CreateEmployeeDTO): Promise<Employee>;
@@ -10,6 +11,8 @@ export abstract class EmployeesRepository {
     email: string,
     office_id: string,
   ): Promise<Employee | null>;
+  abstract findById(employee_id: string): Promise<Employee | null>;
+  abstract update(employee_id: string, data: UpdateEmployeeDTO): Promise<void>;
 }
 
 @Injectable()
@@ -26,6 +29,22 @@ export class EmployeesRepositorySQL implements EmployeesRepository {
   async findByEmail(email: string, office_id: string): Promise<Employee> {
     return await this.prisma.employee.findFirst({
       where: { email: email, office_id: office_id },
+    });
+  }
+
+  async findById(employee_id: string): Promise<Employee> {
+    return await this.prisma.employee.findUnique({
+      where: { id: employee_id },
+    });
+  }
+
+  async update(employee_id: string, data: UpdateEmployeeDTO): Promise<void> {
+    const raw = { ...data, updated_at: new Date() };
+    await this.prisma.employee.update({
+      where: {
+        id: employee_id,
+      },
+      data: raw,
     });
   }
 }
