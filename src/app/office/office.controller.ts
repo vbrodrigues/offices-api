@@ -20,7 +20,9 @@ export class OfficeController {
 
   @Post()
   async create(@Body() request: CreateOfficeDTO): Promise<Office> {
-    const office = await this.createOffice.execute(request);
+    const office = await this.createOffice.execute({
+      ...request,
+    });
     return office;
   }
 

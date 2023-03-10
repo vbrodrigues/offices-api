@@ -5,6 +5,9 @@ import { OfficesRepository } from '../office.repository';
 import { CreateOfficeDTO } from '../dtos/create-office-dto';
 import { EmployeesRepository } from 'src/app/employee/employee.repository';
 import { RolesRepository } from 'src/app/role/role.repository';
+import { StorageService } from 'src/providers/storage/storage';
+import { decodeBase64 } from 'src/app/common/utils/base64';
+import { v4 as uuid } from 'uuid';
 
 @Injectable()
 export class CreateOfficeUsecase {
@@ -12,6 +15,7 @@ export class CreateOfficeUsecase {
     private officesRepository: OfficesRepository,
     private employeesRepository: EmployeesRepository,
     private rolesRepository: RolesRepository,
+    private storageService: StorageService,
   ) {}
 
   async execute(request: CreateOfficeDTO): Promise<Office> {
@@ -22,6 +26,13 @@ export class CreateOfficeUsecase {
     if (alreadyExists) {
       throw new BadRequestException('Office already exists');
     }
+
+    const logoFile = decodeBase64(request.logo);
+    const logoPath = `offices/${uuid()}_logo_${request.name}.png`;
+
+    await this.storageService.uploadFile(logoFile, logoPath);
+
+    request.logo = logoPath;
 
     const role = await this.rolesRepository.findByLabel('owner');
 

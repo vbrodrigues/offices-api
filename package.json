@@ -28,15 +28,19 @@
     "@nestjs/platform-express": "^8.0.0",
     "@prisma/client": "^4.8.0",
     "@types/bcrypt": "^5.0.0",
+    "@types/uuid": "^9.0.1",
+    "aws-sdk": "^2.1332.0",
     "bcrypt": "^5.1.0",
     "class-transformer": "^0.5.1",
     "class-validator": "^0.14.0",
+    "multer-s3": "^3.0.1",
     "passport": "^0.6.0",
     "passport-jwt": "^4.0.1",
     "passport-local": "^1.0.0",
     "reflect-metadata": "^0.1.13",
     "rimraf": "^3.0.2",
-    "rxjs": "^7.2.0"
+    "rxjs": "^7.2.0",
+    "uuid": "^9.0.0"
   },
   "devDependencies": {
     "@nestjs/cli": "^8.0.0",
