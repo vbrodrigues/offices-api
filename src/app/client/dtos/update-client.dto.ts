@@ -3,4 +3,5 @@ export class UpdateClientDTO {
   email?: string | null;
   phone_number?: string | null;
   is_active?: boolean | null;
+  avatar?: string | null;
 }
