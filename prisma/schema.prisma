@@ -28,6 +28,7 @@ model Client {
   name         String
   email        String
   phone_number String?
+  avatar       String?
   is_active    Boolean   @default(true)
   created_at   DateTime  @default(now())
   updated_at   DateTime?
@@ -52,6 +53,7 @@ model Employee {
   email        String
   password     String
   phone_number String?
+  avatar       String?
   is_active    Boolean   @default(true)
   created_at   DateTime  @default(now())
   updated_at   DateTime?

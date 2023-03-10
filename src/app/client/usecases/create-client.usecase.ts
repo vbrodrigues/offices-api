@@ -1,14 +1,18 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { Client } from '@prisma/client';
 import { OfficesRepository } from 'src/app/office/office.repository';
+import { StorageService } from 'src/providers/storage/storage';
 import { ClientsRepository } from '../client.repository';
 import { CreateClientDTO } from '../dtos/create-client.dto';
+import { v4 as uuid } from 'uuid';
+import { decodeBase64 } from 'src/app/common/utils/base64';
 
 @Injectable()
 export class CreateClientUsecase {
   constructor(
     private officesRepository: OfficesRepository,
     private clientsRepository: ClientsRepository,
+    private storageService: StorageService,
   ) {}
 
   async execute(request: CreateClientDTO): Promise<Client> {
@@ -25,6 +29,18 @@ export class CreateClientUsecase {
 
     if (alreadyExists) {
       throw new BadRequestException('Client already exists.');
+    }
+
+    if (request.avatar) {
+      const logoFile = decodeBase64(request.avatar);
+      const logoFilepath = `clients/${uuid()}.png`;
+
+      const logoStoragePath = await this.storageService.uploadFile(
+        logoFile,
+        logoFilepath,
+      );
+
+      request.avatar = logoStoragePath;
     }
 
     return await this.clientsRepository.add(request);

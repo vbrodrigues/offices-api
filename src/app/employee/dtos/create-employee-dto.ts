@@ -18,4 +18,6 @@ export class CreateEmployeeDTO {
   password: string;
 
   phone_number?: string | null;
+
+  avatar?: string | null;
 }

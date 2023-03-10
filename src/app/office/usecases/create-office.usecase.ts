@@ -27,15 +27,17 @@ export class CreateOfficeUsecase {
       throw new BadRequestException('Office already exists');
     }
 
-    const logoFile = decodeBase64(request.logo);
-    const logoFilepath = `offices/${uuid()}_logo_${request.name}.png`;
+    if (request.logo) {
+      const logoFile = decodeBase64(request.logo);
+      const logoFilepath = `offices/${uuid()}_logo_${request.name}.png`;
 
-    const logoStoragePath = await this.storageService.uploadFile(
-      logoFile,
-      logoFilepath,
-    );
+      const logoStoragePath = await this.storageService.uploadFile(
+        logoFile,
+        logoFilepath,
+      );
 
-    request.logo = logoStoragePath;
+      request.logo = logoStoragePath;
+    }
 
     const role = await this.rolesRepository.findByLabel('owner');
 

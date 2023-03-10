@@ -11,4 +11,6 @@ export class CreateClientDTO {
   email: string;
 
   phone_number: string;
+
+  avatar?: string | null;
 }
