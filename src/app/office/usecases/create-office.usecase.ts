@@ -28,11 +28,14 @@ export class CreateOfficeUsecase {
     }
 
     const logoFile = decodeBase64(request.logo);
-    const logoPath = `offices/${uuid()}_logo_${request.name}.png`;
+    const logoFilepath = `offices/${uuid()}_logo_${request.name}.png`;
 
-    await this.storageService.uploadFile(logoFile, logoPath);
+    const logoStoragePath = await this.storageService.uploadFile(
+      logoFile,
+      logoFilepath,
+    );
 
-    request.logo = logoPath;
+    request.logo = logoStoragePath;
 
     const role = await this.rolesRepository.findByLabel('owner');
 

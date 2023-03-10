@@ -14,17 +14,8 @@ export class S3StorageService implements StorageService {
       Body: file,
     };
 
-    try {
-      this.s3.upload(params, function (err, data) {
-        if (err) {
-          console.log('Error uploading to AWS S3. Error:', err);
-        }
-        console.log(data);
-      });
-    } catch (err) {
-      console.log('Error uploading to AWS S3.');
-    }
+    const data = await this.s3.upload(params).promise();
 
-    return filepath;
+    return data.Location;
   }
 }
