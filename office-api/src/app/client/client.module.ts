@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { DatabaseModule } from 'src/database/database.module';
+import { NotificationsModule } from 'src/events/notifications.module';
 import { StorageModule } from 'src/providers/storage/storage.module';
 import { ClientController } from './client.controller';
 import { CreateClientUsecase } from './usecases/create-client.usecase';
@@ -9,7 +10,7 @@ import { InactivateClientUsecase } from './usecases/inactivate-client.usecase';
 import { ListClientsUsecase } from './usecases/list-clients.usecase';
 
 @Module({
-  imports: [DatabaseModule, StorageModule],
+  imports: [DatabaseModule, StorageModule, NotificationsModule],
   controllers: [ClientController],
   providers: [
     CreateClientUsecase,

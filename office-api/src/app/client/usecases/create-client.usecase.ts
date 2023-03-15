@@ -6,6 +6,7 @@ import { ClientsRepository } from '../client.repository';
 import { CreateClientDTO } from '../dtos/create-client.dto';
 import { v4 as uuid } from 'uuid';
 import { decodeBase64 } from 'src/app/common/utils/base64';
+import { NotificationsService } from 'src/events/notifications.service';
 
 @Injectable()
 export class CreateClientUsecase {
@@ -13,6 +14,7 @@ export class CreateClientUsecase {
     private officesRepository: OfficesRepository,
     private clientsRepository: ClientsRepository,
     private storageService: StorageService,
+    private notificationsService: NotificationsService,
   ) {}
 
   async execute(request: CreateClientDTO): Promise<Client> {
@@ -43,6 +45,10 @@ export class CreateClientUsecase {
       request.avatar = logoStoragePath;
     }
 
-    return await this.clientsRepository.add(request);
+    const client = await this.clientsRepository.add(request);
+
+    this.notificationsService.notify({ type: 'CLIENT_CREATED', data: client });
+
+    return client;
   }
 }

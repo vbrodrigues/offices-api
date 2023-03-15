@@ -6,6 +6,7 @@ import { RoleModule } from './app/role/role.module';
 import { AuthModule } from './auth/auth.module';
 import { DatabaseModule } from './database/database.module';
 import { ProjectTypeModule } from './app/project-type/project-type.module';
+import { NotificationsModule } from './events/notifications.module';
 
 @Module({
   imports: [
@@ -16,6 +17,7 @@ import { ProjectTypeModule } from './app/project-type/project-type.module';
     EmployeeModule,
     AuthModule,
     ProjectTypeModule,
+    NotificationsModule,
   ],
 })
 export class AppModule {}
