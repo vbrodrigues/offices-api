@@ -16,6 +16,10 @@ import {
   ProjectTypesRepositorySQL,
 } from 'src/app/project-type/project-type.repository';
 import {
+  ProjectsRepository,
+  ProjectsRepositorySQL,
+} from 'src/app/project/project.repository';
+import {
   RolesRepository,
   RolesRepositorySQL,
 } from 'src/app/role/role.repository';
@@ -44,6 +48,10 @@ import { PrismaService } from './prisma-service';
       provide: ProjectTypesRepository,
       useClass: ProjectTypesRepositorySQL,
     },
+    {
+      provide: ProjectsRepository,
+      useClass: ProjectsRepositorySQL,
+    },
   ],
   exports: [
     OfficesRepository,
@@ -51,6 +59,7 @@ import { PrismaService } from './prisma-service';
     RolesRepository,
     EmployeesRepository,
     ProjectTypesRepository,
+    ProjectsRepository,
   ],
 })
 export class DatabaseModule {}

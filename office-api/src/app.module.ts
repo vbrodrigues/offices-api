@@ -7,6 +7,7 @@ import { AuthModule } from './auth/auth.module';
 import { DatabaseModule } from './database/database.module';
 import { ProjectTypeModule } from './app/project-type/project-type.module';
 import { NotificationsModule } from './events/notifications.module';
+import { ProjectModule } from './app/project/project.module';
 
 @Module({
   imports: [
@@ -18,6 +19,7 @@ import { NotificationsModule } from './events/notifications.module';
     AuthModule,
     ProjectTypeModule,
     NotificationsModule,
+    ProjectModule,
   ],
 })
 export class AppModule {}
