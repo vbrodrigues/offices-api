@@ -2,6 +2,7 @@ import {
   Body,
   Controller,
   Delete,
+  Get,
   Param,
   Post,
   Put,
@@ -16,6 +17,8 @@ import { Request } from '@nestjs/common/decorators/http/route-params.decorator';
 import { CreateEmployeeUsecase } from './usecases/create-employee.usecase';
 import { EditEmployeeUsecase } from './usecases/edit-employee.usecase';
 import { InactivateEmployeeUsecase } from './usecases/inactivate-employee.usecase';
+import { ListEmployeesUsecase } from './usecases/list-employees.usecase';
+import { OfficeRequest } from 'src/auth/auth.dtos';
 
 @Controller('/employees')
 export class EmployeeController {
@@ -23,6 +26,7 @@ export class EmployeeController {
     private createEmployee: CreateEmployeeUsecase,
     private editEmployee: EditEmployeeUsecase,
     private inactivateEmployee: InactivateEmployeeUsecase,
+    private listEmployees: ListEmployeesUsecase,
   ) {}
 
   @UseGuards(JwtAuthGuard)
@@ -51,5 +55,13 @@ export class EmployeeController {
   ): Promise<BaseResponse> {
     await this.inactivateEmployee.execute(employee_id, request.user.office_id);
     return { success: true, message: 'Employee inactivated.' };
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get()
+  async show(
+    @Request() { user: { office_id } }: OfficeRequest,
+  ): Promise<Employee[]> {
+    return await this.listEmployees.execute(office_id);
   }
 }

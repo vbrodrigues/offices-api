@@ -1,4 +1,5 @@
 import { IsNotEmpty } from 'class-validator';
+import { CreateProjectScheduleInternalDTO } from 'src/app/project-schedule/dtos/create-project-schedule.dto';
 
 export class CreateProjectDTO {
   @IsNotEmpty()
@@ -9,4 +10,6 @@ export class CreateProjectDTO {
 
   @IsNotEmpty()
   name: string;
+
+  schedule?: CreateProjectScheduleInternalDTO;
 }

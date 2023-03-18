@@ -12,6 +12,7 @@ export abstract class EmployeesRepository {
     office_id: string,
   ): Promise<Employee | null>;
   abstract findById(employee_id: string): Promise<Employee | null>;
+  abstract findByOfficeId(office_id: string): Promise<Employee[]>;
   abstract update(employee_id: string, data: UpdateEmployeeDTO): Promise<void>;
 }
 
@@ -35,6 +36,12 @@ export class EmployeesRepositorySQL implements EmployeesRepository {
   async findById(employee_id: string): Promise<Employee> {
     return await this.prisma.employee.findUnique({
       where: { id: employee_id },
+    });
+  }
+
+  async findByOfficeId(office_id: string): Promise<Employee[]> {
+    return await this.prisma.employee.findMany({
+      where: { office_id: office_id },
     });
   }
 

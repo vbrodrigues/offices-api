@@ -5,6 +5,7 @@ import { EmployeeController } from './employee.controller';
 import { CreateEmployeeUsecase } from './usecases/create-employee.usecase';
 import { EditEmployeeUsecase } from './usecases/edit-employee.usecase';
 import { InactivateEmployeeUsecase } from './usecases/inactivate-employee.usecase';
+import { ListEmployeesUsecase } from './usecases/list-employees.usecase';
 
 @Module({
   imports: [DatabaseModule, StorageModule],
@@ -13,6 +14,7 @@ import { InactivateEmployeeUsecase } from './usecases/inactivate-employee.usecas
     CreateEmployeeUsecase,
     EditEmployeeUsecase,
     InactivateEmployeeUsecase,
+    ListEmployeesUsecase,
   ],
 })
 export class EmployeeModule {}

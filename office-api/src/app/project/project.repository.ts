@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { Project } from '@prisma/client';
+import { Client, Project } from '@prisma/client';
 import { PrismaService } from 'src/database/prisma-service';
 import { CreateProjectDTO } from './dtos/create-project.dto';
 import { ProjectFilters } from './dtos/find-project-filters.dto';
@@ -9,6 +9,12 @@ export abstract class ProjectsRepository {
     office_id: string,
     projectFilters: ProjectFilters,
   ): Promise<Project[]>;
+  abstract findById(project_id: string): Promise<
+    | (Project & {
+        client: Client;
+      })
+    | null
+  >;
   abstract add(data: CreateProjectDTO): Promise<Project>;
 }
 
@@ -23,6 +29,18 @@ export class ProjectsRepositorySQL implements ProjectsRepository {
     return await this.prisma.project.findMany({
       where: { client: { office: { id: office_id } }, ...projectFilters },
       include: { type: true, files: true, client: true },
+    });
+  }
+
+  async findById(project_id: string): Promise<
+    | (Project & {
+        client: Client;
+      })
+    | null
+  > {
+    return await this.prisma.project.findUnique({
+      where: { id: project_id },
+      include: { client: true },
     });
   }
 
