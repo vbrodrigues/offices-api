@@ -13,7 +13,7 @@ import { NotificationsService } from './notifications.service';
             brokers: ['localhost:9092'],
           },
           consumer: {
-            groupId: 'office-notifications',
+            groupId: 'office-client-creation',
           },
         },
       },

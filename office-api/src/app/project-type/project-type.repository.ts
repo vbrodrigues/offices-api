@@ -6,6 +6,7 @@ import { CreateProjectTypeDTO } from './dtos/create-project-type.dto';
 export abstract class ProjectTypesRepository {
   abstract findByName(name: string): Promise<ProjectType | null>;
   abstract add(data: CreateProjectTypeDTO): Promise<ProjectType>;
+  abstract list(): Promise<ProjectType[]>;
 }
 
 @Injectable()
@@ -18,5 +19,9 @@ export class ProjectTypesRepositorySQL implements ProjectTypesRepository {
 
   async add(data: CreateProjectTypeDTO): Promise<ProjectType> {
     return await this.prisma.projectType.create({ data });
+  }
+
+  async list(): Promise<ProjectType[]> {
+    return await this.prisma.projectType.findMany();
   }
 }
