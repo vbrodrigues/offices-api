@@ -5,10 +5,17 @@ import { ProjectScheduleModule } from '../project-schedule/project-schedule.modu
 import { ProjectController } from './project.controller';
 import { CreateProjectUsecase } from './usecases/create-project.usecase';
 import { ListProjectsUsecase } from './usecases/list-projects.usecase';
+import { RenameProjectUsecase } from './usecases/rename-project.usecase';
+import { UpdateProjectStatusUsecase } from './usecases/update-project-status.usecase';
 
 @Module({
   imports: [DatabaseModule, StorageModule, ProjectScheduleModule],
   controllers: [ProjectController],
-  providers: [CreateProjectUsecase, ListProjectsUsecase],
+  providers: [
+    CreateProjectUsecase,
+    ListProjectsUsecase,
+    RenameProjectUsecase,
+    UpdateProjectStatusUsecase,
+  ],
 })
 export class ProjectModule {}

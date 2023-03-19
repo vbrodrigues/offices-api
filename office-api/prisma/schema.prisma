@@ -73,11 +73,13 @@ model ProjectType {
 }
 
 model Project {
-  id              String   @id @default(uuid())
+  id              String    @id @default(uuid())
   client_id       String
   project_type_id String
   name            String
-  created_at      DateTime @default(now())
+  status          String    @default("in_progress")
+  updated_at      DateTime?
+  created_at      DateTime  @default(now())
 
   client    Client            @relation(fields: [client_id], references: [id])
   type      ProjectType       @relation(fields: [project_type_id], references: [id])
