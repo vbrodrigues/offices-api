@@ -35,6 +35,10 @@ export class LocalStrategy extends PassportStrategy(Strategy) {
       throw new UnauthorizedException();
     }
 
+    if (!employee.is_active) {
+      throw new UnauthorizedException();
+    }
+
     return employee;
   }
 }
