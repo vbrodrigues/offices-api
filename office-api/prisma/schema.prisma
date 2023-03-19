@@ -90,6 +90,7 @@ model ProjectFile {
   project_id    String
   created_by_id String
   path          String
+  name          String?
   created_at    DateTime  @default(now())
   updated_at    DateTime?
 

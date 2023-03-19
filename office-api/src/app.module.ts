@@ -8,6 +8,7 @@ import { DatabaseModule } from './database/database.module';
 import { ProjectTypeModule } from './app/project-type/project-type.module';
 import { NotificationsModule } from './events/notifications.module';
 import { ProjectModule } from './app/project/project.module';
+import { ProjectFileModule } from './app/project-file/project-file.module';
 
 @Module({
   imports: [
@@ -20,6 +21,7 @@ import { ProjectModule } from './app/project/project.module';
     ProjectTypeModule,
     NotificationsModule,
     ProjectModule,
+    ProjectFileModule,
   ],
 })
 export class AppModule {}

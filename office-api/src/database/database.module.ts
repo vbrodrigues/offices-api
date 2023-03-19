@@ -12,6 +12,10 @@ import {
   OfficesRepositorySQL,
 } from 'src/app/office/office.repository';
 import {
+  ProjectFilesRepository,
+  ProjectFilesRepositorySQL,
+} from 'src/app/project-file/project-file.repository';
+import {
   ProjectSchedulesRepository,
   ProjectSchedulesRepositorySQL,
 } from 'src/app/project-schedule/project-schedule.repository';
@@ -60,6 +64,10 @@ import { PrismaService } from './prisma-service';
       provide: ProjectSchedulesRepository,
       useClass: ProjectSchedulesRepositorySQL,
     },
+    {
+      provide: ProjectFilesRepository,
+      useClass: ProjectFilesRepositorySQL,
+    },
   ],
   exports: [
     OfficesRepository,
@@ -69,6 +77,7 @@ import { PrismaService } from './prisma-service';
     ProjectTypesRepository,
     ProjectsRepository,
     ProjectSchedulesRepository,
+    ProjectFilesRepository,
   ],
 })
 export class DatabaseModule {}
