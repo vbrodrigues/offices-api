@@ -21,6 +21,8 @@ import { BaseResponse } from '../common/dtos/responses';
 import { RenameProjectUsecase } from './usecases/rename-project.usecase';
 import { UpdateProjectStatusUsecase } from './usecases/update-project-status.usecase';
 import { ProjectStatus } from './dtos/update-project.dto';
+import { FindProjectUsecase } from './usecases/find-project.usecase';
+import { FullProject } from './project.repository';
 
 @Controller('/projects')
 export class ProjectController {
@@ -29,6 +31,7 @@ export class ProjectController {
     private listProjects: ListProjectsUsecase,
     private renameProject: RenameProjectUsecase,
     private updateProjectStatus: UpdateProjectStatusUsecase,
+    private findProject: FindProjectUsecase,
   ) {}
 
   @UseGuards(JwtAuthGuard)
@@ -47,7 +50,7 @@ export class ProjectController {
     @Query('client_id') client_id: string,
     @Query('project_type_id') project_type_id: string,
     @Query('name') name: string,
-  ): Promise<Project[]> {
+  ): Promise<FullProject[]> {
     return await this.listProjects.execute(office_id, {
       client_id,
       project_type_id,
@@ -77,5 +80,14 @@ export class ProjectController {
   ): Promise<BaseResponse> {
     await this.updateProjectStatus.execute(office_id, project_id, data.status);
     return { success: true, message: 'Project status updated successfully.' };
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get('/:project_id')
+  async index(
+    @Request() { user: { office_id } }: OfficeRequest,
+    @Param('project_id') project_id: string,
+  ): Promise<FullProject | null> {
+    return await this.findProject.execute(office_id, project_id);
   }
 }

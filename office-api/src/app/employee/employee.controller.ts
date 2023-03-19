@@ -19,6 +19,7 @@ import { EditEmployeeUsecase } from './usecases/edit-employee.usecase';
 import { InactivateEmployeeUsecase } from './usecases/inactivate-employee.usecase';
 import { ListEmployeesUsecase } from './usecases/list-employees.usecase';
 import { OfficeRequest } from 'src/auth/auth.dtos';
+import { FindEmployeeUsecase } from './usecases/find-employee.usecase';
 
 @Controller('/employees')
 export class EmployeeController {
@@ -27,6 +28,7 @@ export class EmployeeController {
     private editEmployee: EditEmployeeUsecase,
     private inactivateEmployee: InactivateEmployeeUsecase,
     private listEmployees: ListEmployeesUsecase,
+    private findEmployee: FindEmployeeUsecase,
   ) {}
 
   @UseGuards(JwtAuthGuard)
@@ -63,5 +65,14 @@ export class EmployeeController {
     @Request() { user: { office_id } }: OfficeRequest,
   ): Promise<Employee[]> {
     return await this.listEmployees.execute(office_id);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get('/:employee_id')
+  async index(
+    @Request() { user: { office_id } }: OfficeRequest,
+    @Param('employee_id') employee_id: string,
+  ): Promise<Employee | null> {
+    return await this.findEmployee.execute(office_id, employee_id);
   }
 }

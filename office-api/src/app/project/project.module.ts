@@ -4,6 +4,7 @@ import { StorageModule } from 'src/providers/storage/storage.module';
 import { ProjectScheduleModule } from '../project-schedule/project-schedule.module';
 import { ProjectController } from './project.controller';
 import { CreateProjectUsecase } from './usecases/create-project.usecase';
+import { FindProjectUsecase } from './usecases/find-project.usecase';
 import { ListProjectsUsecase } from './usecases/list-projects.usecase';
 import { RenameProjectUsecase } from './usecases/rename-project.usecase';
 import { UpdateProjectStatusUsecase } from './usecases/update-project-status.usecase';
@@ -16,6 +17,7 @@ import { UpdateProjectStatusUsecase } from './usecases/update-project-status.use
     ListProjectsUsecase,
     RenameProjectUsecase,
     UpdateProjectStatusUsecase,
+    FindProjectUsecase,
   ],
 })
 export class ProjectModule {}

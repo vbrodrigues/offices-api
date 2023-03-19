@@ -1,7 +1,7 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { decodeBase64 } from 'src/app/common/utils/base64';
 import { StorageService } from 'src/providers/storage/storage';
-import { UpdateOfficeDTO } from '../dtos/update-office-dto';
+import { UpdateOfficeDTO } from '../dtos/update-office.dto';
 import { OfficesRepository } from '../office.repository';
 import { v4 as uuid } from 'uuid';
 

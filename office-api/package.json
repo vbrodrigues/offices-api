@@ -28,6 +28,7 @@
     "@nestjs/microservices": "^9.3.9",
     "@nestjs/passport": "^9.0.3",
     "@nestjs/platform-express": "^9.3.9",
+    "@nestjs/swagger": "^6.2.1",
     "@prisma/client": "^4.8.0",
     "@types/bcrypt": "^5.0.0",
     "@types/uuid": "^9.0.1",

@@ -19,6 +19,7 @@ import { EditClientUsecase } from './usecases/edit-client.usecase';
 import { UpdateClientDTO } from './dtos/update-client.dto';
 import { BaseResponse } from '../common/dtos/responses';
 import { InactivateClientUsecase } from './usecases/inactivate-client.usecase';
+import { OfficeRequest } from 'src/auth/auth.dtos';
 
 @Controller('/clients')
 export class ClientController {
@@ -38,8 +39,11 @@ export class ClientController {
 
   @UseGuards(JwtAuthGuard)
   @Get(':client_id')
-  async index(@Param('client_id') client_id: string): Promise<Client | null> {
-    return await this.findClient.execute(client_id);
+  async index(
+    @Request() { user: { office_id } }: OfficeRequest,
+    @Param('client_id') client_id: string,
+  ): Promise<Client | null> {
+    return await this.findClient.execute(office_id, client_id);
   }
 
   @UseGuards(JwtAuthGuard)

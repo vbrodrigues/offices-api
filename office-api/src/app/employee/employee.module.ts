@@ -4,6 +4,7 @@ import { StorageModule } from 'src/providers/storage/storage.module';
 import { EmployeeController } from './employee.controller';
 import { CreateEmployeeUsecase } from './usecases/create-employee.usecase';
 import { EditEmployeeUsecase } from './usecases/edit-employee.usecase';
+import { FindEmployeeUsecase } from './usecases/find-employee.usecase';
 import { InactivateEmployeeUsecase } from './usecases/inactivate-employee.usecase';
 import { ListEmployeesUsecase } from './usecases/list-employees.usecase';
 
@@ -15,6 +16,7 @@ import { ListEmployeesUsecase } from './usecases/list-employees.usecase';
     EditEmployeeUsecase,
     InactivateEmployeeUsecase,
     ListEmployeesUsecase,
+    FindEmployeeUsecase,
   ],
 })
 export class EmployeeModule {}

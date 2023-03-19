@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { BadRequestException } from '@nestjs/common/exceptions';
 import { Office } from '@prisma/client';
 import { OfficesRepository } from '../office.repository';
-import { CreateOfficeDTO } from '../dtos/create-office-dto';
+import { CreateOfficeDTO } from '../dtos/create-office.dto';
 import { EmployeesRepository } from 'src/app/employee/employee.repository';
 import { RolesRepository } from 'src/app/role/role.repository';
 import { StorageService } from 'src/providers/storage/storage';
