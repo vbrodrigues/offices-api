@@ -16,6 +16,7 @@ export abstract class ProjectFilesRepository {
     project_file_id: string,
     data: UpdateProjectFileDTO,
   ): Promise<void>;
+  abstract delete(project_file_id: string): Promise<void>;
 }
 
 @Injectable()
@@ -49,5 +50,9 @@ export class ProjectFilesRepositorySQL implements ProjectFilesRepository {
       },
       data: raw,
     });
+  }
+
+  async delete(project_file_id: string): Promise<void> {
+    await this.prisma.projectFile.delete({ where: { id: project_file_id } });
   }
 }
