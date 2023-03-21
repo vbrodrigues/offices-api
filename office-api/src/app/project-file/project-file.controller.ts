@@ -4,12 +4,12 @@ import {
   Param,
   Request,
 } from '@nestjs/common/decorators/http/route-params.decorator';
-import { OfficeRequest } from 'src/auth/auth.dtos';
 import { CreateProjectFileDTO } from './dtos/create-project-file.dto';
 import { CreateProjectFileUsecase } from './usecases/create-project-file.usecase';
-import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import { RemoveProjectFileUsecase } from './usecases/remove-project-file.usecase';
 import { BaseResponse } from '../common/dtos/responses';
+import { JwtAuthGuard } from 'src/auth/employee/jwt-auth.guard';
+import { OfficeRequest } from 'src/auth/employee/auth.dtos';
 
 @Controller('/project-files')
 export class ProjectFileController {

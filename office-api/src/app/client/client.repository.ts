@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { Client } from '@prisma/client';
 import { PrismaService } from 'src/database/prisma-service';
+import { hashPassword } from '../common/utils/hash-password';
 import { CreateClientDTO } from './dtos/create-client.dto';
 import { FindByEmailAndOfficeIdDTO } from './dtos/find-by-email-and-office-id.dto';
 import { UpdateClientDTO } from './dtos/update-client.dto';
@@ -20,6 +21,7 @@ export class ClientsRepositorySQL implements ClientsRepository {
   constructor(private prisma: PrismaService) {}
 
   async add(data: CreateClientDTO): Promise<Client> {
+    data.password = await hashPassword(data.password);
     const client = await this.prisma.client.create({ data: data });
     return client;
   }

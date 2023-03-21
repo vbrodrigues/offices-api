@@ -8,7 +8,6 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { Project } from '@prisma/client';
-import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import {
   Param,
   Request,
@@ -16,13 +15,15 @@ import {
 import { CreateProjectDTO } from './dtos/create-project.dto';
 import { CreateProjectUsecase } from './usecases/create-project.usecase';
 import { ListProjectsUsecase } from './usecases/list-projects.usecase';
-import { OfficeRequest } from 'src/auth/auth.dtos';
 import { BaseResponse } from '../common/dtos/responses';
 import { RenameProjectUsecase } from './usecases/rename-project.usecase';
 import { UpdateProjectStatusUsecase } from './usecases/update-project-status.usecase';
 import { ProjectStatus } from './dtos/update-project.dto';
 import { FindProjectUsecase } from './usecases/find-project.usecase';
 import { FullProject } from './project.repository';
+import { JwtAuthGuard } from 'src/auth/employee/jwt-auth.guard';
+import { OfficeRequest } from 'src/auth/employee/auth.dtos';
+import { ClientJwtAuthGuard } from 'src/auth/client/client-jwt-auth.guard';
 
 @Controller('/projects')
 export class ProjectController {
@@ -43,7 +44,7 @@ export class ProjectController {
     return await this.createProject.execute(office_id, request);
   }
 
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, ClientJwtAuthGuard)
   @Get()
   async show(
     @Request() { user: { office_id } }: OfficeRequest,
@@ -82,7 +83,7 @@ export class ProjectController {
     return { success: true, message: 'Project status updated successfully.' };
   }
 
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, ClientJwtAuthGuard)
   @Get('/:project_id')
   async index(
     @Request() { user: { office_id } }: OfficeRequest,

@@ -27,8 +27,9 @@ model Client {
   office_id    String
   name         String
   email        String
+  password     String
   phone_number String?
-  avatar       String?
+  logo         String?
   is_active    Boolean   @default(true)
   created_at   DateTime  @default(now())
   updated_at   DateTime?
@@ -91,7 +92,7 @@ model ProjectFile {
   id            String    @id @default(uuid())
   project_id    String
   created_by_id String
-  path          String
+  path          String?
   name          String?
   created_at    DateTime  @default(now())
   updated_at    DateTime?

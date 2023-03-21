@@ -54,22 +54,24 @@ export class CreateProjectFileUsecase {
       throw new BadRequestException('Project file already exists.');
     }
 
+    const projectFile = await this.projectFilesRepository.add({
+      created_by_id: request.created_by,
+      path: null,
+      project_id: request.project_id,
+      name: request.name,
+    });
+
     const decodedFile = decodeBase64(request.file);
-    const filePath = `projects/${request.project_id}/files/${uuid()}.${
-      request.fileFormat
-    }`;
+    const filePath = `offices/${office_id}/clients/${
+      project.client.id
+    }/projects/${request.project_id}/files/${uuid()}.${request.fileFormat}`;
 
     const fileStoragePath = await this.storageSerivce.uploadFile(
       decodedFile,
       filePath,
     );
 
-    const projectFile = await this.projectFilesRepository.add({
-      created_by_id: request.created_by,
-      path: fileStoragePath,
-      project_id: request.project_id,
-      name: request.name,
-    });
+    projectFile.path = fileStoragePath;
 
     return projectFile;
   }

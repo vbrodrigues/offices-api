@@ -14,12 +14,12 @@ import { CreateClientUsecase } from './usecases/create-client.usecase';
 import { FindClientUsecase } from './usecases/find-client.usecase';
 import { Request } from '@nestjs/common/decorators/http/route-params.decorator';
 import { ListClientsUsecase } from './usecases/list-clients.usecase';
-import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import { EditClientUsecase } from './usecases/edit-client.usecase';
 import { UpdateClientDTO } from './dtos/update-client.dto';
 import { BaseResponse } from '../common/dtos/responses';
 import { InactivateClientUsecase } from './usecases/inactivate-client.usecase';
-import { OfficeRequest } from 'src/auth/auth.dtos';
+import { OfficeRequest } from 'src/auth/employee/auth.dtos';
+import { JwtAuthGuard } from 'src/auth/employee/jwt-auth.guard';
 
 @Controller('/clients')
 export class ClientController {
@@ -34,6 +34,7 @@ export class ClientController {
   @UseGuards(JwtAuthGuard)
   @Post()
   async create(@Body() request: CreateClientDTO): Promise<Client> {
+    console.log(1);
     return await this.createClient.execute(request);
   }
 

@@ -2,7 +2,7 @@ import { Controller } from '@nestjs/common';
 import { Body, Get, Param, Post, Put } from '@nestjs/common/decorators';
 import { UseGuards } from '@nestjs/common/decorators/core/use-guards.decorator';
 import { Office } from '@prisma/client';
-import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
+import { JwtAuthGuard } from 'src/auth/employee/jwt-auth.guard';
 import { BaseResponse } from '../common/dtos/responses';
 import { CreateOfficeDTO } from './dtos/create-office.dto';
 import { UpdateOfficeDTO } from './dtos/update-office.dto';

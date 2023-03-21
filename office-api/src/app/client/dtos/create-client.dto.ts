@@ -1,4 +1,4 @@
-import { IsNotEmpty } from 'class-validator';
+import { IsNotEmpty, IsStrongPassword } from 'class-validator';
 
 export class CreateClientDTO {
   @IsNotEmpty()
@@ -10,7 +10,11 @@ export class CreateClientDTO {
   @IsNotEmpty()
   email: string;
 
+  @IsNotEmpty()
+  @IsStrongPassword()
+  password: string;
+
   phone_number: string;
 
-  avatar?: string | null;
+  logo?: string | null;
 }

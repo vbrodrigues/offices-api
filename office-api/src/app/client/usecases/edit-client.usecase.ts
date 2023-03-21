@@ -31,8 +31,8 @@ export class EditClientUsecase {
       throw new UnauthorizedException();
     }
 
-    if (request.avatar) {
-      const logoFile = decodeBase64(request.avatar);
+    if (request.logo) {
+      const logoFile = decodeBase64(request.logo);
       const logoFilepath = `clients/${uuid()}.png`;
 
       const logoStoragePath = await this.storageService.uploadFile(
@@ -40,7 +40,7 @@ export class EditClientUsecase {
         logoFilepath,
       );
 
-      request.avatar = logoStoragePath;
+      request.logo = logoStoragePath;
     }
 
     await this.clientsRepository.update(client_id, request);

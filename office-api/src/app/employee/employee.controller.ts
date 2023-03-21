@@ -9,7 +9,6 @@ import {
   UseGuards,
 } from '@nestjs/common/decorators';
 import { Employee } from '@prisma/client';
-import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import { BaseResponse } from '../common/dtos/responses';
 import { CreateEmployeeDTO } from './dtos/create-employee-dto';
 import { UpdateEmployeeDTO } from './dtos/update-employee.dto';
@@ -18,8 +17,9 @@ import { CreateEmployeeUsecase } from './usecases/create-employee.usecase';
 import { EditEmployeeUsecase } from './usecases/edit-employee.usecase';
 import { InactivateEmployeeUsecase } from './usecases/inactivate-employee.usecase';
 import { ListEmployeesUsecase } from './usecases/list-employees.usecase';
-import { OfficeRequest } from 'src/auth/auth.dtos';
 import { FindEmployeeUsecase } from './usecases/find-employee.usecase';
+import { JwtAuthGuard } from 'src/auth/employee/jwt-auth.guard';
+import { OfficeRequest } from 'src/auth/employee/auth.dtos';
 
 @Controller('/employees')
 export class EmployeeController {
@@ -33,8 +33,11 @@ export class EmployeeController {
 
   @UseGuards(JwtAuthGuard)
   @Post()
-  async create(@Body() request: CreateEmployeeDTO): Promise<Employee> {
-    const employee = await this.createEmployee.execute(request);
+  async create(
+    @Request() { user: { office_id } }: OfficeRequest,
+    @Body() request: CreateEmployeeDTO,
+  ): Promise<Employee> {
+    const employee = await this.createEmployee.execute(office_id, request);
     return employee;
   }
 

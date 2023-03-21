@@ -7,7 +7,6 @@ import { EmployeesRepository } from 'src/app/employee/employee.repository';
 import { RolesRepository } from 'src/app/role/role.repository';
 import { StorageService } from 'src/providers/storage/storage';
 import { decodeBase64 } from 'src/app/common/utils/base64';
-import { v4 as uuid } from 'uuid';
 
 @Injectable()
 export class CreateOfficeUsecase {
@@ -27,21 +26,22 @@ export class CreateOfficeUsecase {
       throw new BadRequestException('Office already exists');
     }
 
+    const office = await this.officesRepository.add({ ...request, logo: null });
+
     if (request.logo) {
       const logoFile = decodeBase64(request.logo);
-      const logoFilepath = `offices/${uuid()}_logo_${request.name}.png`;
+      const logoFilepath = `offices/${office.id}/brand/logo.png`;
 
       const logoStoragePath = await this.storageService.uploadFile(
         logoFile,
         logoFilepath,
       );
 
-      request.logo = logoStoragePath;
+      await this.officesRepository.update(office.id, { logo: logoStoragePath });
+      office.logo = logoStoragePath;
     }
 
     const role = await this.rolesRepository.findByLabel('owner');
-
-    const office = await this.officesRepository.add(request);
 
     await this.employeesRepository.add({
       email: request.owner_email,

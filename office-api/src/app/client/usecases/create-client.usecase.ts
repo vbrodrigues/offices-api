@@ -4,7 +4,6 @@ import { OfficesRepository } from 'src/app/office/office.repository';
 import { StorageService } from 'src/providers/storage/storage';
 import { ClientsRepository } from '../client.repository';
 import { CreateClientDTO } from '../dtos/create-client.dto';
-import { v4 as uuid } from 'uuid';
 import { decodeBase64 } from 'src/app/common/utils/base64';
 import { NotificationsService } from 'src/events/notifications.service';
 
@@ -33,21 +32,33 @@ export class CreateClientUsecase {
       throw new BadRequestException('Client already exists.');
     }
 
-    if (request.avatar) {
-      const logoFile = decodeBase64(request.avatar);
-      const logoFilepath = `clients/${uuid()}.png`;
+    const client = await this.clientsRepository.add({ ...request, logo: null });
+
+    if (request.logo) {
+      const logoFile = decodeBase64(request.logo);
+      const logoFilepath = `offices/${office.id}/clients/${client.id}/brand/logo.png`;
 
       const logoStoragePath = await this.storageService.uploadFile(
         logoFile,
         logoFilepath,
       );
 
-      request.avatar = logoStoragePath;
+      await this.clientsRepository.update(client.id, {
+        logo: logoStoragePath,
+      });
+      client.logo = logoStoragePath;
     }
 
-    const client = await this.clientsRepository.add(request);
+    try {
+      this.notificationsService.notify({
+        type: 'CLIENT_CREATED',
+        data: client,
+      });
+    } catch (err) {
+      console.log('Error notifying client creation.');
+    }
 
-    this.notificationsService.notify({ type: 'CLIENT_CREATED', data: client });
+    delete client.password;
 
     return client;
   }
