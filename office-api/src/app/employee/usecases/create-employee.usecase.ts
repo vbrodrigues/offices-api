@@ -59,8 +59,9 @@ export class CreateEmployeeUsecase {
       await this.employeesRepository.update(employee.id, {
         avatar: logoStoragePath,
       });
-      employee.avatar = logoStoragePath;
     }
+
+    delete employee.avatar;
 
     return employee;
   }

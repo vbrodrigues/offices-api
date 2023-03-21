@@ -71,7 +71,7 @@ export class CreateProjectFileUsecase {
       filePath,
     );
 
-    projectFile.path = fileStoragePath;
+    delete projectFile.path;
 
     return projectFile;
   }

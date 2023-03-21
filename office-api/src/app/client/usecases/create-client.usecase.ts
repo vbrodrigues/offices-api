@@ -46,7 +46,6 @@ export class CreateClientUsecase {
       await this.clientsRepository.update(client.id, {
         logo: logoStoragePath,
       });
-      client.logo = logoStoragePath;
     }
 
     try {
@@ -59,6 +58,7 @@ export class CreateClientUsecase {
     }
 
     delete client.password;
+    delete client.logo;
 
     return client;
   }

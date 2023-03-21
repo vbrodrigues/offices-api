@@ -38,7 +38,6 @@ export class CreateOfficeUsecase {
       );
 
       await this.officesRepository.update(office.id, { logo: logoStoragePath });
-      office.logo = logoStoragePath;
     }
 
     const role = await this.rolesRepository.findByLabel('owner');
@@ -51,6 +50,8 @@ export class CreateOfficeUsecase {
       office_id: office.id,
       role_id: role.id,
     });
+
+    delete office.logo;
 
     return office;
   }
