@@ -5,7 +5,7 @@ import { DatabaseModule } from 'src/database/database.module';
 import { ClientAuthService } from './client-auth.service';
 import { ClientAuthController } from './client-auth.controller';
 import { ClientLocalStrategy } from './client-local-strategy';
-import { JwtStrategy } from '../employee/jwt.strategy';
+import { ClientJwtStrategy } from './client-jwt.strategy';
 
 @Module({
   imports: [
@@ -17,6 +17,6 @@ import { JwtStrategy } from '../employee/jwt.strategy';
     }),
   ],
   controllers: [ClientAuthController],
-  providers: [ClientAuthService, ClientLocalStrategy, JwtStrategy],
+  providers: [ClientAuthService, ClientLocalStrategy, ClientJwtStrategy],
 })
 export class ClientAuthModule {}

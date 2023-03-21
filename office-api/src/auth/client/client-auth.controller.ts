@@ -12,7 +12,6 @@ export class ClientAuthController {
   @UseGuards(ClientLocalAuthGuard)
   @Post('/login')
   async clientsLogin(@Request() request) {
-    console.log(request);
     return this.authService.clientLogin(request.user);
   }
 }

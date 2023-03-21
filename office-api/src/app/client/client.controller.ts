@@ -34,7 +34,6 @@ export class ClientController {
   @UseGuards(JwtAuthGuard)
   @Post()
   async create(@Body() request: CreateClientDTO): Promise<Client> {
-    console.log(1);
     return await this.createClient.execute(request);
   }
 

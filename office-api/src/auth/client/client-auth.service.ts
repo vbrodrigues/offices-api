@@ -16,7 +16,6 @@ export class ClientAuthService {
     password: string,
     office_id: string,
   ): Promise<Client | null> {
-    console.log(office_id, email, password);
     if (!office_id || !email || !password) {
       return null;
     }
@@ -25,8 +24,6 @@ export class ClientAuthService {
       email,
       office_id,
     });
-
-    console.log(client);
 
     if (!client) {
       return null;
@@ -45,6 +42,7 @@ export class ClientAuthService {
     const payload = {
       email: client.email,
       office_id: client.office_id,
+      aud: 'client',
       sub: client.id,
     };
     return { access_token: this.jwtService.sign(payload) };

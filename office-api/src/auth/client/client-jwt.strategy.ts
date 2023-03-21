@@ -29,6 +29,10 @@ export class ClientJwtStrategy extends PassportStrategy(
       }
     }
 
+    if (payload.aud === 'client') {
+      request.query = { ...request.query, client_id: payload.sub };
+    }
+
     return {
       client_id: payload.sub,
       office_id: payload.office_id,
