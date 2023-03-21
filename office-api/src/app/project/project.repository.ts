@@ -31,7 +31,7 @@ export class ProjectsRepositorySQL implements ProjectsRepository {
   ): Promise<FullProject[]> {
     return await this.prisma.project.findMany({
       where: { client: { office: { id: office_id } }, ...projectFilters },
-      include: { type: true, files: true, client: true },
+      include: { type: true, files: true, client: true, schedules: true },
     });
   }
 
