@@ -10,6 +10,7 @@ import { ProjectModule } from './app/project/project.module';
 import { ProjectFileModule } from './app/project-file/project-file.module';
 import { AuthModule } from './auth/employee/auth.module';
 import { ClientAuthModule } from './auth/client/client-auth.module';
+import { ProjectPostModule } from './app/project-post/project-post.module';
 
 @Module({
   imports: [
@@ -24,6 +25,7 @@ import { ClientAuthModule } from './auth/client/client-auth.module';
     NotificationsModule,
     ProjectModule,
     ProjectFileModule,
+    ProjectPostModule,
   ],
 })
 export class AppModule {}
