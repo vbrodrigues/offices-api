@@ -3,6 +3,9 @@ import { HydratedDocument } from 'mongoose';
 
 @Schema()
 export class ProjectPost {
+  @Prop()
+  id: string;
+
   @Prop({ required: true })
   project_id: string;
 
@@ -16,7 +19,13 @@ export class ProjectPost {
   content: string;
 
   @Prop()
-  encoded_media: string;
+  media_path: string;
+
+  @Prop()
+  likes: number;
+
+  @Prop()
+  created_at: Date;
 }
 
 export type ProjectPostDocument = HydratedDocument<ProjectPost>;
