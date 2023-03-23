@@ -1,7 +1,7 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { ProjectPost } from 'src/database/nosql/models';
 import { StorageService } from 'src/providers/storage/storage';
-import { CreateProjectPostDTO } from '../dtos/create-project-posts.dto';
+import { CreateProjectPostDTO } from '../dtos/create-project-post.dto';
 import { ProjectPostsRepository } from '../project-post.repository';
 import { decodeBase64 } from 'src/app/common/utils/base64';
 import { ProjectsRepository } from 'src/app/project/project.repository';

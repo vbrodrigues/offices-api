@@ -2,10 +2,16 @@ import { Injectable } from '@nestjs/common';
 import { ProjectPost } from 'src/database/nosql/models';
 import { MongoDBService } from 'src/database/nosql/mongodb.service';
 import { PaginationParams } from '../common/dtos/pagination';
-import { CreateProjectPostInternalDTO } from './dtos/create-project-posts.dto';
+import { CreateProjectPostInternalDTO } from './dtos/create-project-post.dto';
+import { UpdateProjectPostDTO } from './dtos/update-project-post.dto';
 
 export abstract class ProjectPostsRepository {
   abstract add(data: CreateProjectPostInternalDTO): Promise<ProjectPost>;
+  abstract findById(project_post_id: string): Promise<ProjectPost | null>;
+  abstract update(
+    project_post_id: string,
+    data: UpdateProjectPostDTO,
+  ): Promise<void>;
   abstract list(
     project_id: string,
     paginationParams: PaginationParams,
@@ -19,6 +25,20 @@ export class ProjectPostsRepositoryMongo implements ProjectPostsRepository {
   async add(data: CreateProjectPostInternalDTO): Promise<ProjectPost> {
     const post = new this.mongo.projectPost(data);
     return post.save();
+  }
+
+  async findById(project_post_id: string): Promise<ProjectPost> {
+    return await this.mongo.projectPost.findOne({ id: project_post_id });
+  }
+
+  async update(
+    project_post_id: any,
+    data: UpdateProjectPostDTO,
+  ): Promise<void> {
+    await this.mongo.projectPost.updateOne(
+      { id: project_post_id },
+      { ...data },
+    );
   }
 
   async list(

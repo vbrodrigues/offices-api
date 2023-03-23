@@ -30,3 +30,27 @@ export class ProjectPost {
 
 export type ProjectPostDocument = HydratedDocument<ProjectPost>;
 export const ProjectPostSchema = SchemaFactory.createForClass(ProjectPost);
+
+@Schema()
+export class ProjectLike {
+  @Prop()
+  id: string;
+
+  @Prop({ required: true })
+  project_post_id: string;
+
+  @Prop({ required: true })
+  liker_id: string;
+
+  @Prop({ required: true })
+  liker_type: string;
+
+  @Prop({ required: true })
+  is_active: boolean;
+
+  @Prop()
+  created_at: Date;
+}
+
+export type ProjectLikeDocument = HydratedDocument<ProjectLike>;
+export const ProjectLikeSchema = SchemaFactory.createForClass(ProjectLike);
