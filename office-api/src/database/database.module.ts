@@ -1,5 +1,4 @@
 import { Module } from '@nestjs/common';
-import { MongooseModule } from '@nestjs/mongoose';
 import {
   ClientsRepository,
   ClientsRepositorySQL,
@@ -17,14 +16,6 @@ import {
   ProjectFilesRepositorySQL,
 } from 'src/app/project-file/project-file.repository';
 import {
-  ProjectLikesRepository,
-  ProjectLikesRepositoryMongo,
-} from 'src/app/project-like/project-like.repository';
-import {
-  ProjectPostsRepository,
-  ProjectPostsRepositoryMongo,
-} from 'src/app/project-post/project-post.repository';
-import {
   ProjectSchedulesRepository,
   ProjectSchedulesRepositorySQL,
 } from 'src/app/project-schedule/project-schedule.repository';
@@ -40,26 +31,12 @@ import {
   RolesRepository,
   RolesRepositorySQL,
 } from 'src/app/role/role.repository';
-import {
-  ProjectLike,
-  ProjectLikeSchema,
-  ProjectPost,
-  ProjectPostSchema,
-} from './nosql/models';
-import { MongoDBService } from './nosql/mongodb.service';
 import { PrismaService } from './prisma-service';
 
 @Module({
-  imports: [
-    MongooseModule.forRoot(process.env.MONGO_URI, { dbName: 'office' }),
-    MongooseModule.forFeature([
-      { name: ProjectPost.name, schema: ProjectPostSchema },
-      { name: ProjectLike.name, schema: ProjectLikeSchema },
-    ]),
-  ],
+  imports: [],
   providers: [
     PrismaService,
-    MongoDBService,
     {
       provide: OfficesRepository,
       useClass: OfficesRepositorySQL,
@@ -92,14 +69,6 @@ import { PrismaService } from './prisma-service';
       provide: ProjectFilesRepository,
       useClass: ProjectFilesRepositorySQL,
     },
-    {
-      provide: ProjectPostsRepository,
-      useClass: ProjectPostsRepositoryMongo,
-    },
-    {
-      provide: ProjectLikesRepository,
-      useClass: ProjectLikesRepositoryMongo,
-    },
   ],
   exports: [
     OfficesRepository,
@@ -110,8 +79,6 @@ import { PrismaService } from './prisma-service';
     ProjectsRepository,
     ProjectSchedulesRepository,
     ProjectFilesRepository,
-    ProjectPostsRepository,
-    ProjectLikesRepository,
   ],
 })
 export class DatabaseModule {}

@@ -1,3 +1,5 @@
+import { Notification } from './notifications.dto';
+
 export abstract class NotificationService {
-  abstract notify(data): Promise<void>;
+  abstract notify(data: Notification): Promise<void>;
 }

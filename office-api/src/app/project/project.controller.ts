@@ -24,6 +24,16 @@ import { FullProject } from './project.repository';
 import { JwtAuthGuard } from 'src/auth/employee/jwt-auth.guard';
 import { OfficeRequest } from 'src/auth/employee/auth.dtos';
 import { ClientJwtAuthGuard } from 'src/auth/client/client-jwt-auth.guard';
+import { LikeProjectPostUsecase } from './usecases/posts/like-project-post.usecase';
+import { UnlikeProjectPostUsecase } from './usecases/posts/unlike-project-post.usecase';
+import { CreateProjectPostUsecase } from './usecases/posts/create-project-post.usecase';
+import { GetProjectFeedUsecase } from './usecases/posts/get-project-feed.usecase';
+import {
+  CreateProjectPostDTO,
+  LikeProjectPostDTO,
+  ProjectPost,
+  UnlikeProjectPostDTO,
+} from 'src/events/project-posts/project-posts.dto';
 
 @Controller('/projects')
 export class ProjectController {
@@ -33,6 +43,10 @@ export class ProjectController {
     private renameProject: RenameProjectUsecase,
     private updateProjectStatus: UpdateProjectStatusUsecase,
     private findProject: FindProjectUsecase,
+    private likeProjectPost: LikeProjectPostUsecase,
+    private unlikeProjectPost: UnlikeProjectPostUsecase,
+    private createProjectPost: CreateProjectPostUsecase,
+    private getProjectFeed: GetProjectFeedUsecase,
   ) {}
 
   @UseGuards(JwtAuthGuard)
@@ -90,5 +104,49 @@ export class ProjectController {
     @Param('project_id') project_id: string,
   ): Promise<FullProject | null> {
     return await this.findProject.execute(office_id, project_id);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Post('/posts')
+  async createPost(
+    @Request() { user: { office_id } }: OfficeRequest,
+    @Body() request: CreateProjectPostDTO,
+  ): Promise<BaseResponse> {
+    await this.createProjectPost.execute(office_id, request);
+    return { success: true, message: 'Successfully created project post.' };
+  }
+
+  @UseGuards(ClientJwtAuthGuard)
+  @Post('/posts/like')
+  async likePost(@Body() request: LikeProjectPostDTO): Promise<BaseResponse> {
+    await this.likeProjectPost.execute(request);
+    return { success: true, message: 'Successfully liked project post.' };
+  }
+
+  @UseGuards(ClientJwtAuthGuard)
+  @Post('/posts/unlike')
+  async unlikePost(
+    @Body() request: UnlikeProjectPostDTO,
+  ): Promise<BaseResponse> {
+    await this.unlikeProjectPost.execute(request);
+    return { success: true, message: 'Successfully unliked project post.' };
+  }
+
+  @UseGuards(ClientJwtAuthGuard)
+  @Get('/feed/:project_id')
+  async getFeed(
+    @Request() { user: { office_id } }: OfficeRequest,
+    @Param('project_id') project_id: string,
+    @Query('ordering') ordering: 'ASC' | 'DESC',
+    @Query('sortField') sortField: string,
+    @Query('offset') offset: number,
+    @Query('limit') limit: number,
+  ): Promise<ProjectPost[]> {
+    return await this.getProjectFeed.execute(office_id, project_id, {
+      ordering,
+      sortField,
+      offset,
+      limit,
+    });
   }
 }

@@ -26,6 +26,10 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       }
     }
 
+    if (payload.aud !== 'employee') {
+      throw new UnauthorizedException();
+    }
+
     return {
       employee_id: payload.sub,
       office_id: payload.office_id,

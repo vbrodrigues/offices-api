@@ -5,12 +5,12 @@ import { OfficeModule } from './app/office/office.module';
 import { RoleModule } from './app/role/role.module';
 import { DatabaseModule } from './database/database.module';
 import { ProjectTypeModule } from './app/project-type/project-type.module';
-import { NotificationsModule } from './events/notifications.module';
 import { ProjectModule } from './app/project/project.module';
 import { ProjectFileModule } from './app/project-file/project-file.module';
 import { AuthModule } from './auth/employee/auth.module';
 import { ClientAuthModule } from './auth/client/client-auth.module';
-import { ProjectPostModule } from './app/project-post/project-post.module';
+import { NotificationsModule } from './events/notifications/notifications.module';
+import { ProjectPostsModule } from './events/project-posts/project-posts.module';
 
 @Module({
   imports: [
@@ -25,7 +25,7 @@ import { ProjectPostModule } from './app/project-post/project-post.module';
     NotificationsModule,
     ProjectModule,
     ProjectFileModule,
-    ProjectPostModule,
+    ProjectPostsModule,
   ],
 })
 export class AppModule {}

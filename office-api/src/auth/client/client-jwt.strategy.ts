@@ -29,9 +29,11 @@ export class ClientJwtStrategy extends PassportStrategy(
       }
     }
 
-    if (payload.aud === 'client') {
-      request.query = { ...request.query, client_id: payload.sub };
+    if (payload.aud !== 'client') {
+      throw new UnauthorizedException();
     }
+
+    request.query = { ...request.query, client_id: payload.sub };
 
     return {
       client_id: payload.sub,

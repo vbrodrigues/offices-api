@@ -5,7 +5,7 @@ import { StorageService } from 'src/providers/storage/storage';
 import { ClientsRepository } from '../client.repository';
 import { CreateClientDTO } from '../dtos/create-client.dto';
 import { decodeBase64 } from 'src/app/common/utils/base64';
-import { NotificationsService } from 'src/events/notifications.service';
+import { NotificationsService } from 'src/events/notifications/notifications.service';
 
 @Injectable()
 export class CreateClientUsecase {
@@ -50,8 +50,8 @@ export class CreateClientUsecase {
 
     try {
       this.notificationsService.notify({
-        type: 'CLIENT_CREATED',
-        data: client,
+        type: 'CONSOLE',
+        content: `You got a new client!`,
       });
     } catch (err) {
       console.log('Error notifying client creation.');
