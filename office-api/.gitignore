@@ -2,6 +2,8 @@
 *.db-journal
 .env
 *.env
+/mysql
+mysql/*
 # compiled output
 /dist
 /node_modules

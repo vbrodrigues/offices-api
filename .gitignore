@@ -1,3 +1,6 @@
 todo.md
 .env
 *.env
+/mysql
+mysql/*
+mysql
