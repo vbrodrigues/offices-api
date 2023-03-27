@@ -1,13 +1,16 @@
 import { Controller } from '@nestjs/common';
 import { MessagePattern } from '@nestjs/microservices';
-import { NotificationService } from './notifications/notification.service';
+import { NotificationServiceFactory } from './notifications/notification-service-factory.service';
+import { Notification } from './notifications/notifications.dto';
 
 @Controller()
 export class AppController {
-  constructor(private notificationService: NotificationService) {}
+  constructor(private notificationServiceFactory: NotificationServiceFactory) {}
 
   @MessagePattern('office-notifications')
-  async test(data: any) {
-    await this.notificationService.notify(data);
+  async test(data: Notification) {
+    const notificationService =
+      this.notificationServiceFactory.getNotificationService(data.type);
+    await notificationService.notify(data);
   }
 }
