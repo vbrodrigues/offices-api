@@ -23,9 +23,11 @@
   "dependencies": {
     "@jridgewell/sourcemap-codec": "^1.4.14",
     "@nestjs/common": "^9.0.0",
+    "@nestjs/config": "^2.3.1",
     "@nestjs/core": "^9.0.0",
     "@nestjs/microservices": "^9.3.9",
     "@nestjs/platform-express": "^9.0.0",
+    "config": "^3.3.9",
     "kafkajs": "^2.2.4",
     "reflect-metadata": "^0.1.13",
     "rimraf": "^3.0.2",

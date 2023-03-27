@@ -55,8 +55,9 @@ export class LikeProjectPostUsecase {
 
     try {
       await this.notificationsService.notify({
-        type: 'CONSOLE',
+        type: 'EMAIL',
         content: `${data.liker_name} liked a post!`,
+        receiver: 'office.api.vitor@gmail.com',
       });
     } catch (err) {
       console.log('Error notifying post like.');

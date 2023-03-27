@@ -1,3 +1,5 @@
+import { Notification } from 'src/notifications/notifications.dto';
+
 export abstract class MessageConverter {
-  abstract convert(data: any): Promise<any>;
+  abstract convert(data: Notification): Promise<any>;
 }

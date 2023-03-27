@@ -1,13 +1,17 @@
+import { ConfigModule } from '@nestjs/config';
+
+const EnvModule = ConfigModule.forRoot({
+  envFilePath: '.env',
+  isGlobal: true,
+});
+
 import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
-import { MessageConverter } from './converters/converter.service';
 import { NotificationServiceFactory } from './notifications/notification-service-factory.service';
-import { NotificationService } from './notifications/notification.service';
 
 @Module({
-  imports: [],
+  imports: [EnvModule],
   controllers: [AppController],
   providers: [NotificationServiceFactory],
-  exports: [NotificationService, MessageConverter],
 })
 export class AppModule {}

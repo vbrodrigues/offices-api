@@ -1,5 +1,7 @@
 import { ConsoleMessaageConverter } from 'src/converters/console-message-converter.service';
+import { EmailMessageConverter } from 'src/converters/email-message-converter.service';
 import { ConsoleNotificationService } from './console-notification.service';
+import { EmailNotificationService } from './email-notification.service';
 import { NotificationService } from './notification.service';
 
 export class NotificationServiceFactory {
@@ -8,8 +10,9 @@ export class NotificationServiceFactory {
   ): NotificationService {
     switch (type) {
       case 'CONSOLE':
-        const converter = new ConsoleMessaageConverter();
-        return new ConsoleNotificationService(converter);
+        return new ConsoleNotificationService(new ConsoleMessaageConverter());
+      case 'EMAIL':
+        return new EmailNotificationService(new EmailMessageConverter());
     }
   }
 }

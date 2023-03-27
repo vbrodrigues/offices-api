@@ -20,7 +20,6 @@ export class ProjectPostsService {
 
   async create(data: CreateProjectPostDTO) {
     try {
-      console.log('Trying to publish on kafka topic create post', data);
       await lastValueFrom(
         this.clientKafka.send('office-create-project-post', data),
       );
@@ -32,7 +31,9 @@ export class ProjectPostsService {
   async like(data: LikeProjectPostDTO) {
     try {
       console.log('Trying to publish on kafka topic like post', data);
-      this.clientKafka.send('office-like-project-post', data);
+      await lastValueFrom(
+        this.clientKafka.send('office-like-project-post', data),
+      );
     } catch (err) {
       console.log('Error sending like project post event. Error:', err);
     }
