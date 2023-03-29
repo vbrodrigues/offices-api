@@ -52,10 +52,10 @@ export class ProjectController {
   @UseGuards(JwtAuthGuard)
   @Post()
   async create(
-    @Request() { user: { office_id } }: OfficeRequest,
+    @Request() { user: { office_id, employee_id } }: OfficeRequest,
     @Body() request: CreateProjectDTO,
   ): Promise<Project> {
-    return await this.createProject.execute(office_id, request);
+    return await this.createProject.execute(office_id, employee_id, request);
   }
 
   @UseGuards(JwtAuthGuard)

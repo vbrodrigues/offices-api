@@ -11,14 +11,16 @@ import { ProjectFilesRepository } from '../project-file.repository';
 import { v4 as uuid } from 'uuid';
 import { ProjectsRepository } from 'src/app/project/project.repository';
 import { EmployeesRepository } from 'src/app/employee/employee.repository';
+import { NotificationsService } from 'src/events/notifications/notifications.service';
 
 @Injectable()
 export class CreateProjectFileUsecase {
   constructor(
     private projectFilesRepository: ProjectFilesRepository,
     private projectsRepository: ProjectsRepository,
-    private employeeRepository: EmployeesRepository,
+    private employeesRepository: EmployeesRepository,
     private storageSerivce: StorageService,
+    private notificationsService: NotificationsService,
   ) {}
 
   async execute(
@@ -35,7 +37,9 @@ export class CreateProjectFileUsecase {
       throw new UnauthorizedException();
     }
 
-    const employee = await this.employeeRepository.findById(request.created_by);
+    const employee = await this.employeesRepository.findById(
+      request.created_by,
+    );
 
     if (!employee) {
       throw new UnauthorizedException();
@@ -66,12 +70,21 @@ export class CreateProjectFileUsecase {
       project.client.id
     }/projects/${request.project_id}/files/${uuid()}.${request.fileFormat}`;
 
-    const fileStoragePath = await this.storageSerivce.uploadFile(
-      decodedFile,
-      filePath,
-    );
+    await this.storageSerivce.uploadFile(decodedFile, filePath);
 
     delete projectFile.path;
+
+    const employees = await this.employeesRepository.findByOfficeId(office_id);
+
+    employees.forEach(async (notifiedEmployee) => {
+      if (notifiedEmployee.id !== request.created_by) {
+        await this.notificationsService.notify({
+          content: `Novo arquivo ${request.name} adicionado por ${employee.name} ao projeto ${project.name}`,
+          type: 'EMAIL',
+          receiver: notifiedEmployee.email,
+        });
+      }
+    });
 
     return projectFile;
   }

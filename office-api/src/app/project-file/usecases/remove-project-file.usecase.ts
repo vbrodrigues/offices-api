@@ -1,6 +1,8 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { InternalServerErrorException } from '@nestjs/common/exceptions';
+import { EmployeesRepository } from 'src/app/employee/employee.repository';
 import { ProjectsRepository } from 'src/app/project/project.repository';
+import { NotificationsService } from 'src/events/notifications/notifications.service';
 import { StorageService } from 'src/providers/storage/storage';
 import { ProjectFilesRepository } from '../project-file.repository';
 
@@ -10,6 +12,8 @@ export class RemoveProjectFileUsecase {
     private projectFilesRepository: ProjectFilesRepository,
     private projectsRepository: ProjectsRepository,
     private storageService: StorageService,
+    private employeesRepository: EmployeesRepository,
+    private notificationsService: NotificationsService,
   ) {}
 
   async execute(office_id: string, project_file_id: string): Promise<void> {
@@ -40,6 +44,16 @@ export class RemoveProjectFileUsecase {
         'Something went wrong deleting the project file.',
       );
     }
+
+    const employees = await this.employeesRepository.findByOfficeId(office_id);
+
+    employees.forEach(async (notifiedEmployee) => {
+      await this.notificationsService.notify({
+        content: `Arquivo ${projectFile.name} removido do projeto ${project.name}`,
+        type: 'EMAIL',
+        receiver: notifiedEmployee.email,
+      });
+    });
 
     await this.projectFilesRepository.delete(project_file_id);
   }

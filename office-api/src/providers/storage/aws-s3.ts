@@ -42,14 +42,13 @@ export class S3StorageService implements StorageService {
   }
 
   async signFile(filepath: string): Promise<string> {
-    console.log(this.signingParams);
     const signedUrl = cf.getSignedUrl(
       `${process.env.AWS_CLOUDFRONT_DNS}/${
         filepath.split('amazonaws.com/')[1]
       }`,
       this.signingParams,
     );
-    console.log(signedUrl);
+
     return signedUrl;
   }
 }

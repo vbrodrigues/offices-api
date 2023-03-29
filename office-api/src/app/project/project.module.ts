@@ -13,6 +13,7 @@ import { UpdateProjectStatusUsecase } from './usecases/update-project-status.use
 import { LikeProjectPostUsecase } from './usecases/posts/like-project-post.usecase';
 import { UnlikeProjectPostUsecase } from './usecases/posts/unlike-project-post.usecase';
 import { GetProjectFeedUsecase } from './usecases/posts/get-project-feed.usecase';
+import { NotificationsModule } from 'src/events/notifications/notifications.module';
 
 @Module({
   imports: [
@@ -20,6 +21,7 @@ import { GetProjectFeedUsecase } from './usecases/posts/get-project-feed.usecase
     StorageModule,
     ProjectScheduleModule,
     ProjectPostsModule,
+    NotificationsModule,
   ],
   controllers: [ProjectController],
   providers: [

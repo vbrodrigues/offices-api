@@ -1,5 +1,3 @@
-import { Employee } from '@prisma/client';
-
 export class OfficeRequest {
-  user: Employee;
+  user: { employee_id: string; office_id: string; email: string };
 }
