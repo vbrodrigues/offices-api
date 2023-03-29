@@ -58,9 +58,24 @@ export class ProjectController {
     return await this.createProject.execute(office_id, request);
   }
 
-  @UseGuards(JwtAuthGuard, ClientJwtAuthGuard)
+  @UseGuards(JwtAuthGuard)
   @Get()
   async show(
+    @Request() { user: { office_id } }: OfficeRequest,
+    @Query('client_id') client_id: string,
+    @Query('project_type_id') project_type_id: string,
+    @Query('name') name: string,
+  ): Promise<FullProject[]> {
+    return await this.listProjects.execute(office_id, {
+      client_id,
+      project_type_id,
+      name,
+    });
+  }
+
+  @UseGuards(ClientJwtAuthGuard)
+  @Get('/clients')
+  async showForClient(
     @Request() { user: { office_id } }: OfficeRequest,
     @Query('client_id') client_id: string,
     @Query('project_type_id') project_type_id: string,
@@ -97,9 +112,18 @@ export class ProjectController {
     return { success: true, message: 'Project status updated successfully.' };
   }
 
-  @UseGuards(JwtAuthGuard, ClientJwtAuthGuard)
+  @UseGuards(JwtAuthGuard)
   @Get('/:project_id')
   async index(
+    @Request() { user: { office_id } }: OfficeRequest,
+    @Param('project_id') project_id: string,
+  ): Promise<FullProject | null> {
+    return await this.findProject.execute(office_id, project_id);
+  }
+
+  @UseGuards(JwtAuthGuard, ClientJwtAuthGuard)
+  @Get('clients/:project_id')
+  async indexForClient(
     @Request() { user: { office_id } }: OfficeRequest,
     @Param('project_id') project_id: string,
   ): Promise<FullProject | null> {

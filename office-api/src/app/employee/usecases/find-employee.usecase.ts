@@ -1,10 +1,14 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { Employee } from '@prisma/client';
+import { StorageService } from 'src/providers/storage/storage';
 import { EmployeesRepository } from '../employee.repository';
 
 @Injectable()
 export class FindEmployeeUsecase {
-  constructor(private employeesReository: EmployeesRepository) {}
+  constructor(
+    private employeesReository: EmployeesRepository,
+    private storageService: StorageService,
+  ) {}
 
   async execute(
     office_id: string,
@@ -18,6 +22,10 @@ export class FindEmployeeUsecase {
 
     if (office_id !== employee.office_id) {
       throw new UnauthorizedException();
+    }
+
+    if (employee.avatar) {
+      employee.avatar = await this.storageService.signFile(employee.avatar);
     }
 
     return employee;

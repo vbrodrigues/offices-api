@@ -21,7 +21,9 @@ export class FindClientUsecase {
       throw new UnauthorizedException();
     }
 
-    client.logo = await this.storageService.signFile(client.logo);
+    if (client.logo) {
+      client.logo = await this.storageService.signFile(client.logo);
+    }
 
     return client;
   }

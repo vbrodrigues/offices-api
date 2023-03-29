@@ -1,9 +1,13 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { StorageService } from 'src/providers/storage/storage';
 import { FullProject, ProjectsRepository } from '../project.repository';
 
 @Injectable()
 export class FindProjectUsecase {
-  constructor(private projectsRepository: ProjectsRepository) {}
+  constructor(
+    private projectsRepository: ProjectsRepository,
+    private storageService: StorageService,
+  ) {}
 
   async execute(
     office_id: string,
@@ -17,6 +21,15 @@ export class FindProjectUsecase {
 
     if (office_id !== project.client.office_id) {
       throw new UnauthorizedException();
+    }
+
+    if (project.files) {
+      project.files = await Promise.all(
+        project.files.map(async (file) => {
+          file.path = await this.storageService.signFile(file.path);
+          return file;
+        }),
+      );
     }
 
     return project;
