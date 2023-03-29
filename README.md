@@ -35,6 +35,7 @@
 - MySQL
 - MongoDB
 - AWS S3
+- AWS CloudFront
 - Nodemailer
 - Docker
 
