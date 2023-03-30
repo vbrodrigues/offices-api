@@ -34,6 +34,7 @@
 - Kafka
 - MySQL
 - MongoDB
+- Redis
 - AWS S3
 - AWS CloudFront
 - Nodemailer
