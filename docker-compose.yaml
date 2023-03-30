@@ -36,3 +36,8 @@ services:
       - ./mysql/data:/var/lib/mysql
     ports:
       - "3306:3306"
+  redis:
+    image: redis:latest
+    container_name: office-cache
+    ports:
+      - "6379:6379"
