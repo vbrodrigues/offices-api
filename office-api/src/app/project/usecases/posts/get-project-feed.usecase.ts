@@ -25,12 +25,15 @@ export class GetProjectFeedUsecase {
     }
 
     try {
-      const response = await HTTPClient.get('/feed', {
-        params: paginationParams,
-      });
+      const response = await HTTPClient.get(
+        `/project-posts/feed/${project_id}`,
+        {
+          params: paginationParams,
+        },
+      );
       return response.data;
     } catch (err) {
-      console.log('Error getting project feed.');
+      console.log('Error getting project feed. Error:', err);
     }
   }
 }

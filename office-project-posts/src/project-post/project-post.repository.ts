@@ -61,7 +61,6 @@ export class ProjectPostsRepositoryMongo implements ProjectPostsRepository {
       })
       .skip(paginationParams.offset)
       .limit(paginationParams.limit);
-
     return projectPosts;
   }
 }

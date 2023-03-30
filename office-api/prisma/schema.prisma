@@ -15,7 +15,7 @@ model Office {
   name               String
   owner_email        String
   owner_phone_number String?
-  logo               String?
+  logo               String?  @db.VarChar(4096)
   created_at         DateTime @default(now())
 
   clients   Client[]
@@ -29,7 +29,7 @@ model Client {
   email        String
   password     String
   phone_number String?
-  logo         String?
+  logo         String?   @db.VarChar(4096)
   is_active    Boolean   @default(true)
   created_at   DateTime  @default(now())
   updated_at   DateTime?
@@ -54,7 +54,7 @@ model Employee {
   email        String
   password     String
   phone_number String?
-  avatar       String?
+  avatar       String?   @db.VarChar(4096)
   is_active    Boolean   @default(true)
   created_at   DateTime  @default(now())
   updated_at   DateTime?
@@ -92,7 +92,7 @@ model ProjectFile {
   id            String    @id @default(uuid())
   project_id    String
   created_by_id String
-  path          String?
+  path          String?   @db.VarChar(4096)
   name          String?
   created_at    DateTime  @default(now())
   updated_at    DateTime?

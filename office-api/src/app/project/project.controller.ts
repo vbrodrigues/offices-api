@@ -1,7 +1,10 @@
 import {
   Body,
+  CacheInterceptor,
+  CACHE_MANAGER,
   Controller,
   Get,
+  Inject,
   Post,
   Put,
   Query,
@@ -34,10 +37,12 @@ import {
   ProjectPost,
   UnlikeProjectPostDTO,
 } from 'src/events/project-posts/project-posts.dto';
+import { Cache } from 'cache-manager';
 
 @Controller('/projects')
 export class ProjectController {
   constructor(
+    @Inject(CACHE_MANAGER) private cacheManager: Cache,
     private createProject: CreateProjectUsecase,
     private listProjects: ListProjectsUsecase,
     private renameProject: RenameProjectUsecase,
@@ -66,11 +71,29 @@ export class ProjectController {
     @Query('project_type_id') project_type_id: string,
     @Query('name') name: string,
   ): Promise<FullProject[]> {
-    return await this.listProjects.execute(office_id, {
+    const cachedResponse: FullProject[] = await this.cacheManager.get(
+      `projects-${office_id}-${client_id}-${project_type_id}-${name}`,
+    );
+
+    if (cachedResponse) {
+      return cachedResponse;
+    }
+
+    const response = await this.listProjects.execute(office_id, {
       client_id,
       project_type_id,
       name,
     });
+
+    if (response) {
+      await this.cacheManager.set(
+        `projects-${office_id}-${client_id}-${project_type_id}-${name}`,
+        response,
+        5000,
+      );
+    }
+
+    return response;
   }
 
   @UseGuards(ClientJwtAuthGuard)
@@ -81,11 +104,29 @@ export class ProjectController {
     @Query('project_type_id') project_type_id: string,
     @Query('name') name: string,
   ): Promise<FullProject[]> {
-    return await this.listProjects.execute(office_id, {
+    const cachedResponse: FullProject[] = await this.cacheManager.get(
+      `projects-${office_id}-${client_id}-${project_type_id}-${name}`,
+    );
+
+    if (cachedResponse) {
+      return cachedResponse;
+    }
+
+    const response = await this.listProjects.execute(office_id, {
       client_id,
       project_type_id,
       name,
     });
+
+    if (response) {
+      await this.cacheManager.set(
+        `projects-${office_id}-${client_id}-${project_type_id}-${name}`,
+        response,
+        5000,
+      );
+    }
+
+    return response;
   }
 
   @UseGuards(JwtAuthGuard)
@@ -118,7 +159,24 @@ export class ProjectController {
     @Request() { user: { office_id } }: OfficeRequest,
     @Param('project_id') project_id: string,
   ): Promise<FullProject | null> {
-    return await this.findProject.execute(office_id, project_id);
+    const cachedResponse: FullProject = await this.cacheManager.get(
+      `project-${office_id}-${project_id}`,
+    );
+
+    if (cachedResponse) {
+      return cachedResponse;
+    }
+    const response = await this.findProject.execute(office_id, project_id);
+
+    if (response) {
+      await this.cacheManager.set(
+        `project-${office_id}-${project_id}`,
+        response,
+        5000,
+      );
+    }
+
+    return response;
   }
 
   @UseGuards(JwtAuthGuard, ClientJwtAuthGuard)
@@ -127,7 +185,25 @@ export class ProjectController {
     @Request() { user: { office_id } }: OfficeRequest,
     @Param('project_id') project_id: string,
   ): Promise<FullProject | null> {
-    return await this.findProject.execute(office_id, project_id);
+    const cachedResponse: FullProject = await this.cacheManager.get(
+      `project-${office_id}-${project_id}`,
+    );
+
+    if (cachedResponse) {
+      return cachedResponse;
+    }
+
+    const response = await this.findProject.execute(office_id, project_id);
+
+    if (response) {
+      await this.cacheManager.set(
+        `project-${office_id}-${project_id}`,
+        response,
+        5000,
+      );
+    }
+
+    return response;
   }
 
   @UseGuards(JwtAuthGuard)
@@ -163,14 +239,32 @@ export class ProjectController {
     @Param('project_id') project_id: string,
     @Query('ordering') ordering: 'ASC' | 'DESC',
     @Query('sortField') sortField: string,
-    @Query('offset') offset: number,
-    @Query('limit') limit: number,
+    @Query('offset') offset = 0,
+    @Query('limit') limit = 10,
   ): Promise<ProjectPost[]> {
-    return await this.getProjectFeed.execute(office_id, project_id, {
+    const cachedResponse: ProjectPost[] = await this.cacheManager.get(
+      `project-feed-${office_id}-${project_id}-${ordering}-${sortField}-${offset}-${limit}`,
+    );
+
+    if (cachedResponse) {
+      return cachedResponse;
+    }
+
+    const response = await this.getProjectFeed.execute(office_id, project_id, {
       ordering,
       sortField,
       offset,
       limit,
     });
+
+    if (response) {
+      await this.cacheManager.set(
+        `project-feed-${office_id}-${project_id}-${ordering}-${sortField}-${offset}-${limit}`,
+        response,
+        15000,
+      );
+    }
+
+    return response;
   }
 }

@@ -70,7 +70,14 @@ export class CreateProjectFileUsecase {
       project.client.id
     }/projects/${request.project_id}/files/${uuid()}.${request.fileFormat}`;
 
-    await this.storageSerivce.uploadFile(decodedFile, filePath);
+    const fileStoragePath = await this.storageSerivce.uploadFile(
+      decodedFile,
+      filePath,
+    );
+
+    await this.projectFilesRepository.update(projectFile.id, {
+      path: fileStoragePath,
+    });
 
     delete projectFile.path;
 

@@ -8,6 +8,7 @@ import { UnlikeProjectPostUsecase } from './usecases/unlike-project-post.usecase
 import { CreateProjectLikeDTO } from '../project-like/dtos/create-project-like.dto';
 import { MessagePattern } from '@nestjs/microservices';
 import { UnlikeProjectPostDTO } from 'src/project-like/dtos/update-project-like.dto';
+import { Param } from '@nestjs/common/decorators';
 
 @Controller('/project-posts')
 export class ProjectPostController {
@@ -38,8 +39,8 @@ export class ProjectPostController {
     return { success: true, message: 'Successfully unliked post.' };
   }
 
-  @Get('/feed')
-  async show(@Query('project_id') project_id: string): Promise<ProjectPost[]> {
+  @Get('/feed/:project_id')
+  async show(@Param('project_id') project_id: string): Promise<ProjectPost[]> {
     return await this.getProjectFeed.execute(project_id, {
       limit: 10,
       offset: 0,

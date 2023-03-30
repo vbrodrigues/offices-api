@@ -16,7 +16,7 @@ export class ListProjectsUsecase {
   ): Promise<FullProject[]> {
     const projects = await this.projectsRepository.findBy(office_id, filters);
 
-    return Promise.all(
+    const response = await Promise.all(
       projects.map(async (project) => {
         if (project.files) {
           project.files = await Promise.all(
@@ -32,5 +32,7 @@ export class ListProjectsUsecase {
         return project;
       }),
     );
+
+    return response;
   }
 }
