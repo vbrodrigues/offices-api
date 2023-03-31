@@ -3,6 +3,7 @@ import {
   Controller,
   Delete,
   Get,
+  Inject,
   Param,
   Post,
   Put,
@@ -20,6 +21,8 @@ import { ListEmployeesUsecase } from './usecases/list-employees.usecase';
 import { FindEmployeeUsecase } from './usecases/find-employee.usecase';
 import { JwtAuthGuard } from 'src/auth/employee/jwt-auth.guard';
 import { OfficeRequest } from 'src/auth/employee/auth.dtos';
+import { Cache } from 'cache-manager';
+import { CACHE_MANAGER } from '@nestjs/common';
 
 @Controller('/employees')
 export class EmployeeController {
@@ -29,6 +32,7 @@ export class EmployeeController {
     private inactivateEmployee: InactivateEmployeeUsecase,
     private listEmployees: ListEmployeesUsecase,
     private findEmployee: FindEmployeeUsecase,
+    @Inject(CACHE_MANAGER) private cacheManager: Cache,
   ) {}
 
   @UseGuards(JwtAuthGuard)
@@ -67,7 +71,25 @@ export class EmployeeController {
   async show(
     @Request() { user: { office_id } }: OfficeRequest,
   ): Promise<Employee[]> {
-    return await this.listEmployees.execute(office_id);
+    const cachedResponse = await this.cacheManager.get<Employee[]>(
+      `employees:${office_id}`,
+    );
+
+    if (cachedResponse) {
+      return cachedResponse;
+    }
+
+    const employees = await this.listEmployees.execute(office_id);
+
+    if (employees) {
+      await this.cacheManager.set<Employee[]>(
+        `employees:${office_id}`,
+        employees,
+        5000,
+      );
+    }
+
+    return employees;
   }
 
   @UseGuards(JwtAuthGuard)

@@ -1,8 +1,10 @@
 import {
   Body,
+  CACHE_MANAGER,
   Controller,
   Delete,
   Get,
+  Inject,
   Param,
   Post,
   Put,
@@ -20,10 +22,12 @@ import { BaseResponse } from '../common/dtos/responses';
 import { InactivateClientUsecase } from './usecases/inactivate-client.usecase';
 import { OfficeRequest } from 'src/auth/employee/auth.dtos';
 import { JwtAuthGuard } from 'src/auth/employee/jwt-auth.guard';
+import { Cache } from 'cache-manager';
 
 @Controller('/clients')
 export class ClientController {
   constructor(
+    @Inject(CACHE_MANAGER) private cacheManager: Cache,
     private createClient: CreateClientUsecase,
     private findClient: FindClientUsecase,
     private listClients: ListClientsUsecase,
@@ -49,7 +53,19 @@ export class ClientController {
   @UseGuards(JwtAuthGuard)
   @Get()
   async show(@Request() request): Promise<Client[]> {
-    return await this.listClients.execute(request.user.office_id);
+    const cachedRespose: Client[] = await this.cacheManager.get('clients');
+
+    if (cachedRespose) {
+      return cachedRespose;
+    }
+
+    const clients = await this.listClients.execute(request.user.office_id);
+
+    if (clients) {
+      await this.cacheManager.set('clients', clients, 5000);
+    }
+
+    return clients;
   }
 
   @UseGuards(JwtAuthGuard)
