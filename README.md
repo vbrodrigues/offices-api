@@ -28,6 +28,8 @@
 
 ### Technologies Used
 
+#### Back-end
+
 - TypeScript
 - NestJS
 - Prisma
@@ -39,6 +41,13 @@
 - AWS CloudFront
 - Nodemailer
 - Docker
+
+#### Front-end
+
+- NextJS 13
+- TailwindCSS
+- Radix UI
+- React Hook Form
 
 ## Installation
 
