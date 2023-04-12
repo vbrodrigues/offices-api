@@ -15,19 +15,69 @@ const signUpSchema = z.object({
 type SignUpFormData = z.infer<typeof signUpSchema>;
 
 const SignUpForm = () => {
-  const { register, handleSubmit } = useForm<SignUpFormData>({
+  const { register, handleSubmit, formState } = useForm<SignUpFormData>({
     resolver: zodResolver(signUpSchema),
   });
 
   return (
     <form className="flex flex-col gap-8 w-full">
-      <TextInput label="Nome" type="text" />
-      <TextInput label="E-mail" type="text" />
-      <TextInput label="Telefone" type="text" />
-      <TextInput label="Senha" type="password" />
-      <TextInput label="Confirme sua senha" type="password" />
+      <div className="flex flex-col gap-1">
+        <p className="font-title text-gray-500">{"Nome do escritório"}</p>
+        <TextInput
+          name="name"
+          label="Nome do escritório"
+          type="text"
+          error={!!formState.errors.name}
+          register={register}
+        />
+      </div>
+
+      <div className="flex flex-col gap-1">
+        <p className="font-title text-gray-500">{"E-mail"}</p>
+        <TextInput
+          name="email"
+          label="E-mail"
+          type="text"
+          error={!!formState.errors.email}
+          register={register}
+        />
+      </div>
+
+      <div className="flex flex-col gap-1">
+        <p className="font-title text-gray-500">{"Telefone"}</p>
+        <TextInput
+          name="phone"
+          label="Telefone"
+          type="text"
+          error={!!formState.errors.phone}
+          register={register}
+        />
+      </div>
+
+      <div className="flex flex-col gap-1">
+        <p className="font-title text-gray-500">{"Senha"}</p>
+        <TextInput
+          name="password"
+          label="Senha"
+          type="password"
+          error={!!formState.errors.password}
+          register={register}
+        />
+      </div>
+
+      <div className="flex flex-col gap-1">
+        <p className="font-title text-gray-500">{"Confirme sua senha"}</p>
+        <TextInput
+          name="passwordConfirmation"
+          label="Confirme sua senha"
+          type="text"
+          error={!!formState.errors.passwordConfirmation}
+          register={register}
+        />
+      </div>
+
       <Dropzone
-        label="Logo de sua empresa"
+        label="Logomarca de sua empresa"
         description="Arraste a imagem aqui ou clique para carregar a imagem de seu computador"
       />
 

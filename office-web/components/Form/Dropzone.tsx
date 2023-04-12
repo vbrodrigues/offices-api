@@ -16,10 +16,10 @@ export function Dropzone({ label, description }: DropzoneProps) {
   });
 
   return (
-    <div className="flex flex-col gap-1 max-w-sm">
+    <div className="flex flex-col gap-1 max-w-md">
       <p className="font-title  text-gray-500">{label}</p>
       <div
-        className="dropzone  border-2 border-dashed border-gray-400 text-gray-400 p-4 rounded-lg hover:cursor-pointer hover:border-blue-500 hover:text-blue-500 flex items-center justify-center text-center"
+        className="dropzone border-2 border-dashed border-gray-400 text-gray-400 p-4 rounded-lg hover:cursor-pointer hover:border-blue-500 hover:text-blue-500 flex items-center justify-center text-center"
         {...getRootProps()}
       >
         <p className="font-title">{description}</p>
