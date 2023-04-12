@@ -1,8 +1,11 @@
+"use client";
+
 import * as z from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm, SubmitHandler } from "react-hook-form";
 import { TextInput } from "./TextInput";
-import { OfficeAPI } from "@/lib/api/office-api";
+import { login } from "@/lib/api/office-api/login";
+import { useRouter } from "next/navigation";
 
 const signInSchema = z.object({
   email: z.string().email("E-mail inválido"),
@@ -20,18 +23,21 @@ const SignInForm = () => {
     resolver: zodResolver(signInSchema),
   });
 
+  const router = useRouter();
+
   const onSubmit: SubmitHandler<SignInFormData> = async ({
     email,
     password,
     office_id,
   }: SignInFormData) => {
-    const response = await OfficeAPI.post("/clients-auth/login", {
-      email,
-      password,
-      office_id,
-    });
+    const loginResponse = await login({ email, password, office_id });
+    console.log(loginResponse);
 
-    console.log(response);
+    if (loginResponse) {
+      router.push("/projects");
+    } else {
+      alert("Erro ao fazer login. Verifique os dados e tente novamente.");
+    }
   };
 
   return (
