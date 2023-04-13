@@ -1,18 +1,26 @@
+import { useCallback } from "react";
 import { useDropzone } from "react-dropzone";
 
 interface DropzoneProps {
   label: string;
+  setFile: (file: File) => void;
   description?: string;
 }
 
-export function Dropzone({ label, description }: DropzoneProps) {
-  const { acceptedFiles, getRootProps, getInputProps } = useDropzone({
+export function Dropzone({ label, description, setFile }: DropzoneProps) {
+  const { getRootProps, getInputProps, acceptedFiles } = useDropzone({
     accept: {
       "image/jpeg": [],
       "image/png": [],
     },
     maxFiles: 1,
     maxSize: 10000000,
+    onDrop: useCallback(
+      (acceptedFiles: File[]) => {
+        setFile(acceptedFiles[0]);
+      },
+      [setFile]
+    ),
   });
 
   return (
@@ -22,7 +30,11 @@ export function Dropzone({ label, description }: DropzoneProps) {
         className="dropzone border-2 border-dashed border-gray-400 text-gray-400 p-4 rounded-lg hover:cursor-pointer hover:border-blue-500 hover:text-blue-500 flex items-center justify-center text-center"
         {...getRootProps()}
       >
-        <p className="font-title">{description}</p>
+        {acceptedFiles.length > 0 ? (
+          <p>{acceptedFiles[0].name}</p>
+        ) : (
+          <p className="font-title">{description}</p>
+        )}
         <input type="text" {...getInputProps()} />
       </div>
     </div>

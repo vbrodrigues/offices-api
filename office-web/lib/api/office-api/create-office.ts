@@ -1,3 +1,4 @@
+import { AxiosError } from "axios";
 import { OfficeAPI } from ".";
 
 export interface CreateOfficeRequest {
@@ -5,7 +6,7 @@ export interface CreateOfficeRequest {
   owner_email: string;
   owner_password: string;
   owner_phone_number: string;
-  logo: string;
+  logo?: string | null;
 }
 
 export interface CreateOfficeResponse {
@@ -19,6 +20,15 @@ export interface CreateOfficeResponse {
 export async function createOffice(
   data: CreateOfficeRequest
 ): Promise<CreateOfficeResponse> {
-  const response = await OfficeAPI.post("/offices", data);
-  return response.data;
+  try {
+    const response = await OfficeAPI.post("/offices", data);
+
+    if (response.status !== 201) {
+      throw new Error(response.data.message);
+    }
+
+    return response.data;
+  } catch (err: AxiosError | any) {
+    throw new Error(err.response?.data.message);
+  }
 }

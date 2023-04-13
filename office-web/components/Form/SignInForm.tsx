@@ -11,8 +11,8 @@ const signInSchema = z.object({
   email: z.string().email("E-mail inválido"),
   password: z
     .string()
-    .min(6, "Senha muito curta.")
-    .max(100, "Senha muito longa"),
+    .min(6, "A senha deve conter no mínimo 6 caracteres.")
+    .max(100, "A senha deve conter no máximo 100 caracteres."),
   office_id: z.string().uuid("ID do escritório inválido"),
 });
 
@@ -46,7 +46,14 @@ const SignInForm = () => {
       onSubmit={handleSubmit(onSubmit)}
     >
       <div className="flex flex-col gap-1">
-        <p className="font-title text-gray-500">{"E-mail"}</p>
+        <div className="flex justify-between items-center">
+          <p className="font-title text-gray-500">{"E-mail"}</p>
+          {formState.errors.email && (
+            <p className="text-red-400 text-xs">
+              {formState.errors.email.message}
+            </p>
+          )}
+        </div>
         <TextInput
           name="email"
           label="E-mail"
@@ -57,7 +64,14 @@ const SignInForm = () => {
       </div>
 
       <div className="flex flex-col gap-1">
-        <p className="font-title text-gray-500">{"Senha"}</p>
+        <div className="flex justify-between items-center">
+          <p className="font-title text-gray-500">{"Senha"}</p>
+          {formState.errors.password && (
+            <p className="text-red-400 text-xs">
+              {formState.errors.password.message}
+            </p>
+          )}
+        </div>
         <TextInput
           name="password"
           label="Senha"
@@ -68,7 +82,14 @@ const SignInForm = () => {
       </div>
 
       <div className="flex flex-col gap-1">
-        <p className="font-title text-gray-500">{"ID do escritório"}</p>
+        <div className="flex justify-between items-center">
+          <p className="font-title text-gray-500">{"ID do escritório"}</p>
+          {formState.errors.office_id && (
+            <p className="text-red-400 text-xs">
+              {formState.errors.office_id.message}
+            </p>
+          )}
+        </div>
         <TextInput
           name="office_id"
           label="ID do escritório"
