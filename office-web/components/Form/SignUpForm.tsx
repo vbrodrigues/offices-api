@@ -8,6 +8,7 @@ import { createOffice } from "@/lib/api/office-api/create-office";
 import { login } from "@/lib/api/office-api/login";
 import { useState } from "react";
 import { convertBase64 } from "@/lib/utils";
+import { ErrorToast } from "../Toast/Toast";
 
 const signUpSchema = z
   .object({
@@ -39,6 +40,9 @@ const SignUpForm = () => {
 
   const router = useRouter();
 
+  const [toastOpen, setToastOpen] = useState(false);
+  const [toastMessage, setToastMessage] = useState("");
+
   const [logoFile, setLogoFile] = useState<string | null>();
 
   const onSubmit: SubmitHandler<SignUpFormData> = async ({
@@ -48,15 +52,6 @@ const SignUpForm = () => {
     phone,
     passwordConfirmation,
   }: SignUpFormData) => {
-    if (password !== passwordConfirmation) {
-      alert("As senhas não conferem.");
-      setError("passwordConfirmation", {
-        type: "custom",
-        message: "As senhas não conferem.",
-      });
-      return;
-    }
-
     try {
       const createOfficeResponse = await createOffice({
         name,
@@ -77,12 +72,16 @@ const SignUpForm = () => {
       if (loginResponse) {
         router.push("/projects");
       } else {
-        alert("Erro ao fazer login. Verifique os dados e tente novamente.");
+        setToastMessage(
+          "Erro ao fazer login. Tente entrar pela tela 'Já faço parte de um escritório' utilizando os dados que preencheu."
+        );
+        setToastOpen(true);
       }
     } catch (err: Error | any) {
       console.log(err);
       if (err.message.includes("already exists")) {
-        alert("Já existe um escritório com esse e-mail.");
+        setToastMessage("Já existe um escritório com esse e-mail.");
+        setToastOpen(true);
         setError("name", {
           type: "custom",
           message: "Já existe um escritório com esse nome e e-mail.",
@@ -90,7 +89,10 @@ const SignUpForm = () => {
         return;
       }
       console.log("Error creating office. Error:", err);
-      alert("Erro ao criar escritório. Verifique os dados e tente novamente.");
+      setToastMessage(
+        "Erro ao criar escritório. Verifique os dados e tente novamente."
+      );
+      setToastOpen(true);
     }
   };
 
@@ -206,6 +208,13 @@ const SignUpForm = () => {
       >
         CADASTRAR
       </button>
+
+      <ErrorToast
+        open={toastOpen}
+        setOpen={setToastOpen}
+        title="Oops"
+        text={toastMessage}
+      />
     </form>
   );
 };
