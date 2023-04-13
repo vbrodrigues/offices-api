@@ -31,9 +31,9 @@ const SignInForm = () => {
     office_id,
   }: SignInFormData) => {
     const loginResponse = await login({ email, password, office_id });
-    console.log(loginResponse);
 
     if (loginResponse) {
+      localStorage.setItem("access_token", loginResponse.access_token);
       router.push("/projects");
     } else {
       alert("Erro ao fazer login. Verifique os dados e tente novamente.");
