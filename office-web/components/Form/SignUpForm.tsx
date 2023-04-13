@@ -22,10 +22,12 @@ const signUpSchema = z
     passwordConfirmation: z.string().min(6).max(100),
   })
   .superRefine(({ passwordConfirmation, password }, ctx) => {
+    console.log("super refine", passwordConfirmation, password);
     if (passwordConfirmation !== password) {
       ctx.addIssue({
-        code: "custom",
+        code: z.ZodIssueCode.custom,
         message: "As senhas não conferem.",
+        path: ["passwordConfirmation"],
       });
     }
   });
