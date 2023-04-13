@@ -6,6 +6,8 @@ import { useForm, SubmitHandler } from "react-hook-form";
 import { TextInput } from "./TextInput";
 import { login } from "@/lib/api/office-api/login";
 import { useRouter } from "next/navigation";
+import { useState } from "react";
+import { ErrorToast } from "../Toast/Toast";
 
 const signInSchema = z.object({
   email: z.string().email("E-mail inválido"),
@@ -23,6 +25,8 @@ const SignInForm = () => {
     resolver: zodResolver(signInSchema),
   });
 
+  const [toastOpen, setToastOpen] = useState(false);
+
   const router = useRouter();
 
   const onSubmit: SubmitHandler<SignInFormData> = async ({
@@ -36,7 +40,7 @@ const SignInForm = () => {
       localStorage.setItem("access_token", loginResponse.access_token);
       router.push("/projects");
     } else {
-      alert("Erro ao fazer login. Verifique os dados e tente novamente.");
+      setToastOpen(true);
     }
   };
 
@@ -105,6 +109,13 @@ const SignInForm = () => {
       >
         ENTRAR
       </button>
+
+      <ErrorToast
+        open={toastOpen}
+        setOpen={setToastOpen}
+        title="Oops"
+        text="Erro ao fazer login. Verifique os dados e tente novamente."
+      />
     </form>
   );
 };
