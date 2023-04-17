@@ -23,3 +23,9 @@ export const decodeBase64 = (url: string) => {
   // );
   return decoded;
 };
+
+export const getInitials = (name: string) => {
+  const names = name.split(" ");
+  const initials = names.map((n) => n[0]);
+  return initials.join("");
+};

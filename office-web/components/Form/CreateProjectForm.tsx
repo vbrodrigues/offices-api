@@ -6,7 +6,7 @@ import { useForm, SubmitHandler } from "react-hook-form";
 import { TextInput } from "./TextInput";
 // import { useRouter } from "next/navigation";
 import { Dropdown } from "./Dropdown";
-import { createProject } from "@/lib/api/office-api/create-project";
+import { createProject } from "@/lib/api/office-api/projects/create-project";
 
 const createProjectSchema = z.object({
   name: z

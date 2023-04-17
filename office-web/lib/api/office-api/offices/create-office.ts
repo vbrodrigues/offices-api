@@ -1,5 +1,6 @@
+// eslint-disable-next-line no-unused-vars
 import { AxiosError } from "axios";
-import { OfficeAPI } from ".";
+import { OfficeAPI } from "..";
 
 export interface CreateOfficeRequest {
   name: string;

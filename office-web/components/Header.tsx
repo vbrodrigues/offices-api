@@ -1,8 +1,26 @@
+import { deleteCookie } from "cookies-next";
+import Link from "next/link";
+import { MdExitToApp } from "react-icons/md";
+
 export function Header() {
+  function logOut() {
+    deleteCookie("access_token");
+  }
+
   return (
-    <header className="w-full h-[72px] flex justify-center items-center border-b py-10">
-      <h1 className="font-title font-bold text-2xl text-blue-500 ">.off</h1>
-      <h1 className="font-title font-bold text-2xl">ice</h1>
+    <header className="w-full h-[72px] flex justify-between items-center border-b p-12">
+      <div className="flex">
+        <h1 className="font-title font-bold text-2xl text-blue-500 ">.off</h1>
+        <h1 className="font-title font-bold text-2xl">ice</h1>
+      </div>
+      <Link
+        href="/"
+        onClick={logOut}
+        className="ml-auto flex gap-2 justify-center items-center text-gray-500 hover:text-blue-500 transition-colors"
+      >
+        <MdExitToApp size={24} />
+        <p>Sair</p>
+      </Link>
     </header>
   );
 }

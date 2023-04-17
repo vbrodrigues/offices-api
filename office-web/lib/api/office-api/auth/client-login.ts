@@ -1,4 +1,4 @@
-import { OfficeAPI } from ".";
+import { OfficeAPI } from "..";
 
 export type ClientLoginResponse = {
   access_token: string;

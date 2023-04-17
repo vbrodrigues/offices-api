@@ -1,18 +1,7 @@
 // eslint-disable-next-line no-unused-vars
 import { AxiosError } from "axios";
-import { OfficeAPI } from ".";
-
-export interface Project {
-  id: string;
-  client_id: string;
-  project_type_id: string;
-  name: string;
-  status: string;
-  updated_at: Date;
-  created_at: Date;
-  client: any;
-  files: any[];
-}
+import { OfficeAPI } from "..";
+import { Project } from "./dtos";
 
 export async function listProjects(access_token: string): Promise<Project[]> {
   try {

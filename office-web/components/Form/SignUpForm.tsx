@@ -4,11 +4,12 @@ import { useForm, SubmitHandler } from "react-hook-form";
 import { TextInput } from "./TextInput";
 import { Dropzone } from "./Dropzone";
 import { useRouter } from "next/navigation";
-import { createOffice } from "@/lib/api/office-api/create-office";
-import { login } from "@/lib/api/office-api/login";
+import { createOffice } from "@/lib/api/office-api/offices/create-office";
+import { login } from "@/lib/api/office-api/auth/login";
 import { useState } from "react";
 import { convertBase64 } from "@/lib/utils";
 import { ErrorToast } from "../Toast/Toast";
+import { setCookie } from "cookies-next";
 
 const signUpSchema = z
   .object({
@@ -72,6 +73,7 @@ const SignUpForm = () => {
       });
 
       if (loginResponse) {
+        setCookie("access_token", loginResponse.access_token);
         router.push("/projects");
       } else {
         setToastMessage(

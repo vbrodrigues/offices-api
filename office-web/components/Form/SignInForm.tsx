@@ -2,9 +2,10 @@
 
 import * as z from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { setCookie } from "cookies-next";
 import { useForm, SubmitHandler } from "react-hook-form";
 import { TextInput } from "./TextInput";
-import { login } from "@/lib/api/office-api/login";
+import { login } from "@/lib/api/office-api/auth/login";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { ErrorToast } from "../Toast/Toast";
@@ -37,7 +38,7 @@ const SignInForm = () => {
     const loginResponse = await login({ email, password, office_id });
 
     if (loginResponse) {
-      localStorage.setItem("access_token", loginResponse.access_token);
+      setCookie("access_token", loginResponse.access_token);
       router.push("/projects");
     } else {
       setToastOpen(true);

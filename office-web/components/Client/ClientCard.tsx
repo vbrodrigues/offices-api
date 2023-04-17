@@ -1,6 +1,6 @@
 import { formatDistance } from "date-fns";
 import ptBR from "date-fns/locale/pt-BR";
-import { CaretRight, Copy, Pencil, Trash } from "phosphor-react";
+import { CaretRight, Copy, Pencil, Trash } from "@phosphor-icons/react";
 
 interface ClientCardProps {
   id: string;

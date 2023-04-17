@@ -4,7 +4,7 @@ import {
   FolderSimpleDotted,
   UserGear,
   Users,
-} from "phosphor-react";
+} from "@phosphor-icons/react";
 import { MenuGroup } from "./MenuGroup";
 import { MenuItem } from "./MenuItem";
 
@@ -13,7 +13,7 @@ export function Sidebar() {
     <aside className="w-72 h-full border-r border-r-gray-300 mr-16">
       <MenuGroup title="MINHA EMPRESA">
         <MenuItem
-          to="/users"
+          to="/employees"
           title="Colaboradores"
           icon={<Users size={20} color="#6b7280" />}
         />
@@ -32,10 +32,12 @@ export function Sidebar() {
       </MenuGroup>
       <MenuGroup title="CONFIGURAÇÕES">
         <MenuItem
+          to="/roles"
           title="Cargos"
           icon={<UserGear size={20} color="#6b7280" />}
         />
         <MenuItem
+          to="/project-types"
           title="Tipos de projeto"
           icon={<FolderSimpleDotted size={20} color="#6b7280" />}
         />

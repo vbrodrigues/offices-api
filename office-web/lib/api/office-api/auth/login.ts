@@ -1,4 +1,4 @@
-import { OfficeAPI } from ".";
+import { OfficeAPI } from "..";
 
 export interface LoginRequest {
   email: string;

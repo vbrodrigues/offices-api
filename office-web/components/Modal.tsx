@@ -1,5 +1,7 @@
+"use client";
+
 import * as Dialog from "@radix-ui/react-dialog";
-import { XCircle } from "phosphor-react";
+import { MdClose } from "react-icons/md";
 import { ReactNode } from "react";
 
 interface ModalProps {
@@ -18,7 +20,7 @@ export function Modal({ trigger, title, description, content }: ModalProps) {
           <Dialog.Title className="flex justify-between items center gap-10">
             {title}
             <Dialog.Close className="flex items-center">
-              <XCircle size={30} color="#6b7280" />
+              <MdClose size={30} color="#6b7280" />
             </Dialog.Close>
           </Dialog.Title>
           <Dialog.Description className="text-gray-400 mt-4">

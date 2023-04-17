@@ -1,5 +1,5 @@
 import * as Select from "@radix-ui/react-select";
-import { CaretDown } from "phosphor-react";
+import { CaretDown } from "@phosphor-icons/react";
 
 interface DropdownProps {
   label: string;
