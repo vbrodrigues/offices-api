@@ -4,18 +4,23 @@ import { PrismaService } from 'src/database/prisma-service';
 import { CreateProjectTypeDTO } from './dtos/create-project-type.dto';
 
 export abstract class ProjectTypesRepository {
-  abstract findByName(name: string): Promise<ProjectType | null>;
+  abstract findByName(
+    name: string,
+    office_id: string,
+  ): Promise<ProjectType | null>;
   abstract findById(project_type_id: string): Promise<ProjectType | null>;
   abstract add(data: CreateProjectTypeDTO): Promise<ProjectType>;
-  abstract list(): Promise<ProjectType[]>;
+  abstract list(office_id: string): Promise<ProjectType[]>;
 }
 
 @Injectable()
 export class ProjectTypesRepositorySQL implements ProjectTypesRepository {
   constructor(private prisma: PrismaService) {}
 
-  async findByName(name: string): Promise<ProjectType> {
-    return await this.prisma.projectType.findFirst({ where: { name } });
+  async findByName(name: string, office_id: string): Promise<ProjectType> {
+    return await this.prisma.projectType.findFirst({
+      where: { name, office_id },
+    });
   }
 
   async findById(project_type_id: string): Promise<ProjectType> {
@@ -28,7 +33,7 @@ export class ProjectTypesRepositorySQL implements ProjectTypesRepository {
     return await this.prisma.projectType.create({ data });
   }
 
-  async list(): Promise<ProjectType[]> {
-    return await this.prisma.projectType.findMany();
+  async list(office_id: string): Promise<ProjectType[]> {
+    return await this.prisma.projectType.findMany({ where: { office_id } });
   }
 }

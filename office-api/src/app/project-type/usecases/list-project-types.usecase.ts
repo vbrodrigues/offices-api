@@ -6,7 +6,7 @@ import { ProjectTypesRepository } from '../project-type.repository';
 export class ListProjectTypesUsecase {
   constructor(private projectTypesRepository: ProjectTypesRepository) {}
 
-  async execute(): Promise<ProjectType[]> {
-    return await this.projectTypesRepository.list();
+  async execute(office_id: string): Promise<ProjectType[]> {
+    return await this.projectTypesRepository.list(office_id);
   }
 }

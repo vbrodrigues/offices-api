@@ -18,8 +18,9 @@ model Office {
   logo               String?  @db.VarChar(4096)
   created_at         DateTime @default(now())
 
-  clients   Client[]
-  employees Employee[]
+  clients     Client[]
+  employees   Employee[]
+  ProjectType ProjectType[]
 }
 
 model Client {
@@ -68,8 +69,10 @@ model Employee {
 model ProjectType {
   id         String   @id @default(uuid())
   name       String
+  office_id  String?
   created_at DateTime @default(now())
 
+  office   Office?   @relation(fields: [office_id], references: [id])
   projects Project[]
 }
 
