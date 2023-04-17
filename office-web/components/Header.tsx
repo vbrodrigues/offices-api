@@ -1,6 +1,7 @@
 import { deleteCookie } from "cookies-next";
 import Link from "next/link";
 import { MdExitToApp } from "react-icons/md";
+import Logo from "./Logo";
 
 export function Header() {
   function logOut() {
@@ -9,10 +10,7 @@ export function Header() {
 
   return (
     <header className="w-full h-[72px] flex justify-between items-center border-b p-12">
-      <div className="flex">
-        <h1 className="font-title font-bold text-2xl text-blue-500 ">.off</h1>
-        <h1 className="font-title font-bold text-2xl">ice</h1>
-      </div>
+      <Logo />
       <Link
         href="/"
         onClick={logOut}

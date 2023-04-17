@@ -107,17 +107,12 @@ const SignUpForm = () => {
 
   return (
     <form
-      className="flex flex-col gap-8 w-full"
+      className="grid grid-cols-2 gap-y-8 gap-x-4"
       onSubmit={handleSubmit(onSubmit)}
     >
-      <div className="flex flex-col gap-1">
+      <div className="flex flex-col gap-1 col-span-2">
         <div className="flex justify-between items-center">
           <p className="font-title text-gray-500">{"Nome do escritório"}</p>
-          {formState.errors.name && (
-            <p className="text-red-400 text-xs">
-              {formState.errors.name.message}
-            </p>
-          )}
         </div>
         <TextInput
           name="name"
@@ -126,16 +121,18 @@ const SignUpForm = () => {
           error={!!formState.errors.name}
           register={register}
         />
+        {formState.errors.name ? (
+          <p className="text-red-400 text-xs">
+            {formState.errors.name.message}
+          </p>
+        ) : (
+          <span className="h-4"></span>
+        )}
       </div>
 
       <div className="flex flex-col gap-1">
         <div className="flex justify-between items-center">
           <p className="font-title text-gray-500">{"E-mail"}</p>
-          {formState.errors.email && (
-            <p className="text-red-400 text-xs">
-              {formState.errors.email.message}
-            </p>
-          )}
         </div>
         <TextInput
           name="email"
@@ -144,16 +141,18 @@ const SignUpForm = () => {
           error={!!formState.errors.email}
           register={register}
         />
+        {formState.errors.email ? (
+          <p className="text-red-400 text-xs">
+            {formState.errors.email.message}
+          </p>
+        ) : (
+          <span className="h-4"></span>
+        )}
       </div>
 
       <div className="flex flex-col gap-1">
         <div className="flex justify-between items-center">
           <p className="font-title text-gray-500">{"Telefone"}</p>
-          {formState.errors.phone && (
-            <p className="text-red-400 text-xs">
-              {formState.errors.phone.message}
-            </p>
-          )}
         </div>
         <TextInput
           name="phone"
@@ -162,16 +161,18 @@ const SignUpForm = () => {
           error={!!formState.errors.phone}
           register={register}
         />
+        {formState.errors.phone ? (
+          <p className="text-red-400 text-xs">
+            {formState.errors.phone.message}
+          </p>
+        ) : (
+          <span className="h-4"></span>
+        )}
       </div>
 
       <div className="flex flex-col gap-1">
         <div className="flex justify-between items-center">
           <p className="font-title text-gray-500">{"Senha"}</p>
-          {formState.errors.password && (
-            <p className="text-red-400 text-xs">
-              {formState.errors.password.message}
-            </p>
-          )}
         </div>
         <TextInput
           name="password"
@@ -180,16 +181,18 @@ const SignUpForm = () => {
           error={!!formState.errors.password}
           register={register}
         />
+        {formState.errors.password ? (
+          <p className="text-red-400 text-xs">
+            {formState.errors.password.message}
+          </p>
+        ) : (
+          <span className="h-4"></span>
+        )}
       </div>
 
       <div className="flex flex-col gap-1">
         <div className="flex justify-between items-center">
           <p className="font-title text-gray-500">{"Confirme sua senha"}</p>
-          {formState.errors.passwordConfirmation && (
-            <p className="text-red-400 text-xs">
-              {formState.errors.passwordConfirmation.message}
-            </p>
-          )}
         </div>
         <TextInput
           name="passwordConfirmation"
@@ -198,17 +201,26 @@ const SignUpForm = () => {
           error={!!formState.errors.passwordConfirmation}
           register={register}
         />
+        {formState.errors.passwordConfirmation ? (
+          <p className="text-red-400 text-xs">
+            {formState.errors.passwordConfirmation.message}
+          </p>
+        ) : (
+          <span className="h-4"></span>
+        )}
       </div>
 
-      <Dropzone
-        label="Logomarca de sua empresa"
-        description="Arraste a imagem aqui ou clique para carregar a imagem de seu computador"
-        setFile={handleDropzoneChange}
-      />
+      <div className="col-span-2 w-full">
+        <Dropzone
+          label="Logomarca de sua empresa"
+          description="Arraste a imagem aqui ou clique para carregar a imagem de seu computador"
+          setFile={handleDropzoneChange}
+        />
+      </div>
 
       <button
         type="submit"
-        className="w-full bg-blue-500 py-3 rounded-lg text-gray-100 font-title tracking-wide hover:opacity-90 transition-opacity"
+        className="col-span-2 mt-4 w-full bg-blue-500 py-3 rounded-lg text-gray-100 font-title tracking-wide hover:opacity-90 transition-opacity"
       >
         CADASTRAR
       </button>

@@ -47,17 +47,12 @@ const SignInForm = () => {
 
   return (
     <form
-      className="flex flex-col gap-8 w-full"
+      className="flex flex-col gap-4 w-full"
       onSubmit={handleSubmit(onSubmit)}
     >
       <div className="flex flex-col gap-1">
         <div className="flex justify-between items-center">
           <p className="font-title text-gray-500">{"E-mail"}</p>
-          {formState.errors.email && (
-            <p className="text-red-400 text-xs">
-              {formState.errors.email.message}
-            </p>
-          )}
         </div>
         <TextInput
           name="email"
@@ -66,16 +61,18 @@ const SignInForm = () => {
           error={!!formState.errors.email}
           register={register}
         />
+        {formState.errors.email ? (
+          <p className="text-red-400 text-xs">
+            {formState.errors.email.message}
+          </p>
+        ) : (
+          <span className="h-4"></span>
+        )}
       </div>
 
       <div className="flex flex-col gap-1">
         <div className="flex justify-between items-center">
           <p className="font-title text-gray-500">{"Senha"}</p>
-          {formState.errors.password && (
-            <p className="text-red-400 text-xs">
-              {formState.errors.password.message}
-            </p>
-          )}
         </div>
         <TextInput
           name="password"
@@ -84,16 +81,18 @@ const SignInForm = () => {
           error={!!formState.errors.password}
           register={register}
         />
+        {formState.errors.password ? (
+          <p className="text-red-400 text-xs">
+            {formState.errors.password.message}
+          </p>
+        ) : (
+          <span className="h-4"></span>
+        )}
       </div>
 
       <div className="flex flex-col gap-1">
         <div className="flex justify-between items-center">
           <p className="font-title text-gray-500">{"ID do escritório"}</p>
-          {formState.errors.office_id && (
-            <p className="text-red-400 text-xs">
-              {formState.errors.office_id.message}
-            </p>
-          )}
         </div>
         <TextInput
           name="office_id"
@@ -102,11 +101,18 @@ const SignInForm = () => {
           error={!!formState.errors.office_id}
           register={register}
         />
+        {formState.errors.office_id ? (
+          <p className="text-red-400 text-xs">
+            {formState.errors.office_id.message}
+          </p>
+        ) : (
+          <span className="h-4"></span>
+        )}
       </div>
 
       <button
         type="submit"
-        className="w-full bg-blue-500 py-3 rounded-lg text-gray-100 font-title tracking-wide hover:opacity-90 transition-opacity"
+        className="w-full mt-4 bg-blue-500 py-3 rounded-lg text-gray-100 font-title tracking-wide hover:opacity-90 transition-opacity"
       >
         ENTRAR
       </button>
