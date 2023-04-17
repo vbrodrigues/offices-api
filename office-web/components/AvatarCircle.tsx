@@ -20,7 +20,7 @@ export default function AvatarCircle({
         src={image || ""}
         alt=""
         className={`rounded-full border border-blue-300 ${
-          size === "small" ? "w-2 h-2" : "w-14 h-14"
+          size === "small" ? "w-8 h-8" : "w-14 h-14"
         }`}
       />
       <Avatar.Fallback

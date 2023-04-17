@@ -4,9 +4,9 @@ import * as z from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm, SubmitHandler } from "react-hook-form";
 import { TextInput } from "./TextInput";
-// import { useRouter } from "next/navigation";
-import { Dropdown } from "./Dropdown";
 import { createProject } from "@/lib/api/office-api/projects/create-project";
+import SelectInput from "./SelectInput";
+import AvatarCircle from "../AvatarCircle";
 
 const createProjectSchema = z.object({
   name: z
@@ -61,11 +61,37 @@ const CreateProjectForm = () => {
         />
       </div>
 
-      <Dropdown label="Cliente" options={["Casa A", "Apartamento A"]} />
+      <SelectInput
+        label="Cliente"
+        options={[
+          {
+            value: "Casa A",
+            label: "Casa A",
+            icon: (
+              <AvatarCircle
+                name="Casa A"
+                image="https://github.com/vbrodrigues.png"
+                size="small"
+              />
+            ),
+          },
+          {
+            value: "Apartamento A",
+            label: "Apartamento A",
+            icon: <AvatarCircle name="Apartamento A" size="small" />,
+          },
+        ]}
+      />
 
-      <Dropdown
+      <SelectInput
         label="Tipo"
-        options={["Apartamento", "Casa", "Escritório", "Loja", "Consultório"]}
+        options={[
+          { value: "Apartamento", label: "Apartamento" },
+          { value: "Casa", label: "Casa" },
+          { value: "Escritório", label: "Escritório" },
+          { value: "Loja", label: "Loja" },
+          { value: "Consultório", label: "Consultório" },
+        ]}
       />
 
       <button
