@@ -1,5 +1,5 @@
-import AvatarCircle from "@/components/AvatarCircle";
-import { findProject } from "@/lib/api/office-api/projects/find-project";
+import AvatarCircle from "@/app/components/AvatarCircle";
+import { findProject } from "@/app/lib/api/office-api/projects/find-project";
 import { formatDistance } from "date-fns";
 import ptBR from "date-fns/locale/pt-BR";
 import { cookies } from "next/headers";

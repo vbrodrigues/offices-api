@@ -4,7 +4,7 @@ import * as z from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm, SubmitHandler } from "react-hook-form";
 import { TextInput } from "./TextInput";
-import { createProject } from "@/lib/api/office-api/projects/create-project";
+import { createProject } from "@/app/lib/api/office-api/projects/create-project";
 import SelectInput from "./SelectInput";
 import AvatarCircle from "../AvatarCircle";
 

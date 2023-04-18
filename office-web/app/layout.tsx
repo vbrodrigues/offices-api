@@ -1,6 +1,6 @@
-import { UserProvider } from "./contexts/UserContext";
 import "./globals.css";
 import React from "react";
+import { UserProvider } from "./contexts/UserContext";
 
 export const metadata = {
   title: "Office",

@@ -3,24 +3,24 @@
 import { formatDistance } from "date-fns";
 import ptBR from "date-fns/locale/pt-BR";
 import { MdCreateNewFolder, MdTopic } from "react-icons/md";
-import { Modal } from "@/components/Modal";
-import { Table } from "@/components/Table/Table";
-import { TableRow } from "@/components/Table/TableRow";
-import { TableCell } from "@/components/Table/TableCell";
-import { listProjects } from "@/lib/api/office-api/projects/list-projects";
-import CreateProjectForm from "@/components/Form/CreateProjectForm";
-import AvatarCircle from "@/components/AvatarCircle";
+import { Modal } from "@/app/components/Modal";
+import { Table } from "@/app/components/Table/Table";
+import { TableRow } from "@/app/components/Table/TableRow";
+import { TableCell } from "@/app/components/Table/TableCell";
+import { listProjects } from "@/app/lib/api/office-api/projects/list-projects";
+import CreateProjectForm from "@/app/components/Form/CreateProjectForm";
+import AvatarCircle from "@/app/components/AvatarCircle";
 import Link from "next/link";
-import { Project } from "@/lib/api/office-api/projects/dtos";
+import { Project } from "@/app/lib/api/office-api/projects/dtos";
 import UnauthorizedPage from "@/app/(errors)/unauthorized/page";
 import useUser from "@/app/hooks/useUser";
 
 const ProjectsPage = async () => {
-  const { user } = useUser();
+  const { getCurrentUser } = useUser();
 
-  console.log("Projects", user);
+  const user = await getCurrentUser();
 
-  if (Object.keys(user).length === 0) {
+  if (!user) {
     return <UnauthorizedPage />;
   }
 

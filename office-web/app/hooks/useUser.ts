@@ -10,8 +10,6 @@ function useUser() {
     throw new Error("useUser must be used within an UserProvider");
   }
 
-  console.log("hook", context.user);
-
   return context;
 }
 

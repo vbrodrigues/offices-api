@@ -1,7 +1,7 @@
 "use client";
 
-import { Header } from "@/components/Header";
-import { Sidebar } from "@/components/Sidebar/Sidebar";
+import { Header } from "@/app/components/Header";
+import { Sidebar } from "@/app/components/Sidebar/Sidebar";
 import React from "react";
 
 interface DashboardLayoutProps {

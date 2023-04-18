@@ -1,5 +1,5 @@
 "use client";
-import { getInitials } from "@/lib/utils";
+import { getInitials } from "@/app/lib/utils";
 import * as Avatar from "@radix-ui/react-avatar";
 import React from "react";
 

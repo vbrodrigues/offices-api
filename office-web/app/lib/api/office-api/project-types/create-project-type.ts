@@ -9,10 +9,15 @@ export interface CreateProjectTypeRequest {
 }
 
 export async function createProjectType(
-  data: CreateProjectTypeRequest
+  data: CreateProjectTypeRequest,
+  access_token: string
 ): Promise<ProjectType> {
   try {
-    const response = await OfficeAPI.post("/project-types", data);
+    const response = await OfficeAPI.post("/project-types", data, {
+      headers: {
+        Authorization: `Bearer ${access_token}`,
+      },
+    });
 
     if (response.status !== 201) {
       throw new Error(response.data.message);

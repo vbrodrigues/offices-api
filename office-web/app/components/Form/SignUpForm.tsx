@@ -6,10 +6,10 @@ import { useForm, SubmitHandler } from "react-hook-form";
 import { TextInput } from "./TextInput";
 import { Dropzone } from "./Dropzone";
 import { useRouter } from "next/navigation";
-import { createOffice } from "@/lib/api/office-api/offices/create-office";
-import { login } from "@/lib/api/office-api/auth/login";
+import { createOffice } from "@/app/lib/api/office-api/offices/create-office";
+import { login } from "@/app/lib/api/office-api/auth/login";
 import { useState } from "react";
-import { convertBase64 } from "@/lib/utils";
+import { convertBase64 } from "@/app/lib/utils";
 import { ErrorToast } from "../Toast/Toast";
 import useUser from "@/app/hooks/useUser";
 
