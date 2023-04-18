@@ -14,6 +14,7 @@ import { useRouter } from "next/navigation";
 import { ErrorToast } from "@/app/components/Toast/Toast";
 import { useState } from "react";
 import * as Toast from "@radix-ui/react-toast";
+import { deleteProjectType } from "@/app/lib/api/office-api/project-types/delete-project-type";
 
 const createProjectTypeSchema = z.object({
   name: z.string().min(3, "O nome deve conter no mínimo 3 caracteres."),
@@ -57,6 +58,15 @@ const ProjectTypesPage = async () => {
     }
   };
 
+  const handleDelete = async (id: string) => {
+    try {
+      await deleteProjectType(id, user.access_token);
+      refresh();
+    } catch (err) {
+      setToastOpen(true);
+    }
+  };
+
   return (
     <Toast.Provider swipeDirection="right" duration={5000}>
       <div className="flex flex-col gap-8 p-10">
@@ -80,7 +90,10 @@ const ProjectTypesPage = async () => {
                 key={projectType.id}
                 className="flex gap-2 justify-center items-center border border-blue-500 bg-blue-100 rounded-full px-4 py-2 text-blue-900"
               >
-                <div className="hover:cursor-pointer">
+                <div
+                  className="hover:cursor-pointer"
+                  onClick={() => handleDelete(projectType.id)}
+                >
                   <MdClose color="rgb(30 58 138)" size={20} />
                 </div>
                 {projectType.name}
