@@ -11,6 +11,7 @@ export abstract class ProjectTypesRepository {
   abstract findById(project_type_id: string): Promise<ProjectType | null>;
   abstract add(data: CreateProjectTypeDTO): Promise<ProjectType>;
   abstract list(office_id: string): Promise<ProjectType[]>;
+  abstract delete(project_type_id: string): Promise<void>;
 }
 
 @Injectable()
@@ -35,5 +36,9 @@ export class ProjectTypesRepositorySQL implements ProjectTypesRepository {
 
   async list(office_id: string): Promise<ProjectType[]> {
     return await this.prisma.projectType.findMany({ where: { office_id } });
+  }
+
+  async delete(project_type_id: string): Promise<void> {
+    await this.prisma.projectType.delete({ where: { id: project_type_id } });
   }
 }
