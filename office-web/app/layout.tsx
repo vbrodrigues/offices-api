@@ -1,3 +1,4 @@
+import { UserProvider } from "./contexts/UserContext";
 import "./globals.css";
 import React from "react";
 
@@ -12,8 +13,10 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en">
-      <body>{children}</body>
-    </html>
+    <UserProvider>
+      <html lang="en">
+        <body>{children}</body>
+      </html>
+    </UserProvider>
   );
 }

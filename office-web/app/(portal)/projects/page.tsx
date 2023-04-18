@@ -1,7 +1,8 @@
+"use client";
+
 import { formatDistance } from "date-fns";
 import ptBR from "date-fns/locale/pt-BR";
-import { cookies } from "next/headers";
-import { MdFolderCopy, MdCreateNewFolder, MdTopic } from "react-icons/md";
+import { MdCreateNewFolder, MdTopic } from "react-icons/md";
 import { Modal } from "@/components/Modal";
 import { Table } from "@/components/Table/Table";
 import { TableRow } from "@/components/Table/TableRow";
@@ -11,31 +12,36 @@ import CreateProjectForm from "@/components/Form/CreateProjectForm";
 import AvatarCircle from "@/components/AvatarCircle";
 import Link from "next/link";
 import { Project } from "@/lib/api/office-api/projects/dtos";
+import UnauthorizedPage from "@/app/(errors)/unauthorized/page";
+import useUser from "@/app/hooks/useUser";
 
 const ProjectsPage = async () => {
-  const access_token = cookies().get("access_token")?.value;
+  const { user } = useUser();
 
-  let projects: Project[] = [];
-  if (access_token) {
-    const projectsData = await listProjects(access_token);
+  console.log("Projects", user);
 
-    projects = projectsData.map((project: Project) => ({
-      ...project,
-      created_at: new Date(project.created_at),
-      files: project.files.map((file) => ({
-        ...file,
-        created_at: new Date(file.created_at),
-        updated_at: file.updated_at ? new Date(file.updated_at) : null,
-      })),
-      client: {
-        ...project.client,
-        created_at: new Date(project.client.created_at),
-        updated_at: project.client.updated_at
-          ? new Date(project.client.updated_at)
-          : null,
-      },
-    }));
+  if (Object.keys(user).length === 0) {
+    return <UnauthorizedPage />;
   }
+
+  const projectsData = await listProjects(user.access_token);
+
+  const projects = projectsData.map((project: Project) => ({
+    ...project,
+    created_at: new Date(project.created_at),
+    files: project.files.map((file) => ({
+      ...file,
+      created_at: new Date(file.created_at),
+      updated_at: file.updated_at ? new Date(file.updated_at) : null,
+    })),
+    client: {
+      ...project.client,
+      created_at: new Date(project.client.created_at),
+      updated_at: project.client.updated_at
+        ? new Date(project.client.updated_at)
+        : null,
+    },
+  }));
 
   return (
     <div className="p-10 w-full max-w-[90rem] min-w-[50rem]">
@@ -51,7 +57,7 @@ const ProjectsPage = async () => {
           }
           title={
             <div className="flex gap-6 items-center">
-              <MdFolderCopy size={48} color="#3b82f6" />
+              <MdCreateNewFolder size={48} color="#3b82f6" />
               <strong className="text-2xl font-title">Adicionar projeto</strong>
             </div>
           }

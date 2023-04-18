@@ -1,8 +1,4 @@
-export interface ProjectType {
-  id: string;
-  name: string;
-  created_at: Date;
-}
+import { ProjectType } from "../project-types/dtos";
 
 export interface ProjectFile {
   id: string;

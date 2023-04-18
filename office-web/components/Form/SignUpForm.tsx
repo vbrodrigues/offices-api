@@ -1,3 +1,5 @@
+"use client";
+
 import * as z from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm, SubmitHandler } from "react-hook-form";
@@ -9,7 +11,7 @@ import { login } from "@/lib/api/office-api/auth/login";
 import { useState } from "react";
 import { convertBase64 } from "@/lib/utils";
 import { ErrorToast } from "../Toast/Toast";
-import { setCookie } from "cookies-next";
+import useUser from "@/app/hooks/useUser";
 
 const signUpSchema = z
   .object({
@@ -43,6 +45,8 @@ const SignUpForm = () => {
 
   const router = useRouter();
 
+  const { setCurrentUser } = useUser();
+
   const [toastOpen, setToastOpen] = useState(false);
   const [toastMessage, setToastMessage] = useState("");
 
@@ -73,7 +77,11 @@ const SignUpForm = () => {
       });
 
       if (loginResponse) {
-        setCookie("access_token", loginResponse.access_token);
+        setCurrentUser({
+          access_token: loginResponse.access_token,
+          email,
+          office_id: createOfficeResponse.id,
+        });
         router.push("/projects");
       } else {
         setToastMessage(

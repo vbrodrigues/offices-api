@@ -2,13 +2,13 @@
 
 import * as z from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { setCookie } from "cookies-next";
 import { useForm, SubmitHandler } from "react-hook-form";
 import { TextInput } from "./TextInput";
 import { login } from "@/lib/api/office-api/auth/login";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { ErrorToast } from "../Toast/Toast";
+import useUser from "@/app/hooks/useUser";
 
 const signInSchema = z.object({
   email: z.string().email("E-mail inválido"),
@@ -30,6 +30,8 @@ const SignInForm = () => {
 
   const router = useRouter();
 
+  const { setCurrentUser } = useUser();
+
   const onSubmit: SubmitHandler<SignInFormData> = async ({
     email,
     password,
@@ -38,7 +40,12 @@ const SignInForm = () => {
     const loginResponse = await login({ email, password, office_id });
 
     if (loginResponse) {
-      setCookie("access_token", loginResponse.access_token);
+      setCurrentUser({
+        access_token: loginResponse.access_token,
+        email,
+        office_id,
+      });
+
       router.push("/projects");
     } else {
       setToastOpen(true);
