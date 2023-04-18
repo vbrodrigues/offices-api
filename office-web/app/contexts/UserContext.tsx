@@ -2,7 +2,13 @@
 
 import { login } from "@/app/lib/api/office-api/auth/login";
 import { deleteCookie, getCookie, setCookie } from "cookies-next";
-import React, { createContext, ReactNode, useCallback, useState } from "react";
+import React, {
+  createContext,
+  ReactNode,
+  useCallback,
+  useEffect,
+  useState,
+} from "react";
 
 interface User {
   access_token: string;
@@ -39,21 +45,30 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({
     [setUser]
   );
 
-  const getCurrentUser = useCallback(async () => {
-    if (Object.keys(user).length > 0) {
-      return user;
-    }
-
+  useEffect(() => {
     const userCookie = getCookie("user")?.valueOf() as string;
 
     if (userCookie) {
       const loggedUser = JSON.parse(userCookie) as User;
       setCurrentUser(loggedUser);
-      return loggedUser;
+    }
+  }, [setCurrentUser]);
+
+  const getCurrentUser = useCallback(async () => {
+    if (Object.keys(user).length > 0) {
+      return user;
     }
 
+    // const userCookie = getCookie("user")?.valueOf() as string;
+
+    // if (userCookie) {
+    //   const loggedUser = JSON.parse(userCookie) as User;
+    //   setCurrentUser(loggedUser);
+    //   return loggedUser;
+    // }
+
     return null;
-  }, [setCurrentUser, user]);
+  }, [user]);
 
   const loginUser = useCallback(
     async (email: string, password: string, office_id: string) => {
