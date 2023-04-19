@@ -4,7 +4,7 @@ import { EmployeeModule } from './app/employee/employee.module';
 import { OfficeModule } from './app/office/office.module';
 import { RoleModule } from './app/role/role.module';
 import { DatabaseModule } from './database/database.module';
-import { ProjectTypeModule } from './app/project-type/project-type.module';
+import { CategoryModule } from './app/category/category.module';
 import { ProjectModule } from './app/project/project.module';
 import { ProjectFileModule } from './app/project-file/project-file.module';
 import { AuthModule } from './auth/employee/auth.module';
@@ -14,7 +14,7 @@ import { ProjectPostsModule } from './events/project-posts/project-posts.module'
 
 import type { RedisClientOptions } from 'redis';
 import * as redisStore from 'cache-manager-redis-store';
-import { APP_INTERCEPTOR } from '@nestjs/core';
+import { StepModule } from './app/step/step.module';
 
 @Module({
   imports: [
@@ -25,11 +25,12 @@ import { APP_INTERCEPTOR } from '@nestjs/core';
     EmployeeModule,
     AuthModule,
     ClientAuthModule,
-    ProjectTypeModule,
+    CategoryModule,
     NotificationsModule,
     ProjectModule,
     ProjectFileModule,
     ProjectPostsModule,
+    StepModule,
 
     CacheModule.register<RedisClientOptions>({
       store: redisStore,

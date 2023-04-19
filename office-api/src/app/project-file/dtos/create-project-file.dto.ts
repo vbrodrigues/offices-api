@@ -5,6 +5,9 @@ export class CreateProjectFileDTO {
   project_id: string;
 
   @IsNotEmpty()
+  category_id: string;
+
+  @IsNotEmpty()
   created_by: string;
 
   @IsNotEmpty()
@@ -19,6 +22,9 @@ export class CreateProjectFileDTO {
 export class CreateProjectFileInternalDTO {
   @IsNotEmpty()
   project_id: string;
+
+  @IsNotEmpty()
+  category_id: string;
 
   @IsNotEmpty()
   created_by_id: string;

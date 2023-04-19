@@ -16,13 +16,13 @@ import {
   ProjectFilesRepositorySQL,
 } from 'src/app/project-file/project-file.repository';
 import {
-  ProjectSchedulesRepository,
-  ProjectSchedulesRepositorySQL,
-} from 'src/app/project-schedule/project-schedule.repository';
+  ProjectStepsRepository,
+  ProjectStepsRepositorySQL,
+} from 'src/app/project-step/project-step.repository';
 import {
-  ProjectTypesRepository,
-  ProjectTypesRepositorySQL,
-} from 'src/app/project-type/project-type.repository';
+  CategoriesRepository,
+  CategoriesRepositorySQL,
+} from 'src/app/category/category.repository';
 import {
   ProjectsRepository,
   ProjectsRepositorySQL,
@@ -32,6 +32,10 @@ import {
   RolesRepositorySQL,
 } from 'src/app/role/role.repository';
 import { PrismaService } from './prisma-service';
+import {
+  StepsRepository,
+  StepsRepositorySQL,
+} from 'src/app/step/step.repository';
 
 @Module({
   imports: [],
@@ -54,20 +58,24 @@ import { PrismaService } from './prisma-service';
       useClass: EmployeesRepositorySQL,
     },
     {
-      provide: ProjectTypesRepository,
-      useClass: ProjectTypesRepositorySQL,
+      provide: CategoriesRepository,
+      useClass: CategoriesRepositorySQL,
     },
     {
       provide: ProjectsRepository,
       useClass: ProjectsRepositorySQL,
     },
     {
-      provide: ProjectSchedulesRepository,
-      useClass: ProjectSchedulesRepositorySQL,
+      provide: ProjectStepsRepository,
+      useClass: ProjectStepsRepositorySQL,
     },
     {
       provide: ProjectFilesRepository,
       useClass: ProjectFilesRepositorySQL,
+    },
+    {
+      provide: StepsRepository,
+      useClass: StepsRepositorySQL,
     },
   ],
   exports: [
@@ -75,10 +83,11 @@ import { PrismaService } from './prisma-service';
     ClientsRepository,
     RolesRepository,
     EmployeesRepository,
-    ProjectTypesRepository,
+    CategoriesRepository,
     ProjectsRepository,
-    ProjectSchedulesRepository,
+    ProjectStepsRepository,
     ProjectFilesRepository,
+    StepsRepository,
   ],
 })
 export class DatabaseModule {}

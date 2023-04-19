@@ -12,6 +12,7 @@ import { v4 as uuid } from 'uuid';
 import { ProjectsRepository } from 'src/app/project/project.repository';
 import { EmployeesRepository } from 'src/app/employee/employee.repository';
 import { NotificationsService } from 'src/events/notifications/notifications.service';
+import { CategoriesRepository } from 'src/app/category/category.repository';
 
 @Injectable()
 export class CreateProjectFileUsecase {
@@ -19,6 +20,7 @@ export class CreateProjectFileUsecase {
     private projectFilesRepository: ProjectFilesRepository,
     private projectsRepository: ProjectsRepository,
     private employeesRepository: EmployeesRepository,
+    private categoriesRepository: CategoriesRepository,
     private storageSerivce: StorageService,
     private notificationsService: NotificationsService,
   ) {}
@@ -45,6 +47,14 @@ export class CreateProjectFileUsecase {
       throw new UnauthorizedException();
     }
 
+    const category = await this.categoriesRepository.findById(
+      request.category_id,
+    );
+
+    if (!category) {
+      throw new UnauthorizedException();
+    }
+
     if (office_id !== employee.office_id) {
       throw new UnauthorizedException();
     }
@@ -63,6 +73,7 @@ export class CreateProjectFileUsecase {
       path: null,
       project_id: request.project_id,
       name: request.name,
+      category_id: request.category_id,
     });
 
     const decodedFile = decodeBase64(request.file);

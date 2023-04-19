@@ -1,6 +1,5 @@
 import {
   Body,
-  CacheInterceptor,
   CACHE_MANAGER,
   Controller,
   Get,
@@ -20,8 +19,6 @@ import { CreateProjectUsecase } from './usecases/create-project.usecase';
 import { ListProjectsUsecase } from './usecases/list-projects.usecase';
 import { BaseResponse } from '../common/dtos/responses';
 import { RenameProjectUsecase } from './usecases/rename-project.usecase';
-import { UpdateProjectStatusUsecase } from './usecases/update-project-status.usecase';
-import { ProjectStatus } from './dtos/update-project.dto';
 import { FindProjectUsecase } from './usecases/find-project.usecase';
 import { FullProject } from './project.repository';
 import { JwtAuthGuard } from 'src/auth/employee/jwt-auth.guard';
@@ -46,7 +43,6 @@ export class ProjectController {
     private createProject: CreateProjectUsecase,
     private listProjects: ListProjectsUsecase,
     private renameProject: RenameProjectUsecase,
-    private updateProjectStatus: UpdateProjectStatusUsecase,
     private findProject: FindProjectUsecase,
     private likeProjectPost: LikeProjectPostUsecase,
     private unlikeProjectPost: UnlikeProjectPostUsecase,
@@ -68,11 +64,10 @@ export class ProjectController {
   async show(
     @Request() { user: { office_id } }: OfficeRequest,
     @Query('client_id') client_id: string,
-    @Query('project_type_id') project_type_id: string,
     @Query('name') name: string,
   ): Promise<FullProject[]> {
     const cachedResponse: FullProject[] = await this.cacheManager.get(
-      `projects-${office_id}-${client_id}-${project_type_id}-${name}`,
+      `projects-${office_id}-${client_id}-${name}`,
     );
 
     if (cachedResponse) {
@@ -81,13 +76,12 @@ export class ProjectController {
 
     const response = await this.listProjects.execute(office_id, {
       client_id,
-      project_type_id,
       name,
     });
 
     if (response) {
       await this.cacheManager.set(
-        `projects-${office_id}-${client_id}-${project_type_id}-${name}`,
+        `projects-${office_id}-${client_id}-${name}`,
         response,
         5000,
       );
@@ -101,11 +95,10 @@ export class ProjectController {
   async showForClient(
     @Request() { user: { office_id } }: OfficeRequest,
     @Query('client_id') client_id: string,
-    @Query('project_type_id') project_type_id: string,
     @Query('name') name: string,
   ): Promise<FullProject[]> {
     const cachedResponse: FullProject[] = await this.cacheManager.get(
-      `projects-${office_id}-${client_id}-${project_type_id}-${name}`,
+      `projects-${office_id}-${client_id}-${name}`,
     );
 
     if (cachedResponse) {
@@ -114,13 +107,12 @@ export class ProjectController {
 
     const response = await this.listProjects.execute(office_id, {
       client_id,
-      project_type_id,
       name,
     });
 
     if (response) {
       await this.cacheManager.set(
-        `projects-${office_id}-${client_id}-${project_type_id}-${name}`,
+        `projects-${office_id}-${client_id}-${name}`,
         response,
         5000,
       );
@@ -139,18 +131,6 @@ export class ProjectController {
   ): Promise<BaseResponse> {
     await this.renameProject.execute(office_id, project_id, data.name);
     return { success: true, message: 'Project renamed successfully.' };
-  }
-
-  @UseGuards(JwtAuthGuard)
-  @Put('/:project_id/status')
-  async updateStatus(
-    @Request()
-    { user: { office_id } }: OfficeRequest,
-    @Param('project_id') project_id: string,
-    @Body() data: { status: ProjectStatus },
-  ): Promise<BaseResponse> {
-    await this.updateProjectStatus.execute(office_id, project_id, data.status);
-    return { success: true, message: 'Project status updated successfully.' };
   }
 
   @UseGuards(JwtAuthGuard)

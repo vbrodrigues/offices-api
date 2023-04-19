@@ -45,6 +45,6 @@ export class AuthService {
       aud: 'employee',
       sub: employee.id,
     };
-    return { access_token: this.jwtService.sign(payload) };
+    return { access_token: this.jwtService.sign(payload, { expiresIn: '1d' }) };
   }
 }

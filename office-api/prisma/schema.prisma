@@ -18,9 +18,10 @@ model Office {
   logo               String?  @db.VarChar(4096)
   created_at         DateTime @default(now())
 
-  clients     Client[]
-  employees   Employee[]
-  ProjectType ProjectType[]
+  clients    Client[]
+  employees  Employee[]
+  categories Category[]
+  steps      Step[]
 }
 
 model Client {
@@ -60,59 +61,72 @@ model Employee {
   created_at   DateTime  @default(now())
   updated_at   DateTime?
 
-  office            Office            @relation(fields: [office_id], references: [id])
-  role              Role              @relation(fields: [role_id], references: [id])
-  project_files     ProjectFile[]
-  project_schedules ProjectSchedule[]
+  office        Office        @relation(fields: [office_id], references: [id])
+  role          Role          @relation(fields: [role_id], references: [id])
+  project_files ProjectFile[]
+  ProjectStep   ProjectStep[]
 }
 
-model ProjectType {
+model Category {
   id         String   @id @default(uuid())
   name       String
   office_id  String?
   created_at DateTime @default(now())
 
-  office   Office?   @relation(fields: [office_id], references: [id])
-  projects Project[]
+  office        Office?       @relation(fields: [office_id], references: [id])
+  project_files ProjectFile[]
 }
 
 model Project {
-  id              String    @id @default(uuid())
-  client_id       String
-  project_type_id String
-  name            String
-  status          String    @default("in_progress")
-  updated_at      DateTime?
-  created_at      DateTime  @default(now())
+  id         String    @id @default(uuid())
+  client_id  String
+  name       String
+  updated_at DateTime?
+  created_at DateTime  @default(now())
 
-  client    Client            @relation(fields: [client_id], references: [id])
-  type      ProjectType       @relation(fields: [project_type_id], references: [id])
-  files     ProjectFile[]
-  schedules ProjectSchedule[]
+  client        Client        @relation(fields: [client_id], references: [id])
+  files         ProjectFile[]
+  project_steps ProjectStep[]
 }
 
 model ProjectFile {
   id            String    @id @default(uuid())
   project_id    String
+  category_id   String?
   created_by_id String
   path          String?   @db.VarChar(4096)
   name          String?
   created_at    DateTime  @default(now())
   updated_at    DateTime?
 
-  project    Project  @relation(fields: [project_id], references: [id])
-  created_by Employee @relation(fields: [created_by_id], references: [id])
+  project    Project   @relation(fields: [project_id], references: [id])
+  created_by Employee  @relation(fields: [created_by_id], references: [id])
+  category   Category? @relation(fields: [category_id], references: [id], onDelete: SetNull)
 }
 
-model ProjectSchedule {
-  id                   String    @id @default(uuid())
-  project_id           String
-  assigned_employee_id String
-  start_date           DateTime
-  end_date             DateTime
-  created_at           DateTime  @default(now())
-  updated_at           DateTime?
+model Step {
+  id         String   @id @default(uuid())
+  office_id  String
+  name       String
+  created_at DateTime @default(now())
 
-  project           Project  @relation(fields: [project_id], references: [id])
-  assigned_employee Employee @relation(fields: [assigned_employee_id], references: [id])
+  office      Office        @relation(fields: [office_id], references: [id])
+  ProjectStep ProjectStep[]
+}
+
+model ProjectStep {
+  id              String    @id @default(uuid())
+  project_id      String
+  project_step_id String
+  assigned_to     String?
+  start_date      DateTime?
+  end_date        DateTime?
+  status          String
+  step_hours      Int?
+  last_updated_at DateTime?
+  last_updated_by String?
+
+  project      Project   @relation(fields: [project_id], references: [id], onDelete: Cascade)
+  project_step Step      @relation(fields: [project_step_id], references: [id], onDelete: Cascade)
+  assigned     Employee? @relation(fields: [assigned_to], references: [id], onDelete: SetNull)
 }
