@@ -1,8 +1,9 @@
 import { MenuGroup } from "./MenuGroup";
 import { MenuItem } from "./MenuItem";
-import { MdOutlineFolderCopy, MdOutlineFolderSpecial } from "react-icons/md";
+import { MdOutlineFolderCopy } from "react-icons/md";
 import { FaRegAddressCard } from "react-icons/fa";
 import { TbUserCheck, TbUsers } from "react-icons/tb";
+import { BsFileEarmarkMedical } from "react-icons/bs";
 
 export function Sidebar() {
   return (
@@ -33,9 +34,9 @@ export function Sidebar() {
           icon={<TbUserCheck size={20} color="#6b7280" />}
         />
         <MenuItem
-          to="/project-types"
-          title="Categorias de projetos"
-          icon={<MdOutlineFolderSpecial size={20} color="#6b7280" />}
+          to="/categories"
+          title="Categorias"
+          icon={<BsFileEarmarkMedical size={20} color="#6b7280" />}
         />
       </MenuGroup>
     </aside>

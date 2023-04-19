@@ -1,9 +1,10 @@
-import { ProjectType } from "../project-types/dtos";
+import { Category } from "../categories/dtos";
 
 export interface ProjectFile {
   id: string;
   project_id: string;
   created_by_id: string;
+  category_id: string;
   path: string;
   name: string;
   created_at: Date;
@@ -25,8 +26,7 @@ export interface Client {
 export interface Project {
   id: string;
   client_id: string;
-  project_type_id: string;
-  type: ProjectType;
+  type: Category;
   name: string;
   status: string;
   updated_at?: Date | null;

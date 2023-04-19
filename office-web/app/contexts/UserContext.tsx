@@ -59,14 +59,6 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({
       return user;
     }
 
-    // const userCookie = getCookie("user")?.valueOf() as string;
-
-    // if (userCookie) {
-    //   const loggedUser = JSON.parse(userCookie) as User;
-    //   setCurrentUser(loggedUser);
-    //   return loggedUser;
-    // }
-
     return null;
   }, [user]);
 

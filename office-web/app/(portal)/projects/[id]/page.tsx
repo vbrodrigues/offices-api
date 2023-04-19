@@ -1,8 +1,11 @@
+"use client";
+
+import UnauthorizedPage from "@/app/(errors)/unauthorized/page";
 import AvatarCircle from "@/app/components/AvatarCircle";
+import useUser from "@/app/hooks/useUser";
 import { findProject } from "@/app/lib/api/office-api/projects/find-project";
 import { formatDistance } from "date-fns";
 import ptBR from "date-fns/locale/pt-BR";
-import { cookies } from "next/headers";
 
 interface ProjectDetailsPageProps {
   params: {
@@ -13,28 +16,31 @@ interface ProjectDetailsPageProps {
 export default async function ProjectDetailsPage({
   params: { id },
 }: ProjectDetailsPageProps) {
-  const access_token = cookies().get("access_token")?.value;
+  const { getCurrentUser } = useUser();
 
-  let project = null;
-  if (access_token) {
-    const projectData = await findProject(access_token, id);
-    project = {
-      ...projectData,
-      created_at: new Date(projectData.created_at),
-      files: projectData.files.map((file) => ({
-        ...file,
-        created_at: new Date(file.created_at),
-        updated_at: file.updated_at ? new Date(file.updated_at) : null,
-      })),
-      client: {
-        ...projectData.client,
-        created_at: new Date(projectData.client.created_at),
-        updated_at: projectData.client.updated_at
-          ? new Date(projectData.client.updated_at)
-          : null,
-      },
-    };
+  const user = await getCurrentUser();
+
+  if (!user) {
+    return <UnauthorizedPage />;
   }
+
+  const projectData = await findProject(user.access_token, id);
+  const project = {
+    ...projectData,
+    created_at: new Date(projectData.created_at),
+    files: projectData.files.map((file) => ({
+      ...file,
+      created_at: new Date(file.created_at),
+      updated_at: file.updated_at ? new Date(file.updated_at) : null,
+    })),
+    client: {
+      ...projectData.client,
+      created_at: new Date(projectData.client.created_at),
+      updated_at: projectData.client.updated_at
+        ? new Date(projectData.client.updated_at)
+        : null,
+    },
+  };
 
   return (
     <div>

@@ -1,21 +1,17 @@
 // eslint-disable-next-line no-unused-vars
 import { AxiosError } from "axios";
 import { OfficeAPI } from "..";
-import { ProjectType } from "./dtos";
+import { Category } from "./dtos";
 
-export async function deleteProjectType(
-  project_type_id: string,
+export async function listCategories(
   access_token: string
-): Promise<ProjectType> {
+): Promise<Category[]> {
   try {
-    const response = await OfficeAPI.delete(
-      `/project-types/${project_type_id}`,
-      {
-        headers: {
-          Authorization: `Bearer ${access_token}`,
-        },
-      }
-    );
+    const response = await OfficeAPI.get("/categories", {
+      headers: {
+        Authorization: `Bearer ${access_token}`,
+      },
+    });
 
     if (response.status !== 200) {
       throw new Error(response.data.message);

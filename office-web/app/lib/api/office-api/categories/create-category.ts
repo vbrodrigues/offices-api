@@ -1,19 +1,19 @@
 // eslint-disable-next-line no-unused-vars
 import { AxiosError } from "axios";
 import { OfficeAPI } from "..";
-import { ProjectType } from "./dtos";
+import { Category } from "./dtos";
 
-export interface CreateProjectTypeRequest {
+export interface CreateCategoryRequest {
   name: string;
   office_id: string;
 }
 
-export async function createProjectType(
-  data: CreateProjectTypeRequest,
+export async function createCategory(
+  data: CreateCategoryRequest,
   access_token: string
-): Promise<ProjectType> {
+): Promise<Category> {
   try {
-    const response = await OfficeAPI.post("/project-types", data, {
+    const response = await OfficeAPI.post("/categories", data, {
       headers: {
         Authorization: `Bearer ${access_token}`,
       },
