@@ -117,7 +117,7 @@ model Step {
 model ProjectStep {
   id              String    @id @default(uuid())
   project_id      String
-  project_step_id String
+  step_id         String
   assigned_to     String?
   start_date      DateTime?
   end_date        DateTime?
@@ -126,7 +126,9 @@ model ProjectStep {
   last_updated_at DateTime?
   last_updated_by String?
 
-  project      Project   @relation(fields: [project_id], references: [id], onDelete: Cascade)
-  project_step Step      @relation(fields: [project_step_id], references: [id], onDelete: Cascade)
-  assigned     Employee? @relation(fields: [assigned_to], references: [id], onDelete: SetNull)
+  project  Project   @relation(fields: [project_id], references: [id], onDelete: Cascade)
+  step     Step      @relation(fields: [step_id], references: [id], onDelete: Cascade)
+  assigned Employee? @relation(fields: [assigned_to], references: [id], onDelete: SetNull)
+
+  @@unique([project_id, step_id])
 }

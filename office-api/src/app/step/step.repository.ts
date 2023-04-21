@@ -7,6 +7,7 @@ export abstract class StepsRepository {
   abstract add(data: CreateStepInternalDTO): Promise<Step>;
   abstract delete(step_id: string): Promise<void>;
   abstract findByName(name: string): Promise<Step | null>;
+  abstract findById(step_id: string): Promise<Step | null>;
 }
 
 @Injectable()
@@ -23,5 +24,9 @@ export class StepsRepositorySQL implements StepsRepository {
 
   async findByName(name: string): Promise<Step | null> {
     return await this.prisma.step.findFirst({ where: { name: name } });
+  }
+
+  async findById(step_id: string): Promise<Step> {
+    return await this.prisma.step.findFirst({ where: { id: step_id } });
   }
 }

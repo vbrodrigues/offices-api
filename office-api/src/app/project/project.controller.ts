@@ -9,7 +9,7 @@ import {
   Query,
   UseGuards,
 } from '@nestjs/common';
-import { Project } from '@prisma/client';
+import { Project, ProjectStep } from '@prisma/client';
 import {
   Param,
   Request,
@@ -35,6 +35,11 @@ import {
   UnlikeProjectPostDTO,
 } from 'src/events/project-posts/project-posts.dto';
 import { Cache } from 'cache-manager';
+import { CreateProjectStepDTO } from '../project-step/dtos/create-project-step.dto';
+import { AddStepToProjectUsecase } from './usecases/steps/add-step-to-project.usecase';
+import { UpdateProjectStepDTO } from '../project-step/dtos/update-project-step.dto';
+import { UpdateStepUsecase } from './usecases/steps/update-step.usecase';
+import { ListProjectStepsUsecase } from './usecases/steps/list-project-steps.usecase';
 
 @Controller('/projects')
 export class ProjectController {
@@ -48,6 +53,9 @@ export class ProjectController {
     private unlikeProjectPost: UnlikeProjectPostUsecase,
     private createProjectPost: CreateProjectPostUsecase,
     private getProjectFeed: GetProjectFeedUsecase,
+    private addStepToProject: AddStepToProjectUsecase,
+    private updateStepForProject: UpdateStepUsecase,
+    private listProjectSteps: ListProjectStepsUsecase,
   ) {}
 
   @UseGuards(JwtAuthGuard)
@@ -246,5 +254,50 @@ export class ProjectController {
     }
 
     return response;
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Post('/:project_id/steps/:step_id')
+  async addStep(
+    @Request() { user: { office_id, employee_id } }: OfficeRequest,
+    @Param('project_id') project_id: string,
+    @Param('step_id') step_id: string,
+    @Body() request: CreateProjectStepDTO,
+  ): Promise<ProjectStep> {
+    const projectStep = await this.addStepToProject.execute(
+      office_id,
+      employee_id,
+      project_id,
+      step_id,
+      request,
+    );
+    return projectStep;
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Put('/:project_id/steps/:step_id')
+  async updateStep(
+    @Request() { user: { office_id, employee_id } }: OfficeRequest,
+    @Param('project_id') project_id: string,
+    @Param('step_id') step_id: string,
+    @Body() request: UpdateProjectStepDTO,
+  ): Promise<BaseResponse> {
+    await this.updateStepForProject.execute(
+      office_id,
+      project_id,
+      step_id,
+      employee_id,
+      request,
+    );
+
+    return { success: true, message: 'Successfully updated step status.' };
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get('/:project_id/steps')
+  async listSteps(
+    @Param('project_id') project_id: string,
+  ): Promise<ProjectStep[]> {
+    return await this.listProjectSteps.execute(project_id);
   }
 }

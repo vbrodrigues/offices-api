@@ -58,19 +58,23 @@ export class CreateProjectUsecase {
       name: request.name,
     });
 
-    request.steps.forEach(async (stepName) => {
-      const step = await this.stepsRepository.findByName(stepName);
+    if (request.steps) {
+      request.steps.forEach(async (stepName) => {
+        const step = await this.stepsRepository.findById(stepName);
 
-      if (!step) {
-        return;
-      }
+        if (!step) {
+          return;
+        }
 
-      await this.createProjectStep.execute(office_id, {
-        project_id: project.id,
-        project_step_id: step.id,
-        status: 'PENDING',
+        await this.createProjectStep.execute(
+          office_id,
+          employee_id,
+          project.id,
+          step.id,
+          {},
+        );
       });
-    });
+    }
 
     const employees = await this.employeesRepository.findByOfficeId(office_id);
 

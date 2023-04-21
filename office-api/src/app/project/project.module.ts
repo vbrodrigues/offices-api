@@ -13,6 +13,9 @@ import { LikeProjectPostUsecase } from './usecases/posts/like-project-post.useca
 import { UnlikeProjectPostUsecase } from './usecases/posts/unlike-project-post.usecase';
 import { GetProjectFeedUsecase } from './usecases/posts/get-project-feed.usecase';
 import { NotificationsModule } from 'src/events/notifications/notifications.module';
+import { AddStepToProjectUsecase } from './usecases/steps/add-step-to-project.usecase';
+import { UpdateStepUsecase } from './usecases/steps/update-step.usecase';
+import { ListProjectStepsUsecase } from './usecases/steps/list-project-steps.usecase';
 
 @Module({
   imports: [
@@ -33,6 +36,9 @@ import { NotificationsModule } from 'src/events/notifications/notifications.modu
     UnlikeProjectPostUsecase,
     GetProjectFeedUsecase,
     CreateProjectPostUsecase,
+    AddStepToProjectUsecase,
+    UpdateStepUsecase,
+    ListProjectStepsUsecase,
   ],
 })
 export class ProjectModule {}
