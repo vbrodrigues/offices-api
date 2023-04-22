@@ -8,6 +8,7 @@ export abstract class StepsRepository {
   abstract delete(step_id: string): Promise<void>;
   abstract findByName(name: string): Promise<Step | null>;
   abstract findById(step_id: string): Promise<Step | null>;
+  abstract listSteps(office_id: string): Promise<Step[]>;
 }
 
 @Injectable()
@@ -19,6 +20,7 @@ export class StepsRepositorySQL implements StepsRepository {
   }
 
   async delete(step_id: string): Promise<void> {
+    console.log(step_id);
     await this.prisma.step.delete({ where: { id: step_id } });
   }
 
@@ -28,5 +30,9 @@ export class StepsRepositorySQL implements StepsRepository {
 
   async findById(step_id: string): Promise<Step> {
     return await this.prisma.step.findFirst({ where: { id: step_id } });
+  }
+
+  async listSteps(office_id: string): Promise<Step[]> {
+    return await this.prisma.step.findMany({ where: { office_id: office_id } });
   }
 }
