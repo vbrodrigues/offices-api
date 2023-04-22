@@ -9,7 +9,7 @@ interface MenuItemProps {
 
 export function MenuItem({ to = "#", title, icon }: MenuItemProps) {
   return (
-    <span className="flex gap-4 items-center">
+    <span className="flex gap-4 items-center justify-start">
       {icon && icon}
       <Link
         href={to}

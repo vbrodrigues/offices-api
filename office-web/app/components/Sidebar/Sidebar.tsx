@@ -3,7 +3,7 @@ import { MenuItem } from "./MenuItem";
 import { MdOutlineFolderCopy } from "react-icons/md";
 import { FaRegAddressCard } from "react-icons/fa";
 import { TbUserCheck, TbUsers } from "react-icons/tb";
-import { BsFileEarmarkMedical } from "react-icons/bs";
+import { BsBarChartSteps, BsFileEarmarkMedical } from "react-icons/bs";
 
 export function Sidebar() {
   return (
@@ -35,8 +35,13 @@ export function Sidebar() {
         />
         <MenuItem
           to="/categories"
-          title="Categorias"
+          title="Categorias de arquivos"
           icon={<BsFileEarmarkMedical size={20} color="#6b7280" />}
+        />
+        <MenuItem
+          to="/steps"
+          title="Etapas de projetos"
+          icon={<BsBarChartSteps size={20} color="#6b7280" />}
         />
       </MenuGroup>
     </aside>

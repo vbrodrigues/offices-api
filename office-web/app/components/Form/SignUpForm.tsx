@@ -12,6 +12,7 @@ import { useState } from "react";
 import { convertBase64 } from "@/app/lib/utils";
 import { ErrorToast } from "../Toast/Toast";
 import useUser from "@/app/hooks/useUser";
+import * as Toast from "@radix-ui/react-toast";
 
 const signUpSchema = z
   .object({
@@ -114,132 +115,134 @@ const SignUpForm = () => {
   };
 
   return (
-    <form
-      className="grid grid-cols-2 gap-y-8 gap-x-4"
-      onSubmit={handleSubmit(onSubmit)}
-    >
-      <div className="flex flex-col gap-1 col-span-2">
-        <div className="flex justify-between items-center">
-          <p className="font-title text-gray-500">{"Nome do escritório"}</p>
-        </div>
-        <TextInput
-          name="name"
-          label="Nome do escritório"
-          type="text"
-          error={!!formState.errors.name}
-          register={register}
-        />
-        {formState.errors.name ? (
-          <p className="text-red-400 text-xs">
-            {formState.errors.name.message}
-          </p>
-        ) : (
-          <span className="h-4"></span>
-        )}
-      </div>
-
-      <div className="flex flex-col gap-1">
-        <div className="flex justify-between items-center">
-          <p className="font-title text-gray-500">{"E-mail"}</p>
-        </div>
-        <TextInput
-          name="email"
-          label="E-mail"
-          type="text"
-          error={!!formState.errors.email}
-          register={register}
-        />
-        {formState.errors.email ? (
-          <p className="text-red-400 text-xs">
-            {formState.errors.email.message}
-          </p>
-        ) : (
-          <span className="h-4"></span>
-        )}
-      </div>
-
-      <div className="flex flex-col gap-1">
-        <div className="flex justify-between items-center">
-          <p className="font-title text-gray-500">{"Telefone"}</p>
-        </div>
-        <TextInput
-          name="phone"
-          label="Telefone"
-          type="text"
-          error={!!formState.errors.phone}
-          register={register}
-        />
-        {formState.errors.phone ? (
-          <p className="text-red-400 text-xs">
-            {formState.errors.phone.message}
-          </p>
-        ) : (
-          <span className="h-4"></span>
-        )}
-      </div>
-
-      <div className="flex flex-col gap-1">
-        <div className="flex justify-between items-center">
-          <p className="font-title text-gray-500">{"Senha"}</p>
-        </div>
-        <TextInput
-          name="password"
-          label="Senha"
-          type="password"
-          error={!!formState.errors.password}
-          register={register}
-        />
-        {formState.errors.password ? (
-          <p className="text-red-400 text-xs">
-            {formState.errors.password.message}
-          </p>
-        ) : (
-          <span className="h-4"></span>
-        )}
-      </div>
-
-      <div className="flex flex-col gap-1">
-        <div className="flex justify-between items-center">
-          <p className="font-title text-gray-500">{"Confirme sua senha"}</p>
-        </div>
-        <TextInput
-          name="passwordConfirmation"
-          label="Confirme sua senha"
-          type="password"
-          error={!!formState.errors.passwordConfirmation}
-          register={register}
-        />
-        {formState.errors.passwordConfirmation ? (
-          <p className="text-red-400 text-xs">
-            {formState.errors.passwordConfirmation.message}
-          </p>
-        ) : (
-          <span className="h-4"></span>
-        )}
-      </div>
-
-      <div className="col-span-2 w-full">
-        <Dropzone
-          label="Logomarca de sua empresa"
-          description="Arraste a imagem aqui ou clique para carregar a imagem de seu computador"
-          setFile={handleDropzoneChange}
-        />
-      </div>
-
-      <button
-        type="submit"
-        className="col-span-2 mt-4 w-full bg-blue-500 py-3 rounded-lg text-gray-100 font-title tracking-wide hover:opacity-90 transition-opacity"
+    <Toast.Provider swipeDirection="right" duration={5000}>
+      <form
+        className="grid grid-cols-2 gap-y-8 gap-x-4"
+        onSubmit={handleSubmit(onSubmit)}
       >
-        CADASTRAR
-      </button>
+        <div className="flex flex-col gap-1 col-span-2">
+          <div className="flex justify-between items-center">
+            <p className="font-title text-gray-500">{"Nome do escritório"}</p>
+          </div>
+          <TextInput
+            name="name"
+            label="Nome do escritório"
+            type="text"
+            error={!!formState.errors.name}
+            register={register}
+          />
+          {formState.errors.name ? (
+            <p className="text-red-400 text-xs">
+              {formState.errors.name.message}
+            </p>
+          ) : (
+            <span className="h-4"></span>
+          )}
+        </div>
 
-      <ErrorToast
-        open={toastOpen}
-        setOpen={setToastOpen}
-        title="Oops"
-        text={toastMessage}
-      />
-    </form>
+        <div className="flex flex-col gap-1">
+          <div className="flex justify-between items-center">
+            <p className="font-title text-gray-500">{"E-mail"}</p>
+          </div>
+          <TextInput
+            name="email"
+            label="E-mail"
+            type="text"
+            error={!!formState.errors.email}
+            register={register}
+          />
+          {formState.errors.email ? (
+            <p className="text-red-400 text-xs">
+              {formState.errors.email.message}
+            </p>
+          ) : (
+            <span className="h-4"></span>
+          )}
+        </div>
+
+        <div className="flex flex-col gap-1">
+          <div className="flex justify-between items-center">
+            <p className="font-title text-gray-500">{"Telefone"}</p>
+          </div>
+          <TextInput
+            name="phone"
+            label="Telefone"
+            type="text"
+            error={!!formState.errors.phone}
+            register={register}
+          />
+          {formState.errors.phone ? (
+            <p className="text-red-400 text-xs">
+              {formState.errors.phone.message}
+            </p>
+          ) : (
+            <span className="h-4"></span>
+          )}
+        </div>
+
+        <div className="flex flex-col gap-1">
+          <div className="flex justify-between items-center">
+            <p className="font-title text-gray-500">{"Senha"}</p>
+          </div>
+          <TextInput
+            name="password"
+            label="Senha"
+            type="password"
+            error={!!formState.errors.password}
+            register={register}
+          />
+          {formState.errors.password ? (
+            <p className="text-red-400 text-xs">
+              {formState.errors.password.message}
+            </p>
+          ) : (
+            <span className="h-4"></span>
+          )}
+        </div>
+
+        <div className="flex flex-col gap-1">
+          <div className="flex justify-between items-center">
+            <p className="font-title text-gray-500">{"Confirme sua senha"}</p>
+          </div>
+          <TextInput
+            name="passwordConfirmation"
+            label="Confirme sua senha"
+            type="password"
+            error={!!formState.errors.passwordConfirmation}
+            register={register}
+          />
+          {formState.errors.passwordConfirmation ? (
+            <p className="text-red-400 text-xs">
+              {formState.errors.passwordConfirmation.message}
+            </p>
+          ) : (
+            <span className="h-4"></span>
+          )}
+        </div>
+
+        <div className="col-span-2 w-full">
+          <Dropzone
+            label="Logomarca de sua empresa"
+            description="Arraste a imagem aqui ou clique para carregar a imagem de seu computador"
+            setFile={handleDropzoneChange}
+          />
+        </div>
+
+        <button
+          type="submit"
+          className="col-span-2 mt-4 w-full bg-blue-500 py-3 rounded-lg text-gray-100 font-title tracking-wide hover:opacity-90 transition-opacity"
+        >
+          CADASTRAR
+        </button>
+
+        <ErrorToast
+          open={toastOpen}
+          setOpen={setToastOpen}
+          title="Oops"
+          text={toastMessage}
+        />
+      </form>
+    </Toast.Provider>
   );
 };
 

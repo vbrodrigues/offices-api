@@ -70,7 +70,7 @@ const ProjectsPage = async () => {
         Sua empresa possui <strong>{projects.length}</strong> projetos.
       </p>
 
-      <Table columnNames={["CLIENTE", "PROJETO", "DETALHES"]}>
+      <Table columnNames={["CLIENTE", "PROJETO", "PROGRESSO", "DETALHES"]}>
         {projects.map((project) => (
           <TableRow key={project.id}>
             <TableCell>
@@ -99,6 +99,14 @@ const ProjectsPage = async () => {
                     locale: ptBR,
                   })}
                 </p>
+              </div>
+            </TableCell>
+
+            <TableCell>
+              <div className="flex w-full h-3 rounded-full bg-gray-400">
+                <div className="w-[30%] h-3 overflow-hidden bg-green-400"></div>
+                <div className="w-[60%] h-3 overflow-hidden bg-amber-300"></div>
+                <div className="w-[100%] h-3 overflow-hidden bg-red-400"></div>
               </div>
             </TableCell>
 

@@ -11,14 +11,13 @@ export interface CreateProjectRequest {
     start_date: Date;
     end_date: Date;
   } | null;
+  steps?: string[] | null;
 }
 
 export interface CreateProjectResponse {
   id: string;
   client_id: string;
-  project_type_id: string;
   name: string;
-  status: string;
   updated_at?: Date | null;
   created_at: Date;
 }
