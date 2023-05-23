@@ -10,13 +10,13 @@ import { createCategory } from "@/app/lib/api/office-api/categories/create-categ
 import UnauthorizedPage from "@/app/(errors)/unauthorized/page";
 import useUser from "@/app/hooks/useUser";
 import { useRouter } from "next/navigation";
-import { ErrorToast } from "@/app/components/Toast/Toast";
-import { useState } from "react";
+import { CornerToast } from "@/app/components/Toast/Toast";
 import * as Toast from "@radix-ui/react-toast";
 import { deleteCategory } from "@/app/lib/api/office-api/categories/delete-category";
 import RoundedLabel from "@/app/components/RoundedLabel";
 import WarningCard from "@/app/components/WarningCard";
 import Button from "@/app/components/Button";
+import { useToast } from "@/app/hooks/useToast";
 
 const createCategorySchema = z.object({
   name: z.string().min(3, "O nome deve conter no mínimo 3 caracteres."),
@@ -27,7 +27,14 @@ type CreateCategoryFormData = z.infer<typeof createCategorySchema>;
 const CategoriesPage = async () => {
   const { refresh } = useRouter();
 
-  const [toastOpen, setToastOpen] = useState(false);
+  const {
+    showToast,
+    setToastOpen,
+    toastOpen,
+    toastTitle,
+    toastText,
+    toastType,
+  } = useToast();
 
   const { register, handleSubmit, formState } = useForm<CreateCategoryFormData>(
     {
@@ -57,7 +64,7 @@ const CategoriesPage = async () => {
       );
       refresh();
     } catch (err) {
-      setToastOpen(true);
+      showToast("Oops!", "Erro ao criar categoria.", "error");
     }
   };
 
@@ -66,7 +73,7 @@ const CategoriesPage = async () => {
       await deleteCategory(id, user.access_token);
       refresh();
     } catch (err) {
-      setToastOpen(true);
+      showToast("Oops!", "Erro ao deletar categoria.", "error");
     }
   };
 
@@ -125,11 +132,12 @@ const CategoriesPage = async () => {
           </form>
         </div>
 
-        <ErrorToast
+        <CornerToast
+          type={toastType}
           open={toastOpen}
           setOpen={setToastOpen}
-          title="Oops"
-          text="Erro ao criar categoria. Por favor, tente novamente mais tarde."
+          title={toastTitle}
+          text={toastText}
         />
       </div>
     </Toast.Provider>

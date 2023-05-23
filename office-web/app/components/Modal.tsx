@@ -16,7 +16,7 @@ export function Modal({ trigger, title, description, content }: ModalProps) {
     <Dialog.Root>
       <Dialog.Trigger>{trigger}</Dialog.Trigger>
       <Dialog.Overlay className="bg-gray-500 bg-opacity-30 backdrop-blur-sm fixed top-0 bottom-0 left-0 right-0 grid place-items-center">
-        <Dialog.Content className="flex flex-col w-min-[440px] items-center bg-gray-100 px-28 py-16 rounded-lg shadow-lg">
+        <Dialog.Content className="flex flex-col w-min-[440px] w-max-[440px] flex-wrap items-center bg-gray-100 px-28 py-16 rounded-lg shadow-lg">
           <Dialog.Title className="flex justify-between items center gap-10">
             {title}
             <Dialog.Close className="flex items-center">

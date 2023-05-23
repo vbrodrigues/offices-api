@@ -8,9 +8,18 @@ interface SelectInputProps {
     label: string;
     icon?: React.ReactNode;
   }[];
+  isMulti?: boolean;
+  onChange: (value: any) => void;
+  value?: any;
 }
 
-export default function SelectInput({ label, options }: SelectInputProps) {
+export default function SelectInput({
+  label,
+  options,
+  isMulti = false,
+  onChange,
+  value,
+}: SelectInputProps) {
   return (
     <div className="flex flex-col gap-1">
       <p className="font-title  text-gray-500">{label}</p>
@@ -19,6 +28,8 @@ export default function SelectInput({ label, options }: SelectInputProps) {
         options={options}
         isSearchable
         isClearable
+        isMulti={isMulti}
+        onChange={onChange}
         styles={{
           control: (provided) => ({
             ...provided,

@@ -7,40 +7,90 @@ import { TextInput } from "./TextInput";
 import { createProject } from "@/app/lib/api/office-api/projects/create-project";
 import SelectInput from "./SelectInput";
 import AvatarCircle from "../AvatarCircle";
+import { Step } from "@/app/lib/api/office-api/steps/dtos";
+import { Client } from "@/app/lib/api/office-api/clients/dtos";
+import useUser from "@/app/hooks/useUser";
+import { useToast } from "@/app/hooks/useToast";
+import { CornerToast } from "../Toast/Toast";
 
 const createProjectSchema = z.object({
   name: z
     .string()
     .min(3, "O nome deve conter pelo menos 3 caracteres.")
     .max(100, "O nome deve conter no máximo 100 caracteres."),
+  steps: z.array(z.string()),
+  client_id: z.string(),
 });
 
 type CreateProjectFormData = z.infer<typeof createProjectSchema>;
 
-const CreateProjectForm = () => {
-  const { register, handleSubmit, formState } = useForm<CreateProjectFormData>({
-    resolver: zodResolver(createProjectSchema),
-  });
+interface CreateProjectFormProps {
+  steps: Step[];
+  clients: Client[];
+}
+
+const CreateProjectForm = ({ steps, clients }: CreateProjectFormProps) => {
+  const { getCurrentUser } = useUser();
+
+  const {
+    showToast,
+    setToastOpen,
+    toastOpen,
+    toastTitle,
+    toastText,
+    toastType,
+  } = useToast();
+
+  const { register, handleSubmit, formState, setValue, watch, reset } =
+    useForm<CreateProjectFormData>({
+      resolver: zodResolver(createProjectSchema),
+    });
+
+  const selectedClient = watch("client_id");
+  const selectedSteps = watch("steps");
+
+  const handleClientSelect = (selectedOption: any) => {
+    setValue("client_id", selectedOption.value);
+  };
+
+  const handleStepsSelect = (selectedOption: any) => {
+    setValue(
+      "steps",
+      selectedOption.map((option: any) => option.value)
+    );
+  };
 
   const onSubmit: SubmitHandler<CreateProjectFormData> = async ({
     name,
   }: CreateProjectFormData) => {
     try {
-      const createProjectResponse = await createProject({
-        client_id: "",
-        project_type_id: "",
-        name,
-      });
+      const user = await getCurrentUser();
 
-      console.log(createProjectResponse);
+      if (user) {
+        await createProject(
+          {
+            client_id: selectedClient,
+            steps: selectedSteps,
+            name,
+          },
+          user?.access_token
+        );
+      }
+
+      showToast("Sucesso!", "Projeto criado com sucesso!", "success");
+      reset();
     } catch (err: Error | any) {
-      throw new Error(err.response?.data.message);
+      if (err.message === "Project already exists.") {
+        showToast("Oops!", "Um projeto com esse nome já existe.", "error");
+      } else {
+        showToast("Oops!", "Erro ao criar um projeto.", "error");
+      }
     }
   };
 
   return (
     <form
-      className="flex flex-col gap-8 w-full mt-10"
+      className="flex flex-col flex-wrap gap-8 w-full mt-10"
       onSubmit={handleSubmit(onSubmit)}
     >
       <div className="flex flex-col gap-1">
@@ -63,35 +113,25 @@ const CreateProjectForm = () => {
 
       <SelectInput
         label="Cliente"
-        options={[
-          {
-            value: "Casa A",
-            label: "Casa A",
-            icon: (
-              <AvatarCircle
-                name="Casa A"
-                image="https://github.com/vbrodrigues.png"
-                size="small"
-              />
-            ),
-          },
-          {
-            value: "Apartamento A",
-            label: "Apartamento A",
-            icon: <AvatarCircle name="Apartamento A" size="small" />,
-          },
-        ]}
+        onChange={handleClientSelect}
+        // value={selectedClient}
+        options={clients.map((client) => ({
+          value: client.id,
+          label: client.name,
+          icon: (
+            <AvatarCircle name={client.name} image={client.logo} size="small" />
+          ),
+        }))}
       />
 
       <SelectInput
-        label="Tipo"
-        options={[
-          { value: "Apartamento", label: "Apartamento" },
-          { value: "Casa", label: "Casa" },
-          { value: "Escritório", label: "Escritório" },
-          { value: "Loja", label: "Loja" },
-          { value: "Consultório", label: "Consultório" },
-        ]}
+        isMulti
+        label="Passos"
+        onChange={handleStepsSelect}
+        options={steps.map((step) => ({
+          value: step.id,
+          label: step.name,
+        }))}
       />
 
       <button
@@ -100,6 +140,14 @@ const CreateProjectForm = () => {
       >
         CADASTRAR
       </button>
+
+      <CornerToast
+        type={toastType}
+        open={toastOpen}
+        setOpen={setToastOpen}
+        title={toastTitle}
+        text={toastText}
+      />
     </form>
   );
 };

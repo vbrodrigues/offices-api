@@ -6,16 +6,17 @@ import useUser from "@/app/hooks/useUser";
 import { findProject } from "@/app/lib/api/office-api/projects/find-project";
 import { formatDistance } from "date-fns";
 import ptBR from "date-fns/locale/pt-BR";
+import { MdDownload } from "react-icons/md";
 
 interface ProjectDetailsPageProps {
   params: {
-    id: string;
+    project_id: string;
   };
 }
 
-export default async function ProjectDetailsPage({
-  params: { id },
-}: ProjectDetailsPageProps) {
+const ProjectDetailsPage = async ({
+  params: { project_id },
+}: ProjectDetailsPageProps) => {
   const { getCurrentUser } = useUser();
 
   const user = await getCurrentUser();
@@ -24,7 +25,7 @@ export default async function ProjectDetailsPage({
     return <UnauthorizedPage />;
   }
 
-  const projectData = await findProject(user.access_token, id);
+  const projectData = await findProject(user.access_token, project_id);
   const project = {
     ...projectData,
     created_at: new Date(projectData.created_at),
@@ -41,6 +42,8 @@ export default async function ProjectDetailsPage({
         : null,
     },
   };
+
+  console.log(project);
 
   return (
     <div>
@@ -91,7 +94,45 @@ export default async function ProjectDetailsPage({
         </div>
       </div>
 
-      <div></div>
+      <div className="flex gap-8 flex-col mt-8">
+        <div className="bg-red-200">
+          <h2 className="text-xl font-semibold">Etapas</h2>
+          <div></div>
+        </div>
+
+        <div className="">
+          <h2 className="text-xl font-semibold">Arquivos</h2>
+          <div className="mt-4 grid grid-cols-4 gap-4">
+            {project.files?.map((file) => (
+              <a
+                href={file.path}
+                key={file.id}
+                className="p-4 ring-2 ring-gray-300 rounded-md hover:cursor-pointer hover:shadow-lg hover:ring-blue-300 transition"
+              >
+                <div className="flex justify-between items-center">
+                  <h3 className="mb-2 text-lg font-semibold">{file.name}</h3>
+                  <MdDownload className="text-2xl text-blue-500" />
+                </div>
+
+                <span className="">
+                  Categoria:
+                  <p>{file.category_id}</p>
+                </span>
+
+                <p className="text-sm mt-2">
+                  Criado{" "}
+                  {formatDistance(file.created_at, Date.now(), {
+                    addSuffix: true,
+                    locale: ptBR,
+                  })}
+                </p>
+              </a>
+            ))}
+          </div>
+        </div>
+      </div>
     </div>
   );
-}
+};
+
+export default ProjectDetailsPage;

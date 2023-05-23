@@ -4,13 +4,7 @@ import { OfficeAPI } from "..";
 
 export interface CreateProjectRequest {
   client_id: string;
-  project_type_id: string;
   name: string;
-  schedule?: {
-    assigned_employee_id: string;
-    start_date: Date;
-    end_date: Date;
-  } | null;
   steps?: string[] | null;
 }
 
@@ -23,10 +17,15 @@ export interface CreateProjectResponse {
 }
 
 export async function createProject(
-  data: CreateProjectRequest
+  data: CreateProjectRequest,
+  access_token: string
 ): Promise<CreateProjectResponse> {
   try {
-    const response = await OfficeAPI.post("/projects", data);
+    const response = await OfficeAPI.post("/projects", data, {
+      headers: {
+        Authorization: `Bearer ${access_token}`,
+      },
+    });
 
     if (response.status !== 201) {
       throw new Error(response.data.message);
