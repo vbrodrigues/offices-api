@@ -46,6 +46,12 @@ const ProjectsPage = async () => {
         ? new Date(project.client.updated_at)
         : null,
     },
+    project_steps: project.project_steps.map((step) => ({
+      ...step,
+      last_updated_at: step.last_updated_at
+        ? new Date(step.last_updated_at)
+        : null,
+    })),
   }));
 
   return (
@@ -111,10 +117,36 @@ const ProjectsPage = async () => {
               </TableCell>
 
               <TableCell>
-                <div className="flex w-full h-3 rounded-full bg-gray-400">
-                  <div className="w-[30%] h-3 overflow-hidden bg-green-400"></div>
-                  <div className="w-[60%] h-3 overflow-hidden bg-amber-300"></div>
-                  <div className="w-[100%] h-3 overflow-hidden bg-red-400"></div>
+                <div className="flex flex-col items-end">
+                  <div className="flex w-full h-1 bg-gray-300">
+                    <div
+                      className={`w-[${Math.floor(
+                        (project.project_steps.filter(
+                          (step) => step.status === "completed"
+                        ).length /
+                          project.project_steps.length) *
+                          100
+                      )}%] h-1 overflow-hidden bg-blue-500`}
+                    ></div>
+                    <div
+                      className={`w-[${Math.floor(
+                        100 -
+                          (project.project_steps.filter(
+                            (step) => step.status === "completed"
+                          ).length /
+                            project.project_steps.length) *
+                            100
+                      )}%] h-1 overflow-hidden bg-gray-300`}
+                    ></div>
+                  </div>
+                  <p className="text-xs text-gray-400">
+                    {
+                      project.project_steps.filter(
+                        (step) => step.status === "completed"
+                      ).length
+                    }
+                    /{project.project_steps.length}
+                  </p>
                 </div>
               </TableCell>
 

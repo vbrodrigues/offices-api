@@ -35,9 +35,11 @@ export class ProjectsRepositorySQL implements ProjectsRepository {
     return await this.prisma.project.findMany({
       where: { client: { office: { id: office_id } }, ...projectFilters },
       include: {
-        files: true,
+        files: {
+          include: { category: true, created_by: { include: { role: true } } },
+        },
         client: true,
-        project_steps: { include: { step: true } },
+        project_steps: { include: { step: true, assigned: true } },
       },
     });
   }
@@ -45,7 +47,13 @@ export class ProjectsRepositorySQL implements ProjectsRepository {
   async findById(project_id: string): Promise<FullProject | null> {
     return await this.prisma.project.findUnique({
       where: { id: project_id },
-      include: { files: true, client: true, project_steps: true },
+      include: {
+        files: {
+          include: { category: true, created_by: { include: { role: true } } },
+        },
+        client: true,
+        project_steps: { include: { step: true, assigned: true } },
+      },
     });
   }
 
