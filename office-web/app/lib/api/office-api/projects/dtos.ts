@@ -7,13 +7,16 @@ export interface ProjectFile {
   id: string;
   project_id: string;
   created_by_id: string;
-  category_id: string;
-  path: string;
+  category_id: string | null;
+  // ProjectStep (of this project) the file belongs to
+  project_step_id: string | null;
+  // Temporary signed download URL (valid for 30 minutes)
+  path: string | null;
   name: string;
   created_at: Date;
   updated_at?: Date | null;
   created_by: Employee;
-  category: Category;
+  category: Category | null;
 }
 
 export interface ProjectStep {

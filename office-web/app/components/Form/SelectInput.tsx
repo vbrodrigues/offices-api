@@ -30,6 +30,8 @@ export default function SelectInput({
         isClearable
         isMulti={isMulti}
         onChange={onChange}
+        // Controlled when a value is passed (undefined keeps it uncontrolled)
+        value={value}
         styles={{
           control: (provided) => ({
             ...provided,

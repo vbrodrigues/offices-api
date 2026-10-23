@@ -8,8 +8,8 @@ import InfoCard from "@/app/components/InfoCard";
 import { listCategories } from "@/app/lib/api/office-api/categories/list-categories";
 import { createCategory } from "@/app/lib/api/office-api/categories/create-category";
 import UnauthorizedPage from "@/app/(errors)/unauthorized/page";
-import useUser from "@/app/hooks/useUser";
-import { useRouter } from "next/navigation";
+import LoadingPage from "@/app/(portal)/loading";
+import useOfficeData from "@/app/hooks/useOfficeData";
 import { CornerToast } from "@/app/components/Toast/Toast";
 import * as Toast from "@radix-ui/react-toast";
 import { deleteCategory } from "@/app/lib/api/office-api/categories/delete-category";
@@ -24,8 +24,13 @@ const createCategorySchema = z.object({
 
 type CreateCategoryFormData = z.infer<typeof createCategorySchema>;
 
-const CategoriesPage = async () => {
-  const { refresh } = useRouter();
+const CategoriesPage = () => {
+  const {
+    user,
+    data: categories,
+    reload,
+    isLoading,
+  } = useOfficeData(listCategories, []);
 
   const {
     showToast,
@@ -36,20 +41,18 @@ const CategoriesPage = async () => {
     toastType,
   } = useToast();
 
-  const { register, handleSubmit, formState } = useForm<CreateCategoryFormData>(
-    {
+  const { register, handleSubmit, formState, reset } =
+    useForm<CreateCategoryFormData>({
       resolver: zodResolver(createCategorySchema),
-    }
-  );
+    });
 
-  const { getCurrentUser } = useUser();
-  const user = await getCurrentUser();
+  if (isLoading) {
+    return <LoadingPage />;
+  }
 
   if (!user) {
     return <UnauthorizedPage />;
   }
-
-  const categories = await listCategories(user.access_token);
 
   const onSubmit: SubmitHandler<CreateCategoryFormData> = async ({
     name,
@@ -62,7 +65,8 @@ const CategoriesPage = async () => {
         },
         user.access_token
       );
-      refresh();
+      reset();
+      await reload();
     } catch (err) {
       showToast("Oops!", "Erro ao criar categoria.", "error");
     }
@@ -71,7 +75,7 @@ const CategoriesPage = async () => {
   const handleDelete = async (id: string) => {
     try {
       await deleteCategory(id, user.access_token);
-      refresh();
+      await reload();
     } catch (err) {
       showToast("Oops!", "Erro ao deletar categoria.", "error");
     }

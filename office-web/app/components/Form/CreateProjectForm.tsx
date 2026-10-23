@@ -12,13 +12,14 @@ import { Client } from "@/app/lib/api/office-api/clients/dtos";
 import useUser from "@/app/hooks/useUser";
 import { useToast } from "@/app/hooks/useToast";
 import { CornerToast } from "../Toast/Toast";
+import SortableList from "../SortableList";
 
 const createProjectSchema = z.object({
   name: z
     .string()
     .min(3, "O nome deve conter pelo menos 3 caracteres.")
     .max(100, "O nome deve conter no máximo 100 caracteres."),
-  steps: z.array(z.string()),
+  steps: z.array(z.string()).optional(),
   client_id: z.string(),
 });
 
@@ -27,9 +28,14 @@ type CreateProjectFormData = z.infer<typeof createProjectSchema>;
 interface CreateProjectFormProps {
   steps: Step[];
   clients: Client[];
+  onCreated?: () => void;
 }
 
-const CreateProjectForm = ({ steps, clients }: CreateProjectFormProps) => {
+const CreateProjectForm = ({
+  steps,
+  clients,
+  onCreated,
+}: CreateProjectFormProps) => {
   const { getCurrentUser } = useUser();
 
   const {
@@ -47,16 +53,39 @@ const CreateProjectForm = ({ steps, clients }: CreateProjectFormProps) => {
     });
 
   const selectedClient = watch("client_id");
-  const selectedSteps = watch("steps");
+  // Ordered: the project's steps are created in this order
+  const selectedSteps = watch("steps") ?? [];
+
+  const clientOptions = clients.map((client) => ({
+    value: client.id,
+    label: client.name,
+    icon: <AvatarCircle name={client.name} image={client.logo} size="small" />,
+  }));
+
+  const stepOptions = steps.map((step) => ({
+    value: step.id,
+    label: step.name,
+  }));
+
+  const orderedSteps = selectedSteps
+    .map((step_id) => steps.find((step) => step.id === step_id))
+    .filter((step): step is Step => !!step);
 
   const handleClientSelect = (selectedOption: any) => {
-    setValue("client_id", selectedOption.value);
+    setValue("client_id", selectedOption?.value, { shouldValidate: true });
   };
 
-  const handleStepsSelect = (selectedOption: any) => {
+  const handleStepsSelect = (selectedOptions: any) => {
     setValue(
       "steps",
-      selectedOption.map((option: any) => option.value)
+      (selectedOptions ?? []).map((option: any) => option.value)
+    );
+  };
+
+  const handleStepsReorder = (reordered: Step[]) => {
+    setValue(
+      "steps",
+      reordered.map((step) => step.id)
     );
   };
 
@@ -79,6 +108,7 @@ const CreateProjectForm = ({ steps, clients }: CreateProjectFormProps) => {
 
       showToast("Sucesso!", "Projeto criado com sucesso!", "success");
       reset();
+      onCreated?.();
     } catch (err: Error | any) {
       if (err.message === "Project already exists.") {
         showToast("Oops!", "Um projeto com esse nome já existe.", "error");
@@ -111,28 +141,48 @@ const CreateProjectForm = ({ steps, clients }: CreateProjectFormProps) => {
         />
       </div>
 
-      <SelectInput
-        label="Cliente"
-        onChange={handleClientSelect}
-        // value={selectedClient}
-        options={clients.map((client) => ({
-          value: client.id,
-          label: client.name,
-          icon: (
-            <AvatarCircle name={client.name} image={client.logo} size="small" />
-          ),
-        }))}
-      />
+      <div className="flex flex-col gap-1">
+        <SelectInput
+          label="Cliente"
+          onChange={handleClientSelect}
+          value={
+            clientOptions.find((option) => option.value === selectedClient) ??
+            null
+          }
+          options={clientOptions}
+        />
+        {formState.errors.client_id && (
+          <p className="text-red-400 text-xs">Escolha um cliente.</p>
+        )}
+      </div>
 
-      <SelectInput
-        isMulti
-        label="Passos"
-        onChange={handleStepsSelect}
-        options={steps.map((step) => ({
-          value: step.id,
-          label: step.name,
-        }))}
-      />
+      <div className="flex flex-col gap-3">
+        <SelectInput
+          isMulti
+          label="Etapas"
+          onChange={handleStepsSelect}
+          value={orderedSteps.map((step) => ({
+            value: step.id,
+            label: step.name,
+          }))}
+          options={stepOptions}
+        />
+
+        {orderedSteps.length > 0 && (
+          <div className="flex flex-col gap-2">
+            <p className="text-sm text-gray-500">
+              Ordem das etapas (arraste para reordenar):
+            </p>
+            <SortableList
+              items={orderedSteps}
+              onReorder={handleStepsReorder}
+              renderItem={(step) => (
+                <span className="text-gray-700">{step.name}</span>
+              )}
+            />
+          </div>
+        )}
+      </div>
 
       <button
         type="submit"

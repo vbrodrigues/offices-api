@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import * as z from "zod";
-import { useRouter } from "next/navigation";
 import * as Toast from "@radix-ui/react-toast";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm, SubmitHandler } from "react-hook-form";
@@ -15,7 +14,8 @@ import Button from "@/app/components/Button";
 import { ErrorToast } from "@/app/components/Toast/Toast";
 
 import UnauthorizedPage from "@/app/(errors)/unauthorized/page";
-import useUser from "@/app/hooks/useUser";
+import LoadingPage from "@/app/(portal)/loading";
+import useOfficeData from "@/app/hooks/useOfficeData";
 
 import { listSteps } from "@/app/lib/api/office-api/steps/list-steps";
 import { createStep } from "@/app/lib/api/office-api/steps/create-step";
@@ -27,23 +27,23 @@ const createStepSchema = z.object({
 
 type CreateStepFormData = z.infer<typeof createStepSchema>;
 
-const StepsPage = async () => {
-  const { refresh } = useRouter();
+const StepsPage = () => {
+  const { user, data: steps, reload, isLoading } = useOfficeData(listSteps, []);
 
   const [toastOpen, setToastOpen] = useState(false);
 
-  const { register, handleSubmit, formState } = useForm<CreateStepFormData>({
-    resolver: zodResolver(createStepSchema),
-  });
+  const { register, handleSubmit, formState, reset } =
+    useForm<CreateStepFormData>({
+      resolver: zodResolver(createStepSchema),
+    });
 
-  const { getCurrentUser } = useUser();
-  const user = await getCurrentUser();
+  if (isLoading) {
+    return <LoadingPage />;
+  }
 
   if (!user) {
     return <UnauthorizedPage />;
   }
-
-  const steps = await listSteps(user.access_token);
 
   const onSubmit: SubmitHandler<CreateStepFormData> = async ({
     name,
@@ -56,7 +56,8 @@ const StepsPage = async () => {
         },
         user.access_token
       );
-      refresh();
+      reset();
+      await reload();
     } catch (err) {
       setToastOpen(true);
     }
@@ -65,7 +66,7 @@ const StepsPage = async () => {
   const handleDelete = async (id: string) => {
     try {
       await deleteStep(id, user.access_token);
-      refresh();
+      await reload();
     } catch (err) {
       setToastOpen(true);
     }

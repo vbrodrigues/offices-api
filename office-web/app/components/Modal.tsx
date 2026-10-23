@@ -9,11 +9,21 @@ interface ModalProps {
   title: ReactNode;
   description: ReactNode;
   content: ReactNode;
+  // Optional: control the modal from outside (e.g. close it after a submit)
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
 }
 
-export function Modal({ trigger, title, description, content }: ModalProps) {
+export function Modal({
+  trigger,
+  title,
+  description,
+  content,
+  open,
+  onOpenChange,
+}: ModalProps) {
   return (
-    <Dialog.Root>
+    <Dialog.Root open={open} onOpenChange={onOpenChange}>
       <Dialog.Trigger>{trigger}</Dialog.Trigger>
       <Dialog.Overlay className="bg-gray-500 bg-opacity-30 backdrop-blur-sm fixed top-0 bottom-0 left-0 right-0 grid place-items-center">
         <Dialog.Content className="flex flex-col w-min-[440px] w-max-[440px] flex-wrap items-center bg-gray-100 px-28 py-16 rounded-lg shadow-lg">

@@ -2,7 +2,7 @@
 
 import { formatDistance } from "date-fns";
 import ptBR from "date-fns/locale/pt-BR";
-import { MdCreateNewFolder, MdTopic } from "react-icons/md";
+import { MdClose, MdCreateNewFolder, MdTopic } from "react-icons/md";
 import { Modal } from "@/app/components/Modal";
 import { Table } from "@/app/components/Table/Table";
 import { TableRow } from "@/app/components/Table/TableRow";
@@ -13,23 +13,60 @@ import AvatarCircle from "@/app/components/AvatarCircle";
 import Link from "next/link";
 import { Project } from "@/app/lib/api/office-api/projects/dtos";
 import UnauthorizedPage from "@/app/(errors)/unauthorized/page";
-import useUser from "@/app/hooks/useUser";
+import LoadingPage from "@/app/(portal)/loading";
+import useOfficeData from "@/app/hooks/useOfficeData";
 import { listSteps } from "@/app/lib/api/office-api/steps/list-steps";
 import { listClients } from "@/app/lib/api/office-api/clients/list-clients";
+import { Step } from "@/app/lib/api/office-api/steps/dtos";
+import { Client } from "@/app/lib/api/office-api/clients/dtos";
+import ProgressBar from "@/app/components/ProgressBar";
 import * as Toast from "@radix-ui/react-toast";
+import { useCallback } from "react";
+import { useSearchParams } from "next/navigation";
 
-const ProjectsPage = async () => {
-  const { getCurrentUser } = useUser();
+interface ProjectsPageData {
+  projects: Project[];
+  steps: Step[];
+  clients: Client[];
+}
 
-  const user = await getCurrentUser();
+const ProjectsPage = () => {
+  // Set by "Ver projetos" on a client card
+  const client_id = useSearchParams()?.get("client_id") ?? undefined;
+
+  const fetchProjectsPageData = useCallback(
+    async (access_token: string): Promise<ProjectsPageData> => {
+      const [projects, steps, clients] = await Promise.all([
+        listProjects(access_token, { client_id }),
+        listSteps(access_token),
+        listClients(access_token),
+      ]);
+
+      return { projects, steps, clients };
+    },
+    [client_id]
+  );
+
+  const {
+    user,
+    data: { projects: projectsData, steps, clients },
+    reload,
+    isLoading,
+  } = useOfficeData(fetchProjectsPageData, {
+    projects: [],
+    steps: [],
+    clients: [],
+  });
+
+  const filteredClient = clients.find((client) => client.id === client_id);
+
+  if (isLoading) {
+    return <LoadingPage />;
+  }
 
   if (!user) {
     return <UnauthorizedPage />;
   }
-
-  const projectsData = await listProjects(user.access_token);
-  const steps = await listSteps(user?.access_token);
-  const clients = await listClients(user.access_token);
 
   const projects = projectsData.map((project: Project) => ({
     ...project,
@@ -76,13 +113,35 @@ const ProjectsPage = async () => {
               </div>
             }
             description="Preencha as informações do seu novo projeto!"
-            content={<CreateProjectForm steps={steps} clients={clients} />}
+            content={
+              <CreateProjectForm
+                steps={steps}
+                clients={clients}
+                onCreated={reload}
+              />
+            }
           />
         </div>
 
-        <p className="mt-4 text-gray-700 text-lg">
-          Sua empresa possui <strong>{projects.length}</strong> projetos.
-        </p>
+        {client_id ? (
+          <div className="mt-4 flex gap-4 items-center">
+            <p className="text-gray-700 text-lg">
+              <strong>{projects.length}</strong> projetos de{" "}
+              <strong>{filteredClient?.name ?? "um cliente removido"}</strong>.
+            </p>
+            <Link
+              href="/projects"
+              className="flex gap-2 items-center border border-blue-500 bg-blue-100 rounded-full px-4 py-1 text-blue-900 hover:opacity-80 transition-opacity"
+            >
+              <MdClose size={16} />
+              Ver todos
+            </Link>
+          </div>
+        ) : (
+          <p className="mt-4 text-gray-700 text-lg">
+            Sua empresa possui <strong>{projects.length}</strong> projetos.
+          </p>
+        )}
 
         <Table columnNames={["CLIENTE", "PROJETO", "PROGRESSO", "DETALHES"]}>
           {projects.map((project) => (
@@ -117,37 +176,7 @@ const ProjectsPage = async () => {
               </TableCell>
 
               <TableCell>
-                <div className="flex flex-col items-end">
-                  <div className="flex w-full h-1 bg-gray-300">
-                    <div
-                      className={`w-[${Math.floor(
-                        (project.project_steps.filter(
-                          (step) => step.status === "completed"
-                        ).length /
-                          project.project_steps.length) *
-                          100
-                      )}%] h-1 overflow-hidden bg-blue-500`}
-                    ></div>
-                    <div
-                      className={`w-[${Math.floor(
-                        100 -
-                          (project.project_steps.filter(
-                            (step) => step.status === "completed"
-                          ).length /
-                            project.project_steps.length) *
-                            100
-                      )}%] h-1 overflow-hidden bg-gray-300`}
-                    ></div>
-                  </div>
-                  <p className="text-xs text-gray-400">
-                    {
-                      project.project_steps.filter(
-                        (step) => step.status === "completed"
-                      ).length
-                    }
-                    /{project.project_steps.length}
-                  </p>
-                </div>
+                <ProgressBar steps={project.project_steps} />
               </TableCell>
 
               <TableCell>

@@ -17,7 +17,7 @@ const Button = ({
   return (
     <button
       className={`
-        rounded-lg  font-title hover:opacity-90 transition-opacity
+        rounded-lg  font-title hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed
         ${
           fill
             ? "bg-blue-500 text-gray-100"
