@@ -43,7 +43,10 @@ export class ClientsRepositorySQL implements ClientsRepository {
   }
 
   async listByOfficeId(office_id: string): Promise<Client[]> {
-    return await this.prisma.client.findMany({ where: { office_id } });
+    return await this.prisma.client.findMany({
+      where: { office_id, is_active: true },
+      orderBy: { created_at: 'desc' },
+    });
   }
 
   async update(client_id: string, data: UpdateClientDTO): Promise<void> {

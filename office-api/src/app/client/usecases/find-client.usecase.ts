@@ -25,6 +25,8 @@ export class FindClientUsecase {
       client.logo = await this.storageService.signFile(client.logo);
     }
 
+    delete client.password;
+
     return client;
   }
 }

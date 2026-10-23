@@ -2,6 +2,7 @@ import {
   Body,
   CACHE_MANAGER,
   Controller,
+  Delete,
   Get,
   Inject,
   Post,
@@ -40,6 +41,10 @@ import { AddStepToProjectUsecase } from './usecases/steps/add-step-to-project.us
 import { UpdateProjectStepDTO } from '../project-step/dtos/update-project-step.dto';
 import { UpdateStepUsecase } from './usecases/steps/update-step.usecase';
 import { ListProjectStepsUsecase } from './usecases/steps/list-project-steps.usecase';
+import { RemoveStepFromProjectUsecase } from './usecases/steps/remove-step-from-project.usecase';
+import { ReorderProjectStepsUsecase } from './usecases/steps/reorder-project-steps.usecase';
+import { invalidateProjectsCache } from '../common/utils/projects-cache';
+import { ReorderProjectStepsDTO } from '../project-step/dtos/reorder-project-steps.dto';
 
 @Controller('/projects')
 export class ProjectController {
@@ -56,6 +61,8 @@ export class ProjectController {
     private addStepToProject: AddStepToProjectUsecase,
     private updateStepForProject: UpdateStepUsecase,
     private listProjectSteps: ListProjectStepsUsecase,
+    private removeStepFromProject: RemoveStepFromProjectUsecase,
+    private reorderProjectSteps: ReorderProjectStepsUsecase,
   ) {}
 
   @UseGuards(JwtAuthGuard)
@@ -64,7 +71,13 @@ export class ProjectController {
     @Request() { user: { office_id, employee_id } }: OfficeRequest,
     @Body() request: CreateProjectDTO,
   ): Promise<Project> {
-    return await this.createProject.execute(office_id, employee_id, request);
+    const project = await this.createProject.execute(
+      office_id,
+      employee_id,
+      request,
+    );
+    await invalidateProjectsCache(this.cacheManager, office_id);
+    return project;
   }
 
   @UseGuards(JwtAuthGuard)
@@ -138,6 +151,7 @@ export class ProjectController {
     @Body() data: { name: string },
   ): Promise<BaseResponse> {
     await this.renameProject.execute(office_id, project_id, data.name);
+    await invalidateProjectsCache(this.cacheManager, office_id, project_id);
     return { success: true, message: 'Project renamed successfully.' };
   }
 
@@ -271,6 +285,7 @@ export class ProjectController {
       step_id,
       request,
     );
+    await invalidateProjectsCache(this.cacheManager, office_id, project_id);
     return projectStep;
   }
 
@@ -289,15 +304,43 @@ export class ProjectController {
       employee_id,
       request,
     );
+    await invalidateProjectsCache(this.cacheManager, office_id, project_id);
 
     return { success: true, message: 'Successfully updated step status.' };
   }
 
   @UseGuards(JwtAuthGuard)
+  @Delete('/:project_id/steps/:step_id')
+  async removeStep(
+    @Request() { user: { office_id } }: OfficeRequest,
+    @Param('project_id') project_id: string,
+    @Param('step_id') step_id: string,
+  ): Promise<BaseResponse> {
+    await this.removeStepFromProject.execute(office_id, project_id, step_id);
+    await invalidateProjectsCache(this.cacheManager, office_id, project_id);
+
+    return { success: true, message: 'Successfully removed step.' };
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Put('/:project_id/steps')
+  async reorderSteps(
+    @Request() { user: { office_id } }: OfficeRequest,
+    @Param('project_id') project_id: string,
+    @Body() { step_ids }: ReorderProjectStepsDTO,
+  ): Promise<BaseResponse> {
+    await this.reorderProjectSteps.execute(office_id, project_id, step_ids);
+    await invalidateProjectsCache(this.cacheManager, office_id, project_id);
+
+    return { success: true, message: 'Successfully reordered steps.' };
+  }
+
+  @UseGuards(JwtAuthGuard)
   @Get('/:project_id/steps')
   async listSteps(
+    @Request() { user: { office_id } }: OfficeRequest,
     @Param('project_id') project_id: string,
   ): Promise<ProjectStep[]> {
-    return await this.listProjectSteps.execute(project_id);
+    return await this.listProjectSteps.execute(office_id, project_id);
   }
 }

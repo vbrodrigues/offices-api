@@ -28,6 +28,8 @@ export class FindEmployeeUsecase {
       employee.avatar = await this.storageService.signFile(employee.avatar);
     }
 
+    delete employee.password;
+
     return employee;
   }
 }

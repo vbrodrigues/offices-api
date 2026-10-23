@@ -5,3 +5,4 @@ todo.md
 mysql/*
 mysql
 .vscode/*
+/mongo

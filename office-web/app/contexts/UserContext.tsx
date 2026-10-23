@@ -17,6 +17,9 @@ interface User {
 }
 
 interface UserContextData {
+  user: User | null;
+  // True until the "user" cookie has been read on the client
+  isLoadingUser: boolean;
   getCurrentUser: () => Promise<User | null>;
   setCurrentUser: (user: User) => void;
   loginUser: (
@@ -37,6 +40,7 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({
   children: ReactNode;
 }) => {
   const [user, setUser] = useState<User>({} as User);
+  const [isLoadingUser, setIsLoadingUser] = useState(true);
 
   const setCurrentUser = useCallback(
     (newUser: User) => {
@@ -52,6 +56,8 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({
       const loggedUser = JSON.parse(userCookie) as User;
       setCurrentUser(loggedUser);
     }
+
+    setIsLoadingUser(false);
   }, [setCurrentUser]);
 
   const getCurrentUser = useCallback(async () => {
@@ -95,6 +101,8 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({
   return (
     <UserContext.Provider
       value={{
+        user: Object.keys(user).length > 0 ? user : null,
+        isLoadingUser,
         getCurrentUser,
         setCurrentUser,
         loginUser,

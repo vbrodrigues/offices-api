@@ -3,9 +3,17 @@ import { AxiosError } from "axios";
 import { OfficeAPI } from "..";
 import { Project } from "./dtos";
 
-export async function listProjects(access_token: string): Promise<Project[]> {
+export interface ListProjectsFilters {
+  client_id?: string;
+}
+
+export async function listProjects(
+  access_token: string,
+  filters: ListProjectsFilters = {}
+): Promise<Project[]> {
   try {
     const response = await OfficeAPI.get("/projects", {
+      params: filters,
       headers: {
         Authorization: `Bearer ${access_token}`,
       },

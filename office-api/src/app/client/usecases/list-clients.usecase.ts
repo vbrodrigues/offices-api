@@ -15,6 +15,8 @@ export class ListClientsUsecase {
 
     const signedClients = Promise.all(
       clients.map(async (client) => {
+        delete client.password;
+
         return {
           ...client,
           logo: client.logo

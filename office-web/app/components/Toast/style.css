@@ -1,7 +1,9 @@
 .ToastViewport {
   --viewport-padding: 25px;
   position: fixed;
-  bottom: 0;
+  /* Toasts sit at the top (Toast.tsx uses top-0). With bottom: 0 as well the
+     viewport stretched to full height and blocked clicks on the right side. */
+  top: 0;
   right: 0;
   display: flex;
   flex-direction: column;

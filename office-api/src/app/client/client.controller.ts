@@ -38,7 +38,9 @@ export class ClientController {
   @UseGuards(JwtAuthGuard)
   @Post()
   async create(@Body() request: CreateClientDTO): Promise<Client> {
-    return await this.createClient.execute(request);
+    const client = await this.createClient.execute(request);
+    await this.cacheManager.del(`clients-${request.office_id}`);
+    return client;
   }
 
   @UseGuards(JwtAuthGuard)
@@ -53,7 +55,8 @@ export class ClientController {
   @UseGuards(JwtAuthGuard)
   @Get()
   async show(@Request() request): Promise<Client[]> {
-    const cachedRespose: Client[] = await this.cacheManager.get('clients');
+    const cacheKey = `clients-${request.user.office_id}`;
+    const cachedRespose: Client[] = await this.cacheManager.get(cacheKey);
 
     if (cachedRespose) {
       return cachedRespose;
@@ -62,7 +65,7 @@ export class ClientController {
     const clients = await this.listClients.execute(request.user.office_id);
 
     if (clients) {
-      await this.cacheManager.set('clients', clients, 5000);
+      await this.cacheManager.set(cacheKey, clients, 5000);
     }
 
     return clients;
@@ -76,6 +79,7 @@ export class ClientController {
     @Request() request,
   ): Promise<BaseResponse> {
     await this.editClient.execute(client_id, request.user.office_id, data);
+    await this.cacheManager.del(`clients-${request.user.office_id}`);
     return { success: true, message: 'Client edited.' };
   }
 
@@ -86,6 +90,7 @@ export class ClientController {
     @Request() request,
   ): Promise<BaseResponse> {
     await this.inactivateClient.execute(client_id, request.user.office_id);
+    await this.cacheManager.del(`clients-${request.user.office_id}`);
     return { success: true, message: 'Client inactivated.' };
   }
 }

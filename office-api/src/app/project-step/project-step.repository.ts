@@ -17,6 +17,10 @@ export abstract class ProjectStepsRepository {
     project_step_id: string,
     data: UpdateProjectStepInternalDTO,
   ): Promise<void>;
+  abstract updatePositions(
+    project_id: string,
+    ordered_step_ids: string[],
+  ): Promise<void>;
 }
 
 @Injectable()
@@ -42,6 +46,7 @@ export class ProjectStepsRepositorySQL implements ProjectStepsRepository {
     return await this.prisma.projectStep.findMany({
       where: { project_id },
       include: { step: true },
+      orderBy: { position: 'asc' },
     });
   }
 
@@ -61,5 +66,19 @@ export class ProjectStepsRepositorySQL implements ProjectStepsRepository {
       where: { id: project_step_id },
       data,
     });
+  }
+
+  async updatePositions(
+    project_id: string,
+    ordered_step_ids: string[],
+  ): Promise<void> {
+    await this.prisma.$transaction(
+      ordered_step_ids.map((step_id, position) =>
+        this.prisma.projectStep.update({
+          where: { project_id_step_id: { project_id, step_id } },
+          data: { position },
+        }),
+      ),
+    );
   }
 }

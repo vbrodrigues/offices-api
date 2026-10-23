@@ -58,33 +58,35 @@ export class CreateProjectUsecase {
       name: request.name,
     });
 
-    if (request.steps) {
-      request.steps.forEach(async (stepName) => {
-        const step = await this.stepsRepository.findById(stepName);
+    // Awaited so the project is returned (and cached) with all its steps
+    for (const step_id of request.steps ?? []) {
+      const step = await this.stepsRepository.findById(step_id);
 
-        if (!step) {
-          return;
-        }
+      if (!step || step.office_id !== office_id) {
+        continue;
+      }
 
-        await this.createProjectStep.execute(
-          office_id,
-          employee_id,
-          project.id,
-          step.id,
-          {},
-        );
-      });
+      await this.createProjectStep.execute(
+        office_id,
+        employee_id,
+        project.id,
+        step.id,
+        {},
+      );
     }
 
     const employees = await this.employeesRepository.findByOfficeId(office_id);
 
-    employees.forEach(async (notifiedEmployee) => {
+    // Fire-and-forget; a failed notification must not crash the process
+    employees.forEach((notifiedEmployee) => {
       if (notifiedEmployee.id !== employee_id) {
-        await this.notificationsService.notify({
-          content: `Um novo projeto foi criado para o cliente ${client.name}! `,
-          type: 'EMAIL',
-          receiver: notifiedEmployee.email,
-        });
+        this.notificationsService
+          .notify({
+            content: `Um novo projeto foi criado para o cliente ${client.name}! `,
+            type: 'EMAIL',
+            receiver: notifiedEmployee.email,
+          })
+          .catch((err) => console.log('Error notifying employee:', err));
       }
     });
 

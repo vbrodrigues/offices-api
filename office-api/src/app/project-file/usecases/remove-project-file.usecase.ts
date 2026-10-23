@@ -16,7 +16,8 @@ export class RemoveProjectFileUsecase {
     private notificationsService: NotificationsService,
   ) {}
 
-  async execute(office_id: string, project_file_id: string): Promise<void> {
+  // Returns the project the file belonged to
+  async execute(office_id: string, project_file_id: string): Promise<string> {
     const projectFile = await this.projectFilesRepository.findById(
       project_file_id,
     );
@@ -37,24 +38,32 @@ export class RemoveProjectFileUsecase {
       throw new UnauthorizedException();
     }
 
-    const success = await this.storageService.deleteFile(projectFile.path);
+    // Older rows can have no path if their upload failed
+    if (projectFile.path) {
+      const success = await this.storageService.deleteFile(projectFile.path);
 
-    if (!success) {
-      throw new InternalServerErrorException(
-        'Something went wrong deleting the project file.',
-      );
+      if (!success) {
+        throw new InternalServerErrorException(
+          'Something went wrong deleting the project file.',
+        );
+      }
     }
 
     const employees = await this.employeesRepository.findByOfficeId(office_id);
 
-    employees.forEach(async (notifiedEmployee) => {
-      await this.notificationsService.notify({
-        content: `Arquivo ${projectFile.name} removido do projeto ${project.name}`,
-        type: 'EMAIL',
-        receiver: notifiedEmployee.email,
-      });
+    // Fire-and-forget; a failed notification must not crash the process
+    employees.forEach((notifiedEmployee) => {
+      this.notificationsService
+        .notify({
+          content: `Arquivo ${projectFile.name} removido do projeto ${project.name}`,
+          type: 'EMAIL',
+          receiver: notifiedEmployee.email,
+        })
+        .catch((err) => console.log('Error notifying employee:', err));
     });
 
     await this.projectFilesRepository.delete(project_file_id);
+
+    return projectFile.project_id;
   }
 }

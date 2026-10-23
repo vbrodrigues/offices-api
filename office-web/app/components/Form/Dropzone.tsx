@@ -6,6 +6,9 @@ interface DropzoneProps {
   setFile: (file: File) => void;
   description?: string;
   height?: string;
+  // Accept any file type and size (project files: PDF, DWG, SKP...).
+  // By default only JPEG/PNG images up to 10MB are accepted.
+  allowAnyFile?: boolean;
 }
 
 export function Dropzone({
@@ -13,17 +16,22 @@ export function Dropzone({
   description,
   setFile,
   height,
+  allowAnyFile = false,
 }: DropzoneProps) {
   const { getRootProps, getInputProps, acceptedFiles } = useDropzone({
-    accept: {
-      "image/jpeg": [],
-      "image/png": [],
-    },
+    accept: allowAnyFile
+      ? undefined
+      : {
+          "image/jpeg": [],
+          "image/png": [],
+        },
     maxFiles: 1,
-    maxSize: 10000000,
+    maxSize: allowAnyFile ? undefined : 10000000,
     onDrop: useCallback(
       (acceptedFiles: File[]) => {
-        setFile(acceptedFiles[0]);
+        if (acceptedFiles[0]) {
+          setFile(acceptedFiles[0]);
+        }
       },
       [setFile]
     ),
