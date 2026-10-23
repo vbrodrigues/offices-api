@@ -61,10 +61,11 @@ model Employee {
   created_at   DateTime  @default(now())
   updated_at   DateTime?
 
-  office        Office        @relation(fields: [office_id], references: [id])
-  role          Role          @relation(fields: [role_id], references: [id])
-  project_files ProjectFile[]
-  ProjectStep   ProjectStep[]
+  office          Office          @relation(fields: [office_id], references: [id])
+  role            Role            @relation(fields: [role_id], references: [id])
+  project_files   ProjectFile[]
+  ProjectStep     ProjectStep[]
+  project_folders ProjectFolder[]
 }
 
 model Category {
@@ -73,8 +74,9 @@ model Category {
   office_id  String?
   created_at DateTime @default(now())
 
-  office        Office?       @relation(fields: [office_id], references: [id])
-  project_files ProjectFile[]
+  office          Office?         @relation(fields: [office_id], references: [id])
+  project_files   ProjectFile[]
+  project_folders ProjectFolder[]
 }
 
 model Project {
@@ -84,8 +86,9 @@ model Project {
   updated_at DateTime?
   created_at DateTime  @default(now())
 
-  client        Client        @relation(fields: [client_id], references: [id])
+  client        Client          @relation(fields: [client_id], references: [id])
   files         ProjectFile[]
+  folders       ProjectFolder[]
   project_steps ProjectStep[]
 }
 
@@ -95,16 +98,48 @@ model ProjectFile {
   category_id     String?
   // Optional step of the project this file belongs to
   project_step_id String?
+  // Folder the file is in; null = root of the project
+  folder_id       String?
   created_by_id   String
   path            String?   @db.VarChar(4096)
   name            String?
+  // Size in bytes. Double holds integers exactly up to 2^53 and, unlike
+  // BigInt, serializes to JSON.
+  size            Float?    @db.Double
+  content_type    String?
   created_at      DateTime  @default(now())
   updated_at      DateTime?
 
-  project      Project      @relation(fields: [project_id], references: [id])
-  created_by   Employee     @relation(fields: [created_by_id], references: [id])
-  category     Category?    @relation(fields: [category_id], references: [id], onDelete: SetNull)
-  project_step ProjectStep? @relation(fields: [project_step_id], references: [id], onDelete: SetNull)
+  project      Project        @relation(fields: [project_id], references: [id])
+  folder       ProjectFolder? @relation(fields: [folder_id], references: [id], onDelete: SetNull)
+  created_by   Employee       @relation(fields: [created_by_id], references: [id])
+  category     Category?      @relation(fields: [category_id], references: [id], onDelete: SetNull)
+  project_step ProjectStep?   @relation(fields: [project_step_id], references: [id], onDelete: SetNull)
+}
+
+// Folder tree of a project, of any depth. Category and step are only default
+// tags given to files uploaded into the folder, not part of the hierarchy.
+model ProjectFolder {
+  id              String    @id @default(uuid())
+  project_id      String
+  // null = folder at the root of the project
+  parent_id       String?
+  name            String
+  // Order among its siblings, starting at 0
+  position        Int       @default(0)
+  category_id     String?
+  project_step_id String?
+  created_by_id   String
+  created_at      DateTime  @default(now())
+  updated_at      DateTime?
+
+  project      Project         @relation(fields: [project_id], references: [id], onDelete: Cascade)
+  parent       ProjectFolder?  @relation("FolderTree", fields: [parent_id], references: [id], onDelete: Cascade)
+  children     ProjectFolder[] @relation("FolderTree")
+  files        ProjectFile[]
+  created_by   Employee        @relation(fields: [created_by_id], references: [id])
+  category     Category?       @relation(fields: [category_id], references: [id], onDelete: SetNull)
+  project_step ProjectStep?    @relation(fields: [project_step_id], references: [id], onDelete: SetNull)
 }
 
 model Step {
@@ -131,10 +166,11 @@ model ProjectStep {
   // Order of the step inside the project, starting at 0
   position        Int       @default(0)
 
-  project  Project       @relation(fields: [project_id], references: [id], onDelete: Cascade)
-  step     Step          @relation(fields: [step_id], references: [id], onDelete: Cascade)
-  assigned Employee?     @relation(fields: [assigned_to], references: [id], onDelete: SetNull)
+  project  Project         @relation(fields: [project_id], references: [id], onDelete: Cascade)
+  step     Step            @relation(fields: [step_id], references: [id], onDelete: Cascade)
+  assigned Employee?       @relation(fields: [assigned_to], references: [id], onDelete: SetNull)
   files    ProjectFile[]
+  folders  ProjectFolder[]
 
   @@unique([project_id, step_id])
 }

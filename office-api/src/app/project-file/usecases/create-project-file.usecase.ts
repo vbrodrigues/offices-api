@@ -13,6 +13,7 @@ import { ProjectsRepository } from 'src/app/project/project.repository';
 import { EmployeesRepository } from 'src/app/employee/employee.repository';
 import { NotificationsService } from 'src/events/notifications/notifications.service';
 import { CategoriesRepository } from 'src/app/category/category.repository';
+import { projectFileKey } from 'src/app/common/utils/storage-keys';
 
 @Injectable()
 export class CreateProjectFileUsecase {
@@ -63,8 +64,10 @@ export class CreateProjectFileUsecase {
       throw new BadRequestException('Step does not belong to the project.');
     }
 
+    // This endpoint uploads to the root of the project
     const alreadyExists = await this.projectFilesRepository.findByName(
       request.project_id,
+      null,
       request.name,
     );
 
@@ -72,12 +75,7 @@ export class CreateProjectFileUsecase {
       throw new BadRequestException('Project file already exists.');
     }
 
-    const fileFormat = request.fileFormat.replace(/[^a-zA-Z0-9]/g, '');
-    const filePath = `offices/${office_id}/clients/${
-      project.client.id
-    }/projects/${request.project_id}/files/${uuid()}${
-      fileFormat ? `.${fileFormat}` : ''
-    }`;
+    const filePath = projectFileKey(project, uuid(), request.fileFormat);
 
     // Upload before saving, so a failed upload leaves no file without a path
     const fileKey = await this.storageSerivce.uploadFile(

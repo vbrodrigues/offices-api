@@ -6,6 +6,8 @@ import { StorageService } from './storage';
 
 // How long a signed download URL stays valid
 const SIGNED_URL_TTL_MS = 30 * 60 * 1000;
+// How long a presigned upload URL stays valid, in seconds
+const UPLOAD_URL_TTL_S = 15 * 60;
 
 // Rows saved before keys were stored hold the full S3 URL
 // (https://<bucket>.s3.<region>.amazonaws.com/<key>); accept both.
@@ -20,7 +22,8 @@ export class S3StorageService implements StorageService {
   cloudfrontDNS: string;
   signingParams: any;
   constructor() {
-    this.s3 = new AWS.S3();
+    // Presigned URLs otherwise come out with the legacy SigV2 signature
+    this.s3 = new AWS.S3({ signatureVersion: 'v4' });
     this.signingParams = {
       keypairId: process.env.AWS_CLOUDFRONT_KEYPAIR_ID,
       privateKeyPath: process.env.AWS_CLOUDFRONT_KEY_PATH,
@@ -47,6 +50,28 @@ export class S3StorageService implements StorageService {
         .promise();
     } catch (err) {
       console.log('Error deleting object from AWS S3');
+      return false;
+    }
+    return true;
+  }
+
+  async getUploadUrl(filepath: string, contentType: string): Promise<string> {
+    // The browser must send the same Content-Type header, or S3 rejects the
+    // signature
+    return await this.s3.getSignedUrlPromise('putObject', {
+      Bucket: process.env.AWS_BUCKET,
+      Key: filepath,
+      ContentType: contentType,
+      Expires: UPLOAD_URL_TTL_S,
+    });
+  }
+
+  async exists(filepath: string): Promise<boolean> {
+    try {
+      await this.s3
+        .headObject({ Bucket: process.env.AWS_BUCKET, Key: toKey(filepath) })
+        .promise();
+    } catch (err) {
       return false;
     }
     return true;

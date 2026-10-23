@@ -1,17 +1,34 @@
 import { Injectable } from '@nestjs/common';
-import { ProjectFile } from '@prisma/client';
+import { ProjectFile, ProjectFolder } from '@prisma/client';
 import { PrismaService } from 'src/database/prisma-service';
 import { CreateProjectFileInternalDTO } from './dtos/create-project-file.dto';
 import { UpdateProjectFileDTO } from './dtos/update-project-file.dto';
+import { CreateProjectFolderInternalDTO } from '../project-folder/dtos/project-folder.dto';
+
+export interface ProjectFileMove {
+  id: string;
+  folder_id: string | null;
+  // Changes when the name was taken in the destination folder
+  name: string;
+}
 
 @Injectable()
 export abstract class ProjectFilesRepository {
   abstract findById(project_file_id: string): Promise<ProjectFile | null>;
+  // Name lookups are per folder; folder_id null = root of the project
   abstract findByName(
     project_id: string,
+    folder_id: string | null,
     name: string,
   ): Promise<ProjectFile | null>;
+  abstract findByPaths(paths: string[]): Promise<ProjectFile[]>;
   abstract add(data: CreateProjectFileInternalDTO): Promise<ProjectFile>;
+  // Creates the folders, then the files, all or nothing. Both need their ids.
+  abstract addBatch(
+    folders: (CreateProjectFolderInternalDTO & { id: string })[],
+    files: (CreateProjectFileInternalDTO & { id: string })[],
+  ): Promise<{ folders: ProjectFolder[]; files: ProjectFile[] }>;
+  abstract moveMany(moves: ProjectFileMove[]): Promise<void>;
   abstract update(
     project_file_id: string,
     data: UpdateProjectFileDTO,
@@ -29,14 +46,54 @@ export class ProjectFilesRepositorySQL implements ProjectFilesRepository {
     });
   }
 
-  async findByName(project_id: string, name: string): Promise<ProjectFile> {
+  async findByName(
+    project_id: string,
+    folder_id: string | null,
+    name: string,
+  ): Promise<ProjectFile> {
     return await this.prisma.projectFile.findFirst({
-      where: { project_id, name },
+      where: { project_id, folder_id, name },
+    });
+  }
+
+  async findByPaths(paths: string[]): Promise<ProjectFile[]> {
+    return await this.prisma.projectFile.findMany({
+      where: { path: { in: paths } },
     });
   }
 
   async add(data: CreateProjectFileInternalDTO): Promise<ProjectFile> {
     return await this.prisma.projectFile.create({ data: data });
+  }
+
+  async addBatch(
+    folders: (CreateProjectFolderInternalDTO & { id: string })[],
+    files: (CreateProjectFileInternalDTO & { id: string })[],
+  ): Promise<{ folders: ProjectFolder[]; files: ProjectFile[] }> {
+    const folderIds = folders.map((folder) => folder.id);
+    const fileIds = files.map((file) => file.id);
+
+    const [, , createdFolders, createdFiles] = await this.prisma.$transaction([
+      this.prisma.projectFolder.createMany({ data: folders }),
+      this.prisma.projectFile.createMany({ data: files }),
+      this.prisma.projectFolder.findMany({ where: { id: { in: folderIds } } }),
+      this.prisma.projectFile.findMany({ where: { id: { in: fileIds } } }),
+    ]);
+
+    return { folders: createdFolders, files: createdFiles };
+  }
+
+  async moveMany(moves: ProjectFileMove[]): Promise<void> {
+    const updated_at = new Date();
+
+    await this.prisma.$transaction(
+      moves.map((move) =>
+        this.prisma.projectFile.update({
+          where: { id: move.id },
+          data: { folder_id: move.folder_id, name: move.name, updated_at },
+        }),
+      ),
+    );
   }
 
   async update(
