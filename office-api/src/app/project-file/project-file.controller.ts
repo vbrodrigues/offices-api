@@ -14,8 +14,6 @@ import {
   Request,
 } from '@nestjs/common/decorators/http/route-params.decorator';
 import { Cache } from 'cache-manager';
-import { CreateProjectFileDTO } from './dtos/create-project-file.dto';
-import { CreateProjectFileUsecase } from './usecases/create-project-file.usecase';
 import { RemoveProjectFileUsecase } from './usecases/remove-project-file.usecase';
 import { EditProjectFileUsecase } from './usecases/edit-project-file.usecase';
 import { EditProjectFileDTO } from './dtos/update-project-file.dto';
@@ -37,7 +35,6 @@ import { MoveProjectFilesUsecase } from './usecases/move-project-files.usecase';
 export class ProjectFileController {
   constructor(
     @Inject(CACHE_MANAGER) private cacheManager: Cache,
-    private createProjectFile: CreateProjectFileUsecase,
     private removeProjectFile: RemoveProjectFileUsecase,
     private editProjectFile: EditProjectFileUsecase,
     private requestProjectFileUploads: RequestProjectFileUploadsUsecase,
@@ -85,25 +82,6 @@ export class ProjectFileController {
     const project_id = await this.moveProjectFiles.execute(office_id, request);
     await invalidateProjectsCache(this.cacheManager, office_id, project_id);
     return { success: true, message: 'Project files moved successfully.' };
-  }
-
-  @UseGuards(JwtAuthGuard)
-  @Post()
-  async create(
-    @Request() { user: { office_id, employee_id } }: OfficeRequest,
-    @Body() request: CreateProjectFileDTO,
-  ): Promise<ProjectFile> {
-    const projectFile = await this.createProjectFile.execute(
-      office_id,
-      employee_id,
-      request,
-    );
-    await invalidateProjectsCache(
-      this.cacheManager,
-      office_id,
-      request.project_id,
-    );
-    return projectFile;
   }
 
   @UseGuards(JwtAuthGuard)

@@ -62,9 +62,9 @@ Files (project files, logos, avatars) go through `StorageService` (`src/provider
 1. `POST /project-files/uploads` returns one presigned PUT URL per file, valid for 15 minutes. The browser must send the returned `content_type` as the `Content-Type` header.
 2. `POST /project-files/batch` confirms the batch and saves the rows in one transaction. It checks that every key is under the project's prefix and exists in S3, creates the folders of each file's `relative_path`, and renames duplicates to `name (1).ext`.
 
-The limits are 100 files per batch and 5GB per file. The browser PUT needs a CORS rule on the bucket.
+The limits are 100 files per batch and 5GB per file. The browser PUT needs a CORS rule on the bucket, which currently allows `PUT` from `http://localhost:3333` only.
 
-Logos, avatars and the legacy `POST /project-files` still send base64/data URLs inside the JSON body (`decodeBase64` strips a `data:` prefix), with a practical limit of ~380MB.
+Logos and avatars still send base64/data URLs inside the JSON body (`decodeBase64` strips a `data:` prefix). The body limit is 20MB (`main.ts`).
 
 **All repositories are registered and exported centrally in `src/database/database.module.ts`** (`{ provide: XRepository, useClass: XRepositorySQL }`). Adding a repository means adding it there, and feature modules import `DatabaseModule` to get it. Storage works the same way: abstract `StorageService` bound to `S3StorageService` in `src/providers/storage/`.
 
@@ -106,7 +106,11 @@ These use Kafka request/response (`ClientKafka.send` + `subscribeToResponseOf`),
 Next.js 13.3 with the `app/` directory, Tailwind, Radix UI and Mantine, with zod for form validation. The UI is in Brazilian Portuguese. Commands: `npm run dev` (port 3333, `--turbo`), `npm run build`, `npm run lint`.
 
 - Routes: `app/page.tsx` is sign-in/sign-up (create an office). `app/(portal)/` holds the logged-in pages (projects, `projects/[project_id]`, clients, employees, roles, categories, steps) and shares a Header + Sidebar layout.
-- API calls: one function per endpoint under `app/lib/api/office-api/<resource>/` (e.g. `list-projects.ts`), each using the shared axios instance `OfficeAPI` (`app/lib/api/office-api/index.ts`, hard-coded `http://localhost:3000`) and passing the token as a `Bearer` header. Response types are hand-written in `dtos.ts` next to them; they mirror the Prisma models and must be kept in sync by hand.
+- Project files: `app/components/Project/Files/FileExplorer.tsx` is a Drive-like explorer (the open folder is in `?folder=`).
+  - Batch uploads go through `app/hooks/useUploadQueue.ts`: presign, then XHR PUT to S3 with progress, then a batch confirm.
+  - Files and whole folders can be picked or dropped.
+  - Category and step filters search every folder.
+- API calls: one function per endpoint under `app/lib/api/office-api/<resource>/` (e.g. `list-projects.ts`), each using the shared axios instance `OfficeAPI` (`app/lib/api/office-api/index.ts`, base URL from `NEXT_PUBLIC_API_URL`, default `http://localhost:3000`) and passing the token as a `Bearer` header. Response types are hand-written in `dtos.ts` next to them; they mirror the Prisma models and must be kept in sync by hand.
 - Auth: `app/contexts/UserContext.tsx` (used through `useUser()`) logs in via `POST /auth/login` and stores `{ access_token, office_id, email }` in a `user` cookie (`cookies-next`, 1 day). Pages call `getCurrentUser()` and render `UnauthorizedPage` when it returns null. Only the employee login flow is wired up in the UI.
 - Imports use the `@/app/...` alias.
 

@@ -15,14 +15,7 @@ export interface ProjectFileMove {
 @Injectable()
 export abstract class ProjectFilesRepository {
   abstract findById(project_file_id: string): Promise<ProjectFile | null>;
-  // Name lookups are per folder; folder_id null = root of the project
-  abstract findByName(
-    project_id: string,
-    folder_id: string | null,
-    name: string,
-  ): Promise<ProjectFile | null>;
   abstract findByPaths(paths: string[]): Promise<ProjectFile[]>;
-  abstract add(data: CreateProjectFileInternalDTO): Promise<ProjectFile>;
   // Creates the folders, then the files, all or nothing. Both need their ids.
   abstract addBatch(
     folders: (CreateProjectFolderInternalDTO & { id: string })[],
@@ -46,24 +39,10 @@ export class ProjectFilesRepositorySQL implements ProjectFilesRepository {
     });
   }
 
-  async findByName(
-    project_id: string,
-    folder_id: string | null,
-    name: string,
-  ): Promise<ProjectFile> {
-    return await this.prisma.projectFile.findFirst({
-      where: { project_id, folder_id, name },
-    });
-  }
-
   async findByPaths(paths: string[]): Promise<ProjectFile[]> {
     return await this.prisma.projectFile.findMany({
       where: { path: { in: paths } },
     });
-  }
-
-  async add(data: CreateProjectFileInternalDTO): Promise<ProjectFile> {
-    return await this.prisma.projectFile.create({ data: data });
   }
 
   async addBatch(
