@@ -11,10 +11,10 @@ async function bootstrap() {
     new ValidationPipe({ forbidUnknownValues: false, transform: true }),
   );
 
-  // Project files arrive as base64 inside the JSON body (~33% bigger than the
-  // file). Node can't hold strings over ~512M characters, so the practical
-  // ceiling is a ~380MB file; the body limit just stays above that.
-  app.use(json({ limit: '550mb' }));
+  // Project files go straight to storage through presigned URLs; only logos
+  // and avatars (images up to 10MB) still arrive as base64 in the JSON body,
+  // which makes them ~33% bigger.
+  app.use(json({ limit: '20mb' }));
 
   const config = new DocumentBuilder()
     .setTitle('Office API')

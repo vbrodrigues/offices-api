@@ -10,9 +10,14 @@ export interface ProjectFile {
   category_id: string | null;
   // ProjectStep (of this project) the file belongs to
   project_step_id: string | null;
+  // Folder the file is in; null = root of the project
+  folder_id: string | null;
   // Temporary signed download URL (valid for 30 minutes)
   path: string | null;
   name: string;
+  // Bytes; null for files uploaded before sizes were saved
+  size: number | null;
+  content_type: string | null;
   created_at: Date;
   updated_at?: Date | null;
   created_by: Employee;
