@@ -9,10 +9,10 @@ export class ListProjectStepsUsecase {
     private projectStepsRepository: ProjectStepsRepository,
   ) {}
 
-  async execute(project_id: string) {
+  async execute(office_id: string, project_id: string) {
     const project = await this.projectsRepository.findById(project_id);
 
-    if (!project) {
+    if (!project || office_id !== project.client.office_id) {
       throw new UnauthorizedException();
     }
 

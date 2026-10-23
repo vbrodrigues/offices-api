@@ -1,6 +1,13 @@
 import { Type } from 'class-transformer';
 import { IsDate, IsNotEmpty } from 'class-validator';
 
+export const PROJECT_STEP_STATUSES = [
+  'not-started',
+  'in-progress',
+  'completed',
+  'on-hold',
+];
+
 export class CreateProjectStepDTO {
   assigned_to?: string | null;
 
@@ -37,4 +44,6 @@ export class CreateProjectStepInternalDTO {
   last_updated_at?: Date;
 
   last_updated_by?: string;
+
+  position: number;
 }

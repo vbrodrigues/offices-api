@@ -36,12 +36,18 @@ export class CreateProjectStepUsecase {
       project_id,
       step_id,
     );
-    console.log(request);
-    console.log(projectStep);
-
     if (projectStep) {
       throw new BadRequestException('Step already added to project');
     }
+
+    // New steps go to the end of the project
+    const projectSteps = await this.projectStepsRepository.findByProject(
+      project_id,
+    );
+    const position =
+      projectSteps.length > 0
+        ? Math.max(...projectSteps.map((step) => step.position)) + 1
+        : 0;
 
     return await this.projectStepsRepository.add({
       ...request,
@@ -50,6 +56,7 @@ export class CreateProjectStepUsecase {
       status: 'not-started',
       last_updated_by,
       last_updated_at: new Date(),
+      position,
     });
   }
 }

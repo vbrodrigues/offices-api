@@ -90,18 +90,21 @@ model Project {
 }
 
 model ProjectFile {
-  id            String    @id @default(uuid())
-  project_id    String
-  category_id   String?
-  created_by_id String
-  path          String?   @db.VarChar(4096)
-  name          String?
-  created_at    DateTime  @default(now())
-  updated_at    DateTime?
+  id              String    @id @default(uuid())
+  project_id      String
+  category_id     String?
+  // Optional step of the project this file belongs to
+  project_step_id String?
+  created_by_id   String
+  path            String?   @db.VarChar(4096)
+  name            String?
+  created_at      DateTime  @default(now())
+  updated_at      DateTime?
 
-  project    Project   @relation(fields: [project_id], references: [id])
-  created_by Employee  @relation(fields: [created_by_id], references: [id])
-  category   Category? @relation(fields: [category_id], references: [id], onDelete: SetNull)
+  project      Project      @relation(fields: [project_id], references: [id])
+  created_by   Employee     @relation(fields: [created_by_id], references: [id])
+  category     Category?    @relation(fields: [category_id], references: [id], onDelete: SetNull)
+  project_step ProjectStep? @relation(fields: [project_step_id], references: [id], onDelete: SetNull)
 }
 
 model Step {
@@ -125,10 +128,13 @@ model ProjectStep {
   step_hours      Int?
   last_updated_at DateTime?
   last_updated_by String?
+  // Order of the step inside the project, starting at 0
+  position        Int       @default(0)
 
-  project  Project   @relation(fields: [project_id], references: [id], onDelete: Cascade)
-  step     Step      @relation(fields: [step_id], references: [id], onDelete: Cascade)
-  assigned Employee? @relation(fields: [assigned_to], references: [id], onDelete: SetNull)
+  project  Project       @relation(fields: [project_id], references: [id], onDelete: Cascade)
+  step     Step          @relation(fields: [step_id], references: [id], onDelete: Cascade)
+  assigned Employee?     @relation(fields: [assigned_to], references: [id], onDelete: SetNull)
+  files    ProjectFile[]
 
   @@unique([project_id, step_id])
 }

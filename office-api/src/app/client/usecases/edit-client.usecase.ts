@@ -31,6 +31,21 @@ export class EditClientUsecase {
       throw new UnauthorizedException();
     }
 
+    if (request.email && request.email !== client.email) {
+      const alreadyExists = await this.clientsRepository.findByEmailAndOfficeId(
+        { email: request.email, office_id },
+      );
+
+      if (alreadyExists) {
+        throw new BadRequestException('Client already exists.');
+      }
+    }
+
+    // The global ValidationPipe doesn't whitelist, so only pass known fields
+    // (never password or office_id) to the repository.
+    const { name, email, phone_number, is_active } = request;
+    const data: UpdateClientDTO = { name, email, phone_number, is_active };
+
     if (request.logo) {
       const logoFile = decodeBase64(request.logo);
       const logoFilepath = `clients/${uuid()}.png`;
@@ -40,9 +55,9 @@ export class EditClientUsecase {
         logoFilepath,
       );
 
-      request.logo = logoStoragePath;
+      data.logo = logoStoragePath;
     }
 
-    await this.clientsRepository.update(client_id, request);
+    await this.clientsRepository.update(client_id, data);
   }
 }

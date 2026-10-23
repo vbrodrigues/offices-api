@@ -4,6 +4,17 @@ const cf = require('aws-cloudfront-sign');
 
 import { StorageService } from './storage';
 
+// How long a signed download URL stays valid
+const SIGNED_URL_TTL_MS = 30 * 60 * 1000;
+
+// Rows saved before keys were stored hold the full S3 URL
+// (https://<bucket>.s3.<region>.amazonaws.com/<key>); accept both.
+function toKey(filepath: string): string {
+  return filepath.includes('amazonaws.com/')
+    ? filepath.split('amazonaws.com/')[1]
+    : filepath;
+}
+
 export class S3StorageService implements StorageService {
   s3: AWS.S3;
   cloudfrontDNS: string;
@@ -24,15 +35,15 @@ export class S3StorageService implements StorageService {
       Body: file,
     };
 
-    const data = await this.s3.upload(params).promise();
+    await this.s3.upload(params).promise();
 
-    return data.Location;
+    return filepath;
   }
 
   async deleteFile(filepath: string): Promise<boolean> {
     try {
       await this.s3
-        .deleteObject({ Bucket: process.env.AWS_BUCKET, Key: filepath })
+        .deleteObject({ Bucket: process.env.AWS_BUCKET, Key: toKey(filepath) })
         .promise();
     } catch (err) {
       console.log('Error deleting object from AWS S3');
@@ -43,10 +54,9 @@ export class S3StorageService implements StorageService {
 
   async signFile(filepath: string): Promise<string> {
     const signedUrl = cf.getSignedUrl(
-      `${process.env.AWS_CLOUDFRONT_DNS}/${
-        filepath.split('amazonaws.com/')[1]
-      }`,
-      this.signingParams,
+      `${process.env.AWS_CLOUDFRONT_DNS}/${toKey(filepath)}`,
+      // The library default is only 30 seconds
+      { ...this.signingParams, expireTime: Date.now() + SIGNED_URL_TTL_MS },
     );
 
     return signedUrl;

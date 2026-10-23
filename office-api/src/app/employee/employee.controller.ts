@@ -42,6 +42,7 @@ export class EmployeeController {
     @Body() request: CreateEmployeeDTO,
   ): Promise<Employee> {
     const employee = await this.createEmployee.execute(office_id, request);
+    await this.cacheManager.del(`employees:${office_id}`);
     return employee;
   }
 
@@ -53,6 +54,7 @@ export class EmployeeController {
     @Request() request,
   ): Promise<BaseResponse> {
     await this.editEmployee.execute(employee_id, request.user.office_id, data);
+    await this.cacheManager.del(`employees:${request.user.office_id}`);
     return { success: true, message: 'Employee edited.' };
   }
 
@@ -63,6 +65,7 @@ export class EmployeeController {
     @Request() request,
   ): Promise<BaseResponse> {
     await this.inactivateEmployee.execute(employee_id, request.user.office_id);
+    await this.cacheManager.del(`employees:${request.user.office_id}`);
     return { success: true, message: 'Employee inactivated.' };
   }
 

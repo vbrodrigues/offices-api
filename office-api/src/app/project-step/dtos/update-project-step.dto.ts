@@ -1,15 +1,24 @@
 import { Type } from 'class-transformer';
-import { IsDate } from 'class-validator';
+import { IsDate, IsIn, IsOptional } from 'class-validator';
+import { PROJECT_STEP_STATUSES } from './create-project-step.dto';
 
 export class UpdateProjectStepDTO {
+  @IsOptional()
+  @IsIn(PROJECT_STEP_STATUSES)
   status?: string;
-  step_hours?: number;
-  assigned_to?: string;
 
+  @IsOptional()
+  step_hours?: number;
+
+  @IsOptional()
+  assigned_to?: string | null;
+
+  @IsOptional()
   @IsDate()
   @Type(() => Date)
   start_date?: Date;
 
+  @IsOptional()
   @IsDate()
   @Type(() => Date)
   end_date?: Date;
@@ -18,7 +27,7 @@ export class UpdateProjectStepDTO {
 export class UpdateProjectStepInternalDTO {
   status?: string;
   step_hours?: number;
-  assigned_to?: string;
+  assigned_to?: string | null;
 
   @IsDate()
   @Type(() => Date)

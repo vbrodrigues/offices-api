@@ -16,6 +16,8 @@ import { NotificationsModule } from 'src/events/notifications/notifications.modu
 import { AddStepToProjectUsecase } from './usecases/steps/add-step-to-project.usecase';
 import { UpdateStepUsecase } from './usecases/steps/update-step.usecase';
 import { ListProjectStepsUsecase } from './usecases/steps/list-project-steps.usecase';
+import { RemoveStepFromProjectUsecase } from './usecases/steps/remove-step-from-project.usecase';
+import { ReorderProjectStepsUsecase } from './usecases/steps/reorder-project-steps.usecase';
 
 @Module({
   imports: [
@@ -39,6 +41,8 @@ import { ListProjectStepsUsecase } from './usecases/steps/list-project-steps.use
     AddStepToProjectUsecase,
     UpdateStepUsecase,
     ListProjectStepsUsecase,
+    RemoveStepFromProjectUsecase,
+    ReorderProjectStepsUsecase,
   ],
 })
 export class ProjectModule {}

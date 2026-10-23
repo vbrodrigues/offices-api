@@ -1,5 +1,10 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { ProjectsRepository } from '../../project.repository';
+import { EmployeesRepository } from 'src/app/employee/employee.repository';
 import { UpdateProjectStepUsecase } from 'src/app/project-step/usecases/update-project-step.usecase';
 import { StepsRepository } from 'src/app/step/step.repository';
 import { UpdateProjectStepDTO } from 'src/app/project-step/dtos/update-project-step.dto';
@@ -12,6 +17,7 @@ export class UpdateStepUsecase {
     private stepsRepository: StepsRepository,
     private projectStepsRepository: ProjectStepsRepository,
     private updateProjectStep: UpdateProjectStepUsecase,
+    private employeesRepository: EmployeesRepository,
   ) {}
 
   async execute(
@@ -46,6 +52,26 @@ export class UpdateStepUsecase {
       throw new UnauthorizedException();
     }
 
-    await this.updateProjectStep.execute(projectStep.id, employee_id, data);
+    // The responsible must be an active employee of the office; null unassigns
+    if (data.assigned_to) {
+      const assigned = await this.employeesRepository.findById(
+        data.assigned_to,
+      );
+
+      if (!assigned || assigned.office_id !== office_id || !assigned.is_active) {
+        throw new BadRequestException('Invalid responsible employee.');
+      }
+    }
+
+    // The global ValidationPipe doesn't whitelist, so pass only known fields
+    const { status, step_hours, assigned_to, start_date, end_date } = data;
+
+    await this.updateProjectStep.execute(projectStep.id, employee_id, {
+      status,
+      step_hours,
+      assigned_to,
+      start_date,
+      end_date,
+    });
   }
 }

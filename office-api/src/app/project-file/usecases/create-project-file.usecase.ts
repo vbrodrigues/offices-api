@@ -27,6 +27,7 @@ export class CreateProjectFileUsecase {
 
   async execute(
     office_id: string,
+    employee_id: string,
     request: CreateProjectFileDTO,
   ): Promise<ProjectFile> {
     const project = await this.projectsRepository.findById(request.project_id);
@@ -39,24 +40,27 @@ export class CreateProjectFileUsecase {
       throw new UnauthorizedException();
     }
 
-    const employee = await this.employeesRepository.findById(
-      request.created_by,
-    );
+    const employee = await this.employeesRepository.findById(employee_id);
 
-    if (!employee) {
+    if (!employee || office_id !== employee.office_id) {
       throw new UnauthorizedException();
     }
 
-    const category = await this.categoriesRepository.findById(
-      request.category_id,
-    );
+    if (request.category_id) {
+      const category = await this.categoriesRepository.findById(
+        request.category_id,
+      );
 
-    if (!category) {
-      throw new UnauthorizedException();
+      if (!category || category.office_id !== office_id) {
+        throw new UnauthorizedException();
+      }
     }
 
-    if (office_id !== employee.office_id) {
-      throw new UnauthorizedException();
+    if (
+      request.project_step_id &&
+      !project.project_steps.some((step) => step.id === request.project_step_id)
+    ) {
+      throw new BadRequestException('Step does not belong to the project.');
     }
 
     const alreadyExists = await this.projectFilesRepository.findByName(
@@ -68,39 +72,42 @@ export class CreateProjectFileUsecase {
       throw new BadRequestException('Project file already exists.');
     }
 
-    const projectFile = await this.projectFilesRepository.add({
-      created_by_id: request.created_by,
-      path: null,
-      project_id: request.project_id,
-      name: request.name,
-      category_id: request.category_id,
-    });
-
-    const decodedFile = decodeBase64(request.file);
+    const fileFormat = request.fileFormat.replace(/[^a-zA-Z0-9]/g, '');
     const filePath = `offices/${office_id}/clients/${
       project.client.id
-    }/projects/${request.project_id}/files/${uuid()}.${request.fileFormat}`;
+    }/projects/${request.project_id}/files/${uuid()}${
+      fileFormat ? `.${fileFormat}` : ''
+    }`;
 
-    const fileStoragePath = await this.storageSerivce.uploadFile(
-      decodedFile,
+    // Upload before saving, so a failed upload leaves no file without a path
+    const fileKey = await this.storageSerivce.uploadFile(
+      decodeBase64(request.file),
       filePath,
     );
 
-    await this.projectFilesRepository.update(projectFile.id, {
-      path: fileStoragePath,
+    const projectFile = await this.projectFilesRepository.add({
+      created_by_id: employee_id,
+      path: fileKey,
+      project_id: request.project_id,
+      name: request.name,
+      category_id: request.category_id || null,
+      project_step_id: request.project_step_id || null,
     });
 
     delete projectFile.path;
 
     const employees = await this.employeesRepository.findByOfficeId(office_id);
 
-    employees.forEach(async (notifiedEmployee) => {
-      if (notifiedEmployee.id !== request.created_by) {
-        await this.notificationsService.notify({
-          content: `Novo arquivo ${request.name} adicionado por ${employee.name} ao projeto ${project.name}`,
-          type: 'EMAIL',
-          receiver: notifiedEmployee.email,
-        });
+    // Fire-and-forget; a failed notification must not crash the process
+    employees.forEach((notifiedEmployee) => {
+      if (notifiedEmployee.id !== employee_id) {
+        this.notificationsService
+          .notify({
+            content: `Novo arquivo ${request.name} adicionado por ${employee.name} ao projeto ${project.name}`,
+            type: 'EMAIL',
+            receiver: notifiedEmployee.email,
+          })
+          .catch((err) => console.log('Error notifying employee:', err));
       }
     });
 

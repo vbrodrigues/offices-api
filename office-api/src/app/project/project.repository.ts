@@ -8,9 +8,31 @@ import {
 import { ProjectFilters } from './dtos/find-project-filters.dto';
 import { UpdateProjectDTO } from './dtos/update-project.dto';
 
+// Employee data that is safe to send to the browser (never the password)
+const employeePublicFields = {
+  id: true,
+  name: true,
+  email: true,
+  avatar: true,
+  office_id: true,
+  role_id: true,
+};
+
+const clientPublicFields = {
+  id: true,
+  office_id: true,
+  name: true,
+  email: true,
+  phone_number: true,
+  logo: true,
+  is_active: true,
+  created_at: true,
+  updated_at: true,
+};
+
 export type FullProject = Project & {
   files: ProjectFile[];
-  client: Client;
+  client: Omit<Client, 'password'>;
   project_steps: ProjectStep[];
 };
 
@@ -36,10 +58,19 @@ export class ProjectsRepositorySQL implements ProjectsRepository {
       where: { client: { office: { id: office_id } }, ...projectFilters },
       include: {
         files: {
-          include: { category: true, created_by: { include: { role: true } } },
+          include: {
+            category: true,
+            created_by: { select: { ...employeePublicFields, role: true } },
+          },
         },
-        client: true,
-        project_steps: { include: { step: true, assigned: true } },
+        client: { select: clientPublicFields },
+        project_steps: {
+          include: {
+            step: true,
+            assigned: { select: employeePublicFields },
+          },
+          orderBy: { position: 'asc' },
+        },
       },
     });
   }
@@ -49,10 +80,19 @@ export class ProjectsRepositorySQL implements ProjectsRepository {
       where: { id: project_id },
       include: {
         files: {
-          include: { category: true, created_by: { include: { role: true } } },
+          include: {
+            category: true,
+            created_by: { select: { ...employeePublicFields, role: true } },
+          },
         },
-        client: true,
-        project_steps: { include: { step: true, assigned: true } },
+        client: { select: clientPublicFields },
+        project_steps: {
+          include: {
+            step: true,
+            assigned: { select: employeePublicFields },
+          },
+          orderBy: { position: 'asc' },
+        },
       },
     });
   }

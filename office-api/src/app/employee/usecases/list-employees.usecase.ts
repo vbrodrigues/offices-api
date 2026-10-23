@@ -15,6 +15,8 @@ export class ListEmployeesUsecase {
 
     const signedEmployees = Promise.all(
       employees.map(async (employee) => {
+        delete employee.password;
+
         return {
           ...employee,
           avatar: employee.avatar

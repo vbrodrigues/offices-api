@@ -1,8 +1,9 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { Employee } from '@prisma/client';
 import { validatePassword } from 'src/app/common/utils/hash-password';
 import { EmployeesRepository } from 'src/app/employee/employee.repository';
+import { EmployeeOffice } from './auth.dtos';
 
 @Injectable()
 export class AuthService {
@@ -36,6 +37,28 @@ export class AuthService {
     }
 
     return employee;
+  }
+
+  // Offices where these credentials are valid, so login doesn't require the
+  // user to know their office_id. The same e-mail can exist in many offices.
+  async findEmployeeOffices(
+    email: string,
+    password: string,
+  ): Promise<EmployeeOffice[]> {
+    const employees = await this.employeesRepository.listByEmail(email);
+    const offices: EmployeeOffice[] = [];
+
+    for (const employee of employees) {
+      if (await validatePassword(password, employee.password)) {
+        offices.push({ id: employee.office.id, name: employee.office.name });
+      }
+    }
+
+    if (offices.length === 0) {
+      throw new UnauthorizedException();
+    }
+
+    return offices;
   }
 
   async login(employee: Employee) {

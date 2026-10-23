@@ -1,9 +1,11 @@
 import { Injectable } from '@nestjs/common';
-import { Employee } from '@prisma/client';
+import { Employee, Office } from '@prisma/client';
 import { PrismaService } from 'src/database/prisma-service';
 import { hashPassword } from '../common/utils/hash-password';
 import { CreateEmployeeDTO } from './dtos/create-employee-dto';
 import { UpdateEmployeeDTO } from './dtos/update-employee.dto';
+
+export type EmployeeWithOffice = Employee & { office: Office };
 
 export abstract class EmployeesRepository {
   abstract add(data: CreateEmployeeDTO): Promise<Employee>;
@@ -11,6 +13,7 @@ export abstract class EmployeesRepository {
     email: string,
     office_id: string,
   ): Promise<Employee | null>;
+  abstract listByEmail(email: string): Promise<EmployeeWithOffice[]>;
   abstract findById(employee_id: string): Promise<Employee | null>;
   abstract findByOfficeId(office_id: string): Promise<Employee[]>;
   abstract update(employee_id: string, data: UpdateEmployeeDTO): Promise<void>;
@@ -30,6 +33,13 @@ export class EmployeesRepositorySQL implements EmployeesRepository {
   async findByEmail(email: string, office_id: string): Promise<Employee> {
     return await this.prisma.employee.findFirst({
       where: { email: email, office_id: office_id },
+    });
+  }
+
+  async listByEmail(email: string): Promise<EmployeeWithOffice[]> {
+    return await this.prisma.employee.findMany({
+      where: { email, is_active: true },
+      include: { office: true },
     });
   }
 

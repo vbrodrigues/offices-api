@@ -26,7 +26,9 @@ export class FindProjectUsecase {
     if (project.files) {
       project.files = await Promise.all(
         project.files.map(async (file) => {
-          file.path = await this.storageService.signFile(file.path);
+          file.path = file.path
+            ? await this.storageService.signFile(file.path)
+            : file.path;
           return file;
         }),
       );
