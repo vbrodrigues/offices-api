@@ -58,7 +58,13 @@ Feature modules live in `src/app/<feature>/` and follow a fixed layout:
 - `<feature>.repository.ts`: an `abstract class XRepository` (used as the DI token) plus an `XRepositorySQL` Prisma implementation in the same file.
 - `dtos/`: `class-validator` DTOs; the global `ValidationPipe` runs with `transform: true`.
 
-Files (project files, logos, avatars) go through `StorageService` (`src/providers/storage/`, bound to S3). The database stores only the storage **key** (e.g. `offices/<id>/clients/<id>/projects/<id>/files/<uuid>.pdf`); `signFile()` turns it into a CloudFront signed URL valid for 30 minutes, and also accepts legacy rows holding the full S3 URL. Uploads arrive as base64/data URL inside the JSON body (`decodeBase64` strips a `data:` prefix), so the practical limit is ~380MB per file.
+Files (project files, logos, avatars) go through `StorageService` (`src/providers/storage/`, bound to S3). The database stores only the storage **key** (e.g. `offices/<id>/clients/<id>/projects/<id>/files/<uuid>.pdf`); `signFile()` turns it into a CloudFront signed URL valid for 30 minutes, and also accepts legacy rows holding the full S3 URL. Project files upload in batches straight to S3:
+1. `POST /project-files/uploads` returns one presigned PUT URL per file, valid for 15 minutes. The browser must send the returned `content_type` as the `Content-Type` header.
+2. `POST /project-files/batch` confirms the batch and saves the rows in one transaction. It checks that every key is under the project's prefix and exists in S3, creates the folders of each file's `relative_path`, and renames duplicates to `name (1).ext`.
+
+The limits are 100 files per batch and 5GB per file. The browser PUT needs a CORS rule on the bucket.
+
+Logos, avatars and the legacy `POST /project-files` still send base64/data URLs inside the JSON body (`decodeBase64` strips a `data:` prefix), with a practical limit of ~380MB.
 
 **All repositories are registered and exported centrally in `src/database/database.module.ts`** (`{ provide: XRepository, useClass: XRepositorySQL }`). Adding a repository means adding it there, and feature modules import `DatabaseModule` to get it. Storage works the same way: abstract `StorageService` bound to `S3StorageService` in `src/providers/storage/`.
 
@@ -81,7 +87,7 @@ The global Redis `CacheModule` is used by hand in controllers: `cacheManager.get
 
 ### Data model
 
-Prisma models in `prisma/schema.prisma`: Office → Clients, Employees (with Role), Categories, Steps; Client → Projects; Project → ProjectFiles (with Category) and ProjectSteps (unique on `project_id` + `step_id`). `Step` is an office-level template; `ProjectStep` is that step's instance/status on a project. IDs are UUID strings.
+Prisma models in `prisma/schema.prisma`: Office → Clients, Employees (with Role), Categories, Steps; Client → Projects; Project → ProjectFiles (with Category), ProjectFolders and ProjectSteps (unique on `project_id` + `step_id`). `ProjectFolder` is a per-project tree of any depth (`parent_id` null = root). A file's `folder_id` places it in the tree, while its category and step are only tags. A folder's own category and step are the default tags for files uploaded into it. `Step` is an office-level template; `ProjectStep` is that step's instance/status on a project. IDs are UUID strings.
 
 ## Inter-service communication
 

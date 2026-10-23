@@ -23,6 +23,15 @@ import { BaseResponse } from '../common/dtos/responses';
 import { JwtAuthGuard } from 'src/auth/employee/jwt-auth.guard';
 import { OfficeRequest } from 'src/auth/employee/auth.dtos';
 import { invalidateProjectsCache } from '../common/utils/projects-cache';
+import {
+  CreateProjectFilesBatchDTO,
+  MoveProjectFilesDTO,
+  ProjectFileUpload,
+  RequestProjectFileUploadsDTO,
+} from './dtos/batch-project-files.dto';
+import { RequestProjectFileUploadsUsecase } from './usecases/request-project-file-uploads.usecase';
+import { CreateProjectFilesBatchUsecase } from './usecases/create-project-files-batch.usecase';
+import { MoveProjectFilesUsecase } from './usecases/move-project-files.usecase';
 
 @Controller('/project-files')
 export class ProjectFileController {
@@ -31,7 +40,52 @@ export class ProjectFileController {
     private createProjectFile: CreateProjectFileUsecase,
     private removeProjectFile: RemoveProjectFileUsecase,
     private editProjectFile: EditProjectFileUsecase,
+    private requestProjectFileUploads: RequestProjectFileUploadsUsecase,
+    private createProjectFilesBatch: CreateProjectFilesBatchUsecase,
+    private moveProjectFiles: MoveProjectFilesUsecase,
   ) {}
+
+  // Batch upload, step 1: presigned URLs the browser PUTs each file to
+  @UseGuards(JwtAuthGuard)
+  @Post('/uploads')
+  async requestUploads(
+    @Request() { user: { office_id } }: OfficeRequest,
+    @Body() request: RequestProjectFileUploadsDTO,
+  ): Promise<ProjectFileUpload[]> {
+    return await this.requestProjectFileUploads.execute(office_id, request);
+  }
+
+  // Batch upload, step 2: saves the uploaded files
+  @UseGuards(JwtAuthGuard)
+  @Post('/batch')
+  async createBatch(
+    @Request() { user: { office_id, employee_id } }: OfficeRequest,
+    @Body() request: CreateProjectFilesBatchDTO,
+  ): Promise<ProjectFile[]> {
+    const files = await this.createProjectFilesBatch.execute(
+      office_id,
+      employee_id,
+      request,
+    );
+    await invalidateProjectsCache(
+      this.cacheManager,
+      office_id,
+      request.project_id,
+    );
+    return files;
+  }
+
+  // Declared before /:project_file_id so "move" isn't read as a file id
+  @UseGuards(JwtAuthGuard)
+  @Put('/move')
+  async move(
+    @Request() { user: { office_id } }: OfficeRequest,
+    @Body() request: MoveProjectFilesDTO,
+  ): Promise<BaseResponse> {
+    const project_id = await this.moveProjectFiles.execute(office_id, request);
+    await invalidateProjectsCache(this.cacheManager, office_id, project_id);
+    return { success: true, message: 'Project files moved successfully.' };
+  }
 
   @UseGuards(JwtAuthGuard)
   @Post()

@@ -31,6 +31,10 @@ import {
   RolesRepository,
   RolesRepositorySQL,
 } from 'src/app/role/role.repository';
+import {
+  ProjectFoldersRepository,
+  ProjectFoldersRepositorySQL,
+} from 'src/app/project-folder/project-folder.repository';
 import { PrismaService } from './prisma-service';
 import {
   StepsRepository,
@@ -77,6 +81,10 @@ import {
       provide: StepsRepository,
       useClass: StepsRepositorySQL,
     },
+    {
+      provide: ProjectFoldersRepository,
+      useClass: ProjectFoldersRepositorySQL,
+    },
   ],
   exports: [
     OfficesRepository,
@@ -88,6 +96,7 @@ import {
     ProjectStepsRepository,
     ProjectFilesRepository,
     StepsRepository,
+    ProjectFoldersRepository,
   ],
 })
 export class DatabaseModule {}

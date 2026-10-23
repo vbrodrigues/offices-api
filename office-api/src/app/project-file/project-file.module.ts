@@ -6,6 +6,9 @@ import { ProjectFileController } from './project-file.controller';
 import { CreateProjectFileUsecase } from './usecases/create-project-file.usecase';
 import { RemoveProjectFileUsecase } from './usecases/remove-project-file.usecase';
 import { EditProjectFileUsecase } from './usecases/edit-project-file.usecase';
+import { RequestProjectFileUploadsUsecase } from './usecases/request-project-file-uploads.usecase';
+import { CreateProjectFilesBatchUsecase } from './usecases/create-project-files-batch.usecase';
+import { MoveProjectFilesUsecase } from './usecases/move-project-files.usecase';
 
 @Module({
   imports: [DatabaseModule, StorageModule, NotificationsModule],
@@ -14,6 +17,9 @@ import { EditProjectFileUsecase } from './usecases/edit-project-file.usecase';
     CreateProjectFileUsecase,
     RemoveProjectFileUsecase,
     EditProjectFileUsecase,
+    RequestProjectFileUploadsUsecase,
+    CreateProjectFilesBatchUsecase,
+    MoveProjectFilesUsecase,
   ],
 })
 export class ProjectFileModule {}

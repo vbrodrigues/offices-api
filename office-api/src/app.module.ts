@@ -7,6 +7,7 @@ import { DatabaseModule } from './database/database.module';
 import { CategoryModule } from './app/category/category.module';
 import { ProjectModule } from './app/project/project.module';
 import { ProjectFileModule } from './app/project-file/project-file.module';
+import { ProjectFolderModule } from './app/project-folder/project-folder.module';
 import { AuthModule } from './auth/employee/auth.module';
 import { ClientAuthModule } from './auth/client/client-auth.module';
 import { NotificationsModule } from './events/notifications/notifications.module';
@@ -29,6 +30,7 @@ import { StepModule } from './app/step/step.module';
     NotificationsModule,
     ProjectModule,
     ProjectFileModule,
+    ProjectFolderModule,
     ProjectPostsModule,
     StepModule,
 
