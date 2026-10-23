@@ -1,27 +1,4 @@
-import { IsNotEmpty, IsOptional } from 'class-validator';
-
-export class CreateProjectFileDTO {
-  @IsNotEmpty()
-  project_id: string;
-
-  @IsOptional()
-  category_id?: string | null;
-
-  // Step of this project the file belongs to
-  @IsOptional()
-  project_step_id?: string | null;
-
-  // Base64 or a data URL of the file, of any type
-  @IsNotEmpty()
-  file: string;
-
-  // Extension used for the stored file, e.g. "pdf", "dwg", "skp"
-  @IsNotEmpty()
-  fileFormat: string;
-
-  @IsNotEmpty()
-  name: string;
-}
+import { IsNotEmpty } from 'class-validator';
 
 export class CreateProjectFileInternalDTO {
   // Set when the id must be known before inserting (batch uploads)

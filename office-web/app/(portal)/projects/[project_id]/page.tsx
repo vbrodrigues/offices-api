@@ -26,18 +26,15 @@ import { Project, ProjectStep } from "@/app/lib/api/office-api/projects/dtos";
 import { Step } from "@/app/lib/api/office-api/steps/dtos";
 import { listCategories } from "@/app/lib/api/office-api/categories/list-categories";
 import { Category } from "@/app/lib/api/office-api/categories/dtos";
-import { deleteProjectFile } from "@/app/lib/api/office-api/project-files/delete-project-file";
-import UploadProjectFileForm from "@/app/components/Project/UploadProjectFileForm";
 import { formatDistance } from "date-fns";
 import ptBR from "date-fns/locale/pt-BR";
-import { MdDelete, MdDownload, MdEdit, MdFolderOpen } from "react-icons/md";
-import FilterSelect from "@/app/components/FilterSelect";
+import { MdDelete, MdFolderOpen } from "react-icons/md";
 import ResponsibleSelect from "@/app/components/Project/ResponsibleSelect";
-import EditProjectFileForm from "@/app/components/Project/EditProjectFileForm";
+import FileExplorer from "@/app/components/Project/Files/FileExplorer";
 import { listEmployees } from "@/app/lib/api/office-api/employees/list-employees";
 import { Employee } from "@/app/lib/api/employees/dtos";
-import { shortenString } from "@/app/lib/utils";
-import { Dropzone } from "@/app/components/Form/Dropzone";
+import { listProjectFolders } from "@/app/lib/api/office-api/project-folders/list-project-folders";
+import { ProjectFolder } from "@/app/lib/api/office-api/project-folders/dtos";
 
 interface ProjectDetailsPageProps {
   params: {
@@ -53,6 +50,8 @@ interface ProjectDetailsData {
   categories: Category[];
   // Employees of the office, to pick a step's responsible
   employees: Employee[];
+  // Folder tree of the project's files, as a flat list
+  folders: ProjectFolder[];
 }
 
 const ProjectDetailsPage = ({
@@ -60,21 +59,23 @@ const ProjectDetailsPage = ({
 }: ProjectDetailsPageProps) => {
   const fetchProjectDetails = useCallback(
     async (access_token: string): Promise<ProjectDetailsData> => {
-      const [project, officeSteps, categories, employees] = await Promise.all([
-        findProject(access_token, project_id),
-        listSteps(access_token),
-        listCategories(access_token),
-        listEmployees(access_token),
-      ]);
+      const [project, officeSteps, categories, employees, folders] =
+        await Promise.all([
+          findProject(access_token, project_id),
+          listSteps(access_token),
+          listCategories(access_token),
+          listEmployees(access_token),
+          listProjectFolders(access_token, project_id),
+        ]);
 
-      return { project, officeSteps, categories, employees };
+      return { project, officeSteps, categories, employees, folders };
     },
     [project_id]
   );
 
   const {
     user,
-    data: { project: projectData, officeSteps, categories, employees },
+    data: { project: projectData, officeSteps, categories, employees, folders },
     setData,
     reload,
     isLoading,
@@ -83,6 +84,7 @@ const ProjectDetailsPage = ({
     officeSteps: [],
     categories: [],
     employees: [],
+    folders: [],
   });
 
   const {
@@ -99,18 +101,8 @@ const ProjectDetailsPage = ({
   const [isReordering, setIsReordering] = useState(false);
   const [stepToAdd, setStepToAdd] = useState<string | null>(null);
   const [stepToRemove, setStepToRemove] = useState<string | null>(null);
-  // File dropped and waiting for name/category before being sent
-  const [pendingFile, setPendingFile] = useState<File | null>(null);
-  const [fileToRemove, setFileToRemove] = useState<string | null>(null);
-  // Remounts the dropzone so it forgets the last file after an upload
-  const [dropzoneKey, setDropzoneKey] = useState(0);
-  const [fileToEdit, setFileToEdit] = useState<string | null>(null);
-  // File list filters: "" = all, "none" = files without one, or an id
-  const [categoryFilter, setCategoryFilter] = useState("");
+  // Step filter of the file explorer: "" = all, "none" = no step, or an id
   const [stepFilter, setStepFilter] = useState("");
-  const [fileSort, setFileSort] = useState<"recent" | "oldest" | "category">(
-    "recent"
-  );
   const filesSectionRef = useRef<HTMLDivElement>(null);
 
   if (isLoading) {
@@ -228,27 +220,6 @@ const ProjectDetailsPage = ({
     )
     .map((step) => ({ value: step.id, label: step.name }));
 
-  const closeUpload = () => {
-    setPendingFile(null);
-    setDropzoneKey((key) => key + 1);
-  };
-
-  const handleFileUploaded = async () => {
-    closeUpload();
-    showToast("Sucesso!", "Arquivo enviado.", "success");
-    await reload();
-  };
-
-  const handleRemoveFile = async (project_file_id: string) => {
-    try {
-      await deleteProjectFile(project_file_id, user.access_token);
-      setFileToRemove(null);
-      await reload();
-    } catch (err) {
-      showToast("Oops!", "Erro ao remover o arquivo.", "error");
-    }
-  };
-
   const handleResponsibleChange = async (
     step_id: string,
     employee_id: string | null
@@ -270,22 +241,10 @@ const ProjectDetailsPage = ({
     }
   };
 
-  const handleFileEdited = async () => {
-    setFileToEdit(null);
-    showToast("Sucesso!", "Arquivo atualizado.", "success");
-    await reload();
-  };
-
   // "Ver arquivos" on a step: filter the file list by it and scroll there
   const showStepFiles = (project_step_id: string) => {
     setStepFilter(project_step_id);
     filesSectionRef.current?.scrollIntoView({ behavior: "smooth" });
-  };
-
-  const handleCategoryFilterChange = (value: string) => {
-    setCategoryFilter(value);
-    // Sorting by category makes no sense when showing a single one
-    if (value && fileSort === "category") setFileSort("recent");
   };
 
   // Project steps as options, numbered like the list (value = ProjectStep id)
@@ -303,30 +262,6 @@ const ProjectDetailsPage = ({
     },
     {}
   );
-
-  const matchesFilter = (filter: string, value: string | null) =>
-    !filter || (filter === "none" ? !value : value === filter);
-
-  const visibleFiles = project.files
-    .filter(
-      (file) =>
-        matchesFilter(categoryFilter, file.category_id) &&
-        matchesFilter(stepFilter, file.project_step_id)
-    )
-    .sort((a, b) => {
-      if (fileSort === "category") {
-        // Files without a category go last; ties keep newest first
-        const byCategory = (a.category?.name ?? "￿").localeCompare(
-          b.category?.name ?? "￿",
-          "pt-BR"
-        );
-        if (byCategory !== 0) return byCategory;
-      }
-      const byDate = b.created_at.getTime() - a.created_at.getTime();
-      return fileSort === "oldest" ? -byDate : byDate;
-    });
-
-  const isFiltering = !!categoryFilter || !!stepFilter;
 
   return (
     <Toast.Provider swipeDirection="right" duration={5000}>
@@ -481,214 +416,17 @@ const ProjectDetailsPage = ({
 
           <div ref={filesSectionRef} className="scroll-mt-8">
             <h2 className="text-xl font-semibold">Arquivos</h2>
-            {project.files.length > 0 && (
-              <div className="flex gap-4 items-end flex-wrap mt-4">
-                <FilterSelect
-                  label="Categoria"
-                  value={categoryFilter}
-                  onChange={handleCategoryFilterChange}
-                  options={[
-                    { value: "", label: "Todas as categorias" },
-                    ...categories.map((category) => ({
-                      value: category.id,
-                      label: category.name,
-                    })),
-                    { value: "none", label: "Sem categoria" },
-                  ]}
-                />
-                <FilterSelect
-                  label="Etapa"
-                  value={stepFilter}
-                  onChange={setStepFilter}
-                  options={[
-                    { value: "", label: "Todas as etapas" },
-                    ...projectStepOptions,
-                    { value: "none", label: "Sem etapa" },
-                  ]}
-                />
-                <FilterSelect
-                  label="Ordenar por"
-                  value={fileSort}
-                  onChange={(value) => setFileSort(value as typeof fileSort)}
-                  options={[
-                    { value: "recent", label: "Mais recentes" },
-                    { value: "oldest", label: "Mais antigos" },
-                    // Only useful while showing more than one category
-                    ...(categoryFilter
-                      ? []
-                      : [{ value: "category", label: "Categoria (A-Z)" }]),
-                  ]}
-                />
-                {isFiltering && (
-                  <div className="flex gap-3 items-center pb-2">
-                    <p className="text-sm text-gray-500">
-                      {visibleFiles.length} de {project.files.length} arquivos
-                    </p>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setCategoryFilter("");
-                        setStepFilter("");
-                      }}
-                      className="text-sm text-blue-500 hover:opacity-80"
-                    >
-                      Limpar filtros
-                    </button>
-                  </div>
-                )}
-              </div>
-            )}
-            {pendingFile && (
-              <div className="mt-4 max-w-3xl">
-                <UploadProjectFileForm
-                  file={pendingFile}
-                  project_id={project_id}
-                  categories={categories}
-                  stepOptions={projectStepOptions}
-                  defaultProjectStepId={
-                    stepFilter && stepFilter !== "none" ? stepFilter : null
-                  }
-                  onUploaded={handleFileUploaded}
-                  onCancel={closeUpload}
-                  onError={(message) => showToast("Oops!", message, "error")}
-                />
-              </div>
-            )}
-            <div className="my-8 grid grid-cols-4 gap-4">
-              <div className="">
-                <Dropzone
-                  key={dropzoneKey}
-                  description="Enviar arquivo (PDF, DWG, SKP, imagens ou qualquer outro)"
-                  setFile={setPendingFile}
-                  height="56"
-                  allowAnyFile
-                />
-              </div>
-              {visibleFiles.map((file) => (
-                <div
-                  key={file.id}
-                  className="flex flex-col justify-between min-h-[14rem] gap-3 p-4 ring-2 ring-gray-300 rounded-md hover:shadow-lg hover:ring-blue-300 transition"
-                >
-                  <div className="flex justify-between items-start gap-2">
-                    <h3
-                      className="mb-2 text-lg font-semibold break-all"
-                      title={file.name}
-                    >
-                      {shortenString(file.name)}
-                    </h3>
-                    <div className="flex gap-2 items-center shrink-0">
-                      <Modal
-                        open={fileToEdit === file.id}
-                        onOpenChange={(open) =>
-                          setFileToEdit(open ? file.id : null)
-                        }
-                        trigger={
-                          <span
-                            aria-label={`Editar arquivo ${file.name}`}
-                            className="flex items-center text-gray-400 hover:text-blue-500 transition-colors"
-                          >
-                            <MdEdit size={20} />
-                          </span>
-                        }
-                        title={
-                          <strong className="text-2xl font-title">
-                            Editar {shortenString(file.name)}
-                          </strong>
-                        }
-                        description="Altere a categoria e a etapa do arquivo."
-                        content={
-                          <EditProjectFileForm
-                            file={file}
-                            categories={categories}
-                            stepOptions={projectStepOptions}
-                            onSaved={handleFileEdited}
-                            onError={(message) =>
-                              showToast("Oops!", message, "error")
-                            }
-                          />
-                        }
-                      />
-                      {file.path && (
-                        <a
-                          href={file.path}
-                          target="_blank"
-                          rel="noreferrer"
-                          aria-label={`Baixar ${file.name}`}
-                        >
-                          <MdDownload className="text-2xl text-blue-500 hover:opacity-80" />
-                        </a>
-                      )}
-                      <Modal
-                        open={fileToRemove === file.id}
-                        onOpenChange={(open) =>
-                          setFileToRemove(open ? file.id : null)
-                        }
-                        trigger={
-                          <span
-                            aria-label={`Remover arquivo ${file.name}`}
-                            className="flex items-center text-gray-400 hover:text-red-400 transition-colors"
-                          >
-                            <MdDelete size={22} />
-                          </span>
-                        }
-                        title={
-                          <strong className="text-2xl font-title">
-                            Remover {file.name}?
-                          </strong>
-                        }
-                        description="O arquivo é apagado do armazenamento e sai do projeto."
-                        content={
-                          <ConfirmRemoval
-                            message="Essa ação não pode ser desfeita."
-                            onConfirm={() => handleRemoveFile(file.id)}
-                            onCancel={() => setFileToRemove(null)}
-                          />
-                        }
-                      />
-                    </div>
-                  </div>
-
-                  <span className="flex gap-2">
-                    Categoria:
-                    <p className="font-semibold">
-                      {file.category?.name ?? "Sem categoria"}
-                    </p>
-                  </span>
-                  <span className="flex gap-2">
-                    Etapa:
-                    <p className="font-semibold">
-                      {projectStepOptions.find(
-                        (option) => option.value === file.project_step_id
-                      )?.label ?? "Sem etapa"}
-                    </p>
-                  </span>
-                  <div className="flex flex-col gap-1 mt-2 items-start">
-                    <span className="flex gap-1 items-center justify-start text-blue-500 text-sm">
-                      <AvatarCircle
-                        name={file.created_by.name}
-                        image={file.created_by.avatar}
-                        size="small"
-                      />
-                      <p className="text-gray-700 text-base">
-                        {file.created_by.name}
-                      </p>
-                    </span>
-                    <p className="text-sm text-gray-500">
-                      criou{" "}
-                      {formatDistance(file.created_at, Date.now(), {
-                        addSuffix: true,
-                        locale: ptBR,
-                      })}
-                    </p>
-                  </div>
-                </div>
-              ))}
-            </div>
-            {isFiltering && visibleFiles.length === 0 && (
-              <p className="text-gray-500 -mt-4">
-                Nenhum arquivo com esses filtros.
-              </p>
-            )}
+            <FileExplorer
+              project_id={project_id}
+              files={project.files}
+              folders={folders}
+              categories={categories}
+              stepOptions={projectStepOptions}
+              stepFilter={stepFilter}
+              onStepFilterChange={setStepFilter}
+              onChanged={reload}
+              showToast={showToast}
+            />
           </div>
         </div>
 

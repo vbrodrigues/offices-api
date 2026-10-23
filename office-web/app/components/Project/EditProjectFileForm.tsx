@@ -59,7 +59,7 @@ export default function EditProjectFileForm({
   };
 
   return (
-    <div className="flex flex-col gap-8 w-full mt-10 min-w-[24rem]">
+    <div className="flex flex-col gap-8 w-full mt-10 md:min-w-[24rem]">
       <SelectInput
         label="Categoria (opcional)"
         onChange={(option) => setCategoryId(option?.value ?? null)}
