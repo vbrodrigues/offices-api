@@ -52,10 +52,10 @@ export function ClientCard({ client, onChanged, onNotify }: ClientCardProps) {
 
   return (
     <div className=" bg-gray-100 rounded-lg border border-gray-300">
-      <div className=" p-8 flex flex-col w-full max-w-xl">
-        <div className="flex justify-between">
-          <span className="flex gap-4 items-center">
-            <h3 className="font-title text-xl font-bold text-gray-500">
+      <div className="p-5 sm:p-8 flex flex-col w-full max-w-xl">
+        <div className="flex justify-between items-start gap-3">
+          <span className="flex gap-4 items-center min-w-0">
+            <h3 className="font-title text-xl font-bold text-gray-500 break-words min-w-0">
               {client.name}
             </h3>
           </span>
@@ -63,7 +63,7 @@ export function ClientCard({ client, onChanged, onNotify }: ClientCardProps) {
             open={isEditOpen}
             onOpenChange={setIsEditOpen}
             trigger={
-              <span className="flex gap-2 items-center hover:cursor-pointer hover:opacity-80 transition-opacity">
+              <span className="flex gap-2 items-center min-h-[44px] sm:min-h-0 hover:cursor-pointer hover:opacity-80 transition-opacity">
                 <Pencil size={20} color="#3b82f6" />
                 <p className="text-blue-500 text-lg">Editar</p>
               </span>
@@ -90,17 +90,18 @@ export function ClientCard({ client, onChanged, onNotify }: ClientCardProps) {
         </div>
 
         <span className="flex gap-2 items-center mt-1">
-          <p className="text-gray-500">{client.email}</p>
-          <Copy
-            size={20}
-            color="#6b7280"
-            className="hover:cursor-pointer"
+          <p className="text-gray-500 break-all min-w-0">{client.email}</p>
+          <button
+            type="button"
             aria-label="Copiar e-mail"
             onClick={handleCopyEmail}
-          />
+            className="p-2 -m-2 shrink-0"
+          >
+            <Copy size={20} color="#6b7280" />
+          </button>
         </span>
 
-        <span className="flex gap-2 mt-4 items-center text-center">
+        <span className="flex flex-wrap gap-x-2 gap-y-1 mt-4 items-center">
           {phoneDigits ? (
             <>
               <p className="text-gray-500">{client.phone_number}</p>
@@ -116,7 +117,7 @@ export function ClientCard({ client, onChanged, onNotify }: ClientCardProps) {
           )}
         </span>
 
-        <footer className="flex justify-between mt-4">
+        <footer className="flex flex-wrap justify-between items-center gap-2 mt-4">
           <p className="text-sm text-gray-400">
             Cliente{" "}
             {formatDistance(new Date(client.created_at), new Date(), {
@@ -128,7 +129,7 @@ export function ClientCard({ client, onChanged, onNotify }: ClientCardProps) {
             open={isRemoveOpen}
             onOpenChange={setIsRemoveOpen}
             trigger={
-              <span className="flex gap-2 items-center hover:cursor-pointer hover:opacity-80 transition-opacity">
+              <span className="flex gap-2 items-center min-h-[44px] sm:min-h-0 hover:cursor-pointer hover:opacity-80 transition-opacity">
                 <Trash size={18} color="#f87171" />
                 <p className="text-red-400">Remover</p>
               </span>
