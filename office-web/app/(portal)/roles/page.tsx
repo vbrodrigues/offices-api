@@ -77,7 +77,7 @@ const RolesPage = () => {
           Esses são os cargos cadastrados:
         </p>
 
-        <div className="flex gap-4 flex-wrap">
+        <div className="flex gap-3 sm:gap-4 flex-wrap">
           {roles.map((role) => (
             <RoundedLabel
               key={role.id}
@@ -87,13 +87,13 @@ const RolesPage = () => {
           ))}
         </div>
 
-        <div className="bg-gray-100 p-8 rounded-lg shadow-md">
+        <div className="bg-gray-100 p-5 sm:p-8 rounded-lg shadow-md">
           <form
             onSubmit={handleSubmit(onSubmit)}
             className="flex flex-col gap-4"
           >
             <h3 className="text-lg font-semibold">Cadastrar novo cargo</h3>
-            <div className="flex gap-4">
+            <div className="grid gap-3 sm:gap-4 sm:grid-cols-[minmax(0,24rem)_auto] sm:items-center">
               <TextInput
                 label="Cargo"
                 name="label"
