@@ -1,4 +1,4 @@
-import { CacheInterceptor, CacheModule, Module } from '@nestjs/common';
+import { CacheModule, Module } from '@nestjs/common';
 import { ClientModule } from './app/client/client.module';
 import { EmployeeModule } from './app/employee/employee.module';
 import { OfficeModule } from './app/office/office.module';
@@ -10,11 +10,9 @@ import { ProjectFileModule } from './app/project-file/project-file.module';
 import { ProjectFolderModule } from './app/project-folder/project-folder.module';
 import { AuthModule } from './auth/employee/auth.module';
 import { ClientAuthModule } from './auth/client/client-auth.module';
-import { NotificationsModule } from './events/notifications/notifications.module';
-import { ProjectPostsModule } from './events/project-posts/project-posts.module';
+import { NotificationsModule } from './providers/notifications/notifications.module';
+import { ProjectPostModule } from './app/project-post/project-post.module';
 
-import type { RedisClientOptions } from 'redis';
-import * as redisStore from 'cache-manager-redis-store';
 import { StepModule } from './app/step/step.module';
 
 @Module({
@@ -31,15 +29,12 @@ import { StepModule } from './app/step/step.module';
     ProjectModule,
     ProjectFileModule,
     ProjectFolderModule,
-    ProjectPostsModule,
+    ProjectPostModule,
     StepModule,
 
-    CacheModule.register<RedisClientOptions>({
-      store: redisStore,
-      host: process.env.REDIS_HOST,
-      port: parseInt(process.env.REDIS_PORT),
-      isGlobal: true,
-    }),
+    // In memory, per process. Entries live a few seconds (ttl in seconds,
+    // passed as { ttl } on each set), so a single API instance is enough.
+    CacheModule.register({ isGlobal: true, max: 1000 }),
   ],
 })
 export class AppModule {}

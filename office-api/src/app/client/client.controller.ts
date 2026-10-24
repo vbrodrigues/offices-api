@@ -70,7 +70,7 @@ export class ClientController {
     const clients = await this.listClients.execute(request.user.office_id);
 
     if (clients) {
-      await this.cacheManager.set(cacheKey, clients, 5000);
+      await this.cacheManager.set(cacheKey, clients, { ttl: 5 });
     }
 
     return clients;

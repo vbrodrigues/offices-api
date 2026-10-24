@@ -37,8 +37,9 @@ model Client {
   created_at   DateTime  @default(now())
   updated_at   DateTime?
 
-  office   Office    @relation(fields: [office_id], references: [id])
-  projects Project[]
+  office             Office            @relation(fields: [office_id], references: [id])
+  projects           Project[]
+  project_post_likes ProjectPostLike[]
 }
 
 // Job title of an office's employees ("Arquiteta", "Estagiário"). It only
@@ -83,6 +84,7 @@ model Employee {
   project_files   ProjectFile[]
   ProjectStep     ProjectStep[]
   project_folders ProjectFolder[]
+  project_posts   ProjectPost[]
 }
 
 model Category {
@@ -107,6 +109,7 @@ model Project {
   files         ProjectFile[]
   folders       ProjectFolder[]
   project_steps ProjectStep[]
+  posts         ProjectPost[]
 }
 
 model ProjectFile {
@@ -190,4 +193,35 @@ model ProjectStep {
   folders  ProjectFolder[]
 
   @@unique([project_id, step_id])
+}
+
+// Update posted by the office on a project's feed, which the client reads
+model ProjectPost {
+  id          String    @id @default(uuid())
+  project_id  String
+  employee_id String
+  content     String?   @db.Text
+  // Storage key of the attached image or file, if any
+  media       String?   @db.VarChar(4096)
+  created_at  DateTime  @default(now())
+  updated_at  DateTime?
+
+  project  Project           @relation(fields: [project_id], references: [id], onDelete: Cascade)
+  employee Employee          @relation(fields: [employee_id], references: [id])
+  likes    ProjectPostLike[]
+
+  @@index([project_id, created_at])
+}
+
+// A client liking a post; at most one per client and post
+model ProjectPostLike {
+  id              String   @id @default(uuid())
+  project_post_id String
+  client_id       String
+  created_at      DateTime @default(now())
+
+  project_post ProjectPost @relation(fields: [project_post_id], references: [id], onDelete: Cascade)
+  client       Client      @relation(fields: [client_id], references: [id], onDelete: Cascade)
+
+  @@unique([project_post_id, client_id])
 }

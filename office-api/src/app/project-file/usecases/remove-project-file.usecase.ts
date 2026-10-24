@@ -8,7 +8,7 @@ import { can, Permission } from 'src/auth/employee/permissions';
 import { InternalServerErrorException } from '@nestjs/common/exceptions';
 import { EmployeesRepository } from 'src/app/employee/employee.repository';
 import { ProjectsRepository } from 'src/app/project/project.repository';
-import { NotificationsService } from 'src/events/notifications/notifications.service';
+import { NotificationsService } from 'src/providers/notifications/notifications.service';
 import { StorageService } from 'src/providers/storage/storage';
 import { ProjectFilesRepository } from '../project-file.repository';
 
