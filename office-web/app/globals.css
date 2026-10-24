@@ -21,3 +21,12 @@ body {
   @apply bg-gray-200 text-gray-800;
   -webkit-font-smoothing: antialiased;
 }
+
+/* iOS zooms into any field with text under 16px when it gets focus */
+@media (max-width: 767px) {
+  input,
+  select,
+  textarea {
+    font-size: 16px !important;
+  }
+}

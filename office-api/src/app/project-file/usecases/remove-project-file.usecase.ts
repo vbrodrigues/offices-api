@@ -1,4 +1,10 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import {
+  ForbiddenException,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
+import { OfficeRequest } from 'src/auth/employee/auth.dtos';
+import { can, Permission } from 'src/auth/employee/permissions';
 import { InternalServerErrorException } from '@nestjs/common/exceptions';
 import { EmployeesRepository } from 'src/app/employee/employee.repository';
 import { ProjectsRepository } from 'src/app/project/project.repository';
@@ -17,7 +23,11 @@ export class RemoveProjectFileUsecase {
   ) {}
 
   // Returns the project the file belonged to
-  async execute(office_id: string, project_file_id: string): Promise<string> {
+  async execute(
+    caller: OfficeRequest['user'],
+    project_file_id: string,
+  ): Promise<string> {
+    const { office_id } = caller;
     const projectFile = await this.projectFilesRepository.findById(
       project_file_id,
     );
@@ -36,6 +46,13 @@ export class RemoveProjectFileUsecase {
 
     if (office_id !== project.client.office_id) {
       throw new UnauthorizedException();
+    }
+
+    if (
+      projectFile.created_by_id !== caller.employee_id &&
+      !can(caller.access_level, Permission.DELETE_ANY_FILE)
+    ) {
+      throw new ForbiddenException('You can only delete your own files.');
     }
 
     // Older rows can have no path if their upload failed

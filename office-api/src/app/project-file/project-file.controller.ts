@@ -103,14 +103,18 @@ export class ProjectFileController {
   @UseGuards(JwtAuthGuard)
   @Delete('/:project_file_id')
   async remove(
-    @Request() { user: { office_id } }: OfficeRequest,
+    @Request() { user }: OfficeRequest,
     @Param('project_file_id') project_file_id: string,
   ): Promise<BaseResponse> {
     const project_id = await this.removeProjectFile.execute(
-      office_id,
+      user,
       project_file_id,
     );
-    await invalidateProjectsCache(this.cacheManager, office_id, project_id);
+    await invalidateProjectsCache(
+      this.cacheManager,
+      user.office_id,
+      project_id,
+    );
     return { success: true, message: 'Project file deleted successfully.' };
   }
 }

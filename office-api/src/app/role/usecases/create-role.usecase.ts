@@ -7,13 +7,17 @@ import { RolesRepository } from '../role.repository';
 export class CreateRoleUsecase {
   constructor(private rolesRepository: RolesRepository) {}
 
-  async execute(data: CreateRoleDTO): Promise<Role> {
-    const alreadyExists = await this.rolesRepository.findByLabel(data.label);
+  async execute(office_id: string, data: CreateRoleDTO): Promise<Role> {
+    const label = data.label.trim();
+    const alreadyExists = await this.rolesRepository.findByLabel(
+      office_id,
+      label,
+    );
 
     if (alreadyExists) {
       throw new BadRequestException('Role already exists.');
     }
 
-    return await this.rolesRepository.add(data);
+    return await this.rolesRepository.add(office_id, label);
   }
 }

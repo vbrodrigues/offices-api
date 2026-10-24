@@ -73,17 +73,17 @@ export class ProjectFolderController {
   @UseGuards(JwtAuthGuard)
   @Delete('/:project_folder_id')
   async remove(
-    @Request() { user: { office_id } }: OfficeRequest,
+    @Request() { user }: OfficeRequest,
     @Param('project_folder_id') project_folder_id: string,
   ): Promise<BaseResponse> {
     const removed = await this.removeProjectFolder.execute(
-      office_id,
+      user,
       project_folder_id,
     );
     // Its files leave the project's file list
     await invalidateProjectsCache(
       this.cacheManager,
-      office_id,
+      user.office_id,
       removed.project_id,
     );
     return {

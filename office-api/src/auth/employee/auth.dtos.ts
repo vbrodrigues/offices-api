@@ -1,7 +1,14 @@
-import { IsNotEmpty } from 'class-validator';
+import { AccessLevel } from '@prisma/client';
+import { IsNotEmpty, IsStrongPassword } from 'class-validator';
 
 export class OfficeRequest {
-  user: { employee_id: string; office_id: string; email: string };
+  user: {
+    employee_id: string;
+    office_id: string;
+    email: string;
+    // Read from the database on each request (cached a few seconds)
+    access_level: AccessLevel;
+  };
 }
 
 export class FindEmployeeOfficesDTO {
@@ -15,4 +22,13 @@ export class FindEmployeeOfficesDTO {
 export interface EmployeeOffice {
   id: string;
   name: string;
+}
+
+export class ChangePasswordDTO {
+  @IsNotEmpty()
+  current_password: string;
+
+  @IsNotEmpty()
+  @IsStrongPassword()
+  new_password: string;
 }
