@@ -20,7 +20,7 @@ export function TextInput({
   return (
     <input
       placeholder={label}
-      className={`bg-gray-200 border border-gray-200 rounded-lg px-4 py-2 focus:outline-blue-500 ${
+      className={`w-full min-h-[44px] bg-gray-200 border border-gray-200 rounded-lg px-4 py-2 focus:outline-blue-500 ${
         error && "outline-red-500 focus:outline-red-500"
       }`}
       type={type}

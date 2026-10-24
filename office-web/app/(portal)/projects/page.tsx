@@ -4,9 +4,8 @@ import { formatDistance } from "date-fns";
 import ptBR from "date-fns/locale/pt-BR";
 import { MdClose, MdCreateNewFolder, MdTopic } from "react-icons/md";
 import { Modal } from "@/app/components/Modal";
-import { Table } from "@/app/components/Table/Table";
-import { TableRow } from "@/app/components/Table/TableRow";
-import { TableCell } from "@/app/components/Table/TableCell";
+import { DataList } from "@/app/components/DataList";
+import { ActionLabel, PageHeader } from "@/app/components/PageHeader";
 import { listProjects } from "@/app/lib/api/office-api/projects/list-projects";
 import CreateProjectForm from "@/app/components/Form/CreateProjectForm";
 import AvatarCircle from "@/app/components/AvatarCircle";
@@ -93,76 +92,85 @@ const ProjectsPage = () => {
 
   return (
     <Toast.Provider swipeDirection="right" duration={5000}>
-      <div className="p-10 w-full max-w-[90rem] min-w-[50rem]">
-        <div className="flex justify-between items-center">
-          <h1 className="font-title text-2xl">Projetos</h1>
-
-          <Modal
-            trigger={
-              <span className="bg-blue-500 py-3 px-6 rounded-lg text-gray-100 font-title tracking-wide hover:opacity-90 transition-opacity flex items-center gap-2">
-                <MdCreateNewFolder size={20} color="#f3f4f6" />
-                Criar novo projeto
-              </span>
-            }
-            title={
-              <div className="flex gap-6 items-center">
-                <MdCreateNewFolder size={48} color="#3b82f6" />
-                <strong className="text-2xl font-title">
-                  Adicionar projeto
-                </strong>
-              </div>
-            }
-            description="Preencha as informações do seu novo projeto!"
-            content={
-              <CreateProjectForm
-                steps={steps}
-                clients={clients}
-                onCreated={reload}
-              />
-            }
-          />
-        </div>
-
-        {client_id ? (
-          <div className="mt-4 flex gap-4 items-center">
+      <div className="w-full max-w-[90rem]">
+        <PageHeader
+          title="Projetos"
+          action={
+            <Modal
+              trigger={
+                <ActionLabel
+                  icon={<MdCreateNewFolder size={24} color="#f3f4f6" />}
+                  label="Criar novo projeto"
+                />
+              }
+              title={
+                <div className="flex gap-4 items-center">
+                  <MdCreateNewFolder size={40} color="#3b82f6" />
+                  <strong className="text-2xl font-title">
+                    Adicionar projeto
+                  </strong>
+                </div>
+              }
+              description="Preencha as informações do seu novo projeto!"
+              content={
+                <CreateProjectForm
+                  steps={steps}
+                  clients={clients}
+                  onCreated={reload}
+                />
+              }
+            />
+          }
+        >
+          {client_id ? (
+            <div className="flex flex-wrap gap-3 items-center">
+              <p className="text-gray-700 text-lg">
+                <strong>{projects.length}</strong> projetos de{" "}
+                <strong>{filteredClient?.name ?? "um cliente removido"}</strong>
+                .
+              </p>
+              <Link
+                href="/projects"
+                className="flex gap-2 items-center border border-blue-500 bg-blue-100 rounded-full px-4 py-2 text-blue-900 hover:opacity-80 transition-opacity"
+              >
+                <MdClose size={16} />
+                Ver todos
+              </Link>
+            </div>
+          ) : (
             <p className="text-gray-700 text-lg">
-              <strong>{projects.length}</strong> projetos de{" "}
-              <strong>{filteredClient?.name ?? "um cliente removido"}</strong>.
+              Sua empresa possui <strong>{projects.length}</strong> projetos.
             </p>
-            <Link
-              href="/projects"
-              className="flex gap-2 items-center border border-blue-500 bg-blue-100 rounded-full px-4 py-1 text-blue-900 hover:opacity-80 transition-opacity"
-            >
-              <MdClose size={16} />
-              Ver todos
-            </Link>
-          </div>
-        ) : (
-          <p className="mt-4 text-gray-700 text-lg">
-            Sua empresa possui <strong>{projects.length}</strong> projetos.
-          </p>
-        )}
+          )}
+        </PageHeader>
 
-        <Table columnNames={["CLIENTE", "PROJETO", "PROGRESSO", "DETALHES"]}>
-          {projects.map((project) => (
-            <TableRow key={project.id}>
-              <TableCell>
+        <DataList
+          items={projects}
+          getKey={(project) => project.id}
+          columns={[
+            {
+              header: "CLIENTE",
+              cell: (project) => (
                 <span className="flex items-center gap-4">
                   <AvatarCircle
                     image={project.client.logo}
                     name={project.client.name}
                   />
-                  <div className="flex flex-col gap-2">
+                  <div className="flex flex-col gap-1 min-w-0">
                     <strong>{project.client.name}</strong>
-                    <div className="flex flex-col">
-                      <p>{project.client.email}</p>
-                      <p>{project.client.phone_number}</p>
-                    </div>
+                    <p className="text-sm text-gray-500 break-all">
+                      {project.client.email}
+                    </p>
+                    <p className="text-sm text-gray-500">
+                      {project.client.phone_number}
+                    </p>
                   </div>
                 </span>
-              </TableCell>
-
-              <TableCell>
+              ),
+            },
+            {
+              header: "PROJETO",
+              cell: (project) => (
                 <div>
                   <strong>{project.name}</strong>
                   <p className="text-sm text-gray-500">
@@ -173,24 +181,57 @@ const ProjectsPage = () => {
                     })}
                   </p>
                 </div>
-              </TableCell>
-
-              <TableCell>
-                <ProgressBar steps={project.project_steps} />
-              </TableCell>
-
-              <TableCell>
+              ),
+            },
+            {
+              header: "PROGRESSO",
+              cell: (project) => <ProgressBar steps={project.project_steps} />,
+            },
+            {
+              header: "DETALHES",
+              cell: (project) => (
                 <Link
                   href={`/projects/${project.id}`}
-                  className="flex gap-2 justify-center items-center text-gray-500 hover:cursor-pointer hover:text-blue-500 transition-colors"
+                  className="flex gap-2 items-center text-gray-500 hover:text-blue-500 transition-colors min-h-[44px]"
                 >
                   <MdTopic size={24} />
                   <p>Abrir projeto</p>
                 </Link>
-              </TableCell>
-            </TableRow>
-          ))}
-        </Table>
+              ),
+            },
+          ]}
+          // On phones the whole card opens the project
+          renderCard={(project) => (
+            <Link
+              href={`/projects/${project.id}`}
+              className="flex flex-col gap-3"
+            >
+              <div className="flex items-center gap-3">
+                <AvatarCircle
+                  image={project.client.logo}
+                  name={project.client.name}
+                  size="small"
+                />
+                <div className="min-w-0">
+                  <strong className="block truncate">{project.name}</strong>
+                  <p className="text-sm text-gray-500 truncate">
+                    {project.client.name} · iniciado{" "}
+                    {formatDistance(project.created_at, Date.now(), {
+                      addSuffix: true,
+                      locale: ptBR,
+                    })}
+                  </p>
+                </div>
+              </div>
+              <ProgressBar steps={project.project_steps} />
+            </Link>
+          )}
+          empty={
+            <p className="text-gray-500 mt-6">
+              Nenhum projeto ainda. Crie o primeiro pelo botão +.
+            </p>
+          }
+        />
       </div>
     </Toast.Provider>
   );

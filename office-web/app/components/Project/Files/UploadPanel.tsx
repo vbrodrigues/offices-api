@@ -51,7 +51,8 @@ export default function UploadPanel({
     : `${done} arquivo(s) enviado(s)`;
 
   return (
-    <div className="fixed z-30 inset-x-0 bottom-0 md:inset-x-auto md:right-6 md:bottom-6 md:w-96 bg-white shadow-2xl rounded-t-2xl md:rounded-xl border border-gray-200 pb-[env(safe-area-inset-bottom)]">
+    // Above the tab bar on phones and tablets (it ends at lg)
+    <div className="fixed z-30 inset-x-0 bottom-[calc(57px+env(safe-area-inset-bottom))] md:inset-x-auto md:right-6 md:w-96 lg:bottom-6 bg-white shadow-2xl rounded-t-2xl md:rounded-xl border border-gray-200">
       <div className="flex items-center gap-2 px-4 py-3 border-b border-gray-200">
         <p className="font-semibold flex-1 truncate">{title}</p>
         {failed > 0 && !isBusy && (

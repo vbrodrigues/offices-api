@@ -57,12 +57,12 @@ function SortableRow({ id, index, disabled, children }: SortableRowProps) {
         type="button"
         ref={setActivatorNodeRef}
         aria-label="Arrastar para reordenar"
-        className="text-gray-400 hover:text-blue-500 hover:cursor-grab active:cursor-grabbing touch-none disabled:opacity-30 disabled:cursor-not-allowed"
+        className="p-2 -m-2 text-gray-400 hover:text-blue-500 hover:cursor-grab active:cursor-grabbing touch-none disabled:opacity-30 disabled:cursor-not-allowed"
         disabled={disabled}
         {...attributes}
         {...listeners}
       >
-        <MdDragIndicator size={20} />
+        <MdDragIndicator size={24} />
       </button>
       <span className="flex justify-center items-center w-6 h-6 rounded-full bg-blue-100 border border-blue-300 text-xs font-bold text-blue-900 shrink-0">
         {index + 1}
@@ -73,7 +73,9 @@ function SortableRow({ id, index, disabled, children }: SortableRowProps) {
 }
 
 // Numbered list reordered by dragging the handle (or with the keyboard:
-// focus the handle, Space to pick up, arrows to move, Space to drop).
+// focus the handle, Space to pick up, arrows to move, Space to drop). Only
+// the handle starts a drag (touch-none on it), so swiping the rest of a row
+// still scrolls the page on phones.
 export default function SortableList<T extends { id: string }>({
   items,
   onReorder,

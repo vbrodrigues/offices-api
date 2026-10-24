@@ -2,6 +2,7 @@
 
 import * as z from "zod";
 import * as Toast from "@radix-ui/react-toast";
+import { PageHeader } from "@/app/components/PageHeader";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm, SubmitHandler } from "react-hook-form";
 
@@ -64,8 +65,8 @@ const RolesPage = () => {
 
   return (
     <Toast.Provider swipeDirection="right" duration={5000}>
-      <div className="flex flex-col gap-8 p-10">
-        <h1 className="font-title text-2xl">Cargos</h1>
+      <div className="flex flex-col gap-8">
+        <PageHeader title="Cargos" />
 
         <InfoCard
           title="O que são cargos?"
