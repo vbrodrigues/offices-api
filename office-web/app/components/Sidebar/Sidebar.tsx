@@ -1,49 +1,31 @@
+"use client";
+
+import { usePathname } from "next/navigation";
 import { MenuGroup } from "./MenuGroup";
 import { MenuItem } from "./MenuItem";
-import { MdOutlineFolderCopy } from "react-icons/md";
-import { FaRegAddressCard } from "react-icons/fa";
-import { TbUserCheck, TbUsers } from "react-icons/tb";
-import { BsBarChartSteps, BsFileEarmarkMedical } from "react-icons/bs";
+import { isActive, NAV_GROUPS } from "../Navigation/nav-items";
 
+// Desktop navigation (lg and up); phones use the tab bar and the menu
 export function Sidebar() {
+  const pathname = usePathname();
+
   return (
-    <aside className="w-72 h-full border-r border-r-gray-300 mr-16">
-      <MenuGroup title="MINHA EMPRESA">
-        <MenuItem
-          to="/employees"
-          title="Colaboradores"
-          icon={<TbUsers size={20} color="#6b7280" />}
-        />
-      </MenuGroup>
-      <MenuGroup title="CLIENTES">
-        <MenuItem
-          to="/clients"
-          title="Clientes"
-          icon={<FaRegAddressCard size={20} color="#6b7280" />}
-        />
-        <MenuItem
-          to="/projects"
-          title="Projetos"
-          icon={<MdOutlineFolderCopy size={20} color="#6b7280" />}
-        />
-      </MenuGroup>
-      <MenuGroup title="CONFIGURAÇÕES">
-        <MenuItem
-          to="/roles"
-          title="Cargos"
-          icon={<TbUserCheck size={20} color="#6b7280" />}
-        />
-        <MenuItem
-          to="/categories"
-          title="Categorias de arquivos"
-          icon={<BsFileEarmarkMedical size={20} color="#6b7280" />}
-        />
-        <MenuItem
-          to="/steps"
-          title="Etapas de projetos"
-          icon={<BsBarChartSteps size={20} color="#6b7280" />}
-        />
-      </MenuGroup>
+    <aside className="hidden lg:block w-64 shrink-0 border-r border-r-gray-300 pr-6">
+      <nav className="sticky top-6">
+        {NAV_GROUPS.map((group) => (
+          <MenuGroup key={group.title} title={group.title}>
+            {group.items.map((item) => (
+              <MenuItem
+                key={item.to}
+                to={item.to}
+                title={item.title}
+                icon={item.icon(20)}
+                active={isActive(pathname, item.to)}
+              />
+            ))}
+          </MenuGroup>
+        ))}
+      </nav>
     </aside>
   );
 }

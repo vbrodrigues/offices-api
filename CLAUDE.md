@@ -123,6 +123,19 @@ Next.js 13.3 with the `app/` directory, Tailwind, Radix UI and Mantine, with zod
 - API calls: one function per endpoint under `app/lib/api/office-api/<resource>/` (e.g. `list-projects.ts`), each using the shared axios instance `OfficeAPI` (`app/lib/api/office-api/index.ts`, base URL from `NEXT_PUBLIC_API_URL`, default `http://localhost:3000`) and passing the token as a `Bearer` header. Response types are hand-written in `dtos.ts` next to them; they mirror the Prisma models and must be kept in sync by hand.
 - Auth: `app/contexts/UserContext.tsx` (used through `useUser()`) logs in via `POST /auth/login` and stores `{ access_token, office_id, email }` in a `user` cookie (`cookies-next`, 1 day). Pages call `getCurrentUser()` and render `UnauthorizedPage` when it returns null. Only the employee login flow is wired up in the UI.
 - Imports use the `@/app/...` alias.
+- **Mobile-first, always.** Offices and their clients use the portal on phones.
+  - Base styles target the phone, `md:` (768) the tablet and `lg:` (1024) the desktop.
+  - The `(portal)` shell gives phones and tablets a header, a bottom tab bar (`components/Navigation/BottomNav.tsx`) and a menu drawer (`MenuDrawer.tsx`). From `lg` up it shows the sidebar instead. All three read the same `components/Navigation/nav-items.tsx`.
+  - Use the shared pieces:
+    - `PageHeader` with an `ActionLabel` trigger for the page's main action, which becomes a floating + button on phones;
+    - `DataList` instead of tables (cards below `md`);
+    - `Modal`, a bottom sheet on phones.
+  - Rules:
+    - no fixed widths over ~360px without a breakpoint;
+    - touch targets of at least 44px;
+    - no hover-only actions or information.
+  - Inputs get 16px text on phones (`globals.css`) so iOS doesn't zoom.
+  - Check every screen at 375, 768 and 1280px wide, with no horizontal scroll.
 
 ## Conventions
 

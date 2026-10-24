@@ -36,6 +36,7 @@ export default function SelectInput({
           control: (provided) => ({
             ...provided,
             borderRadius: "0.5rem",
+            minHeight: "44px",
             paddingTop: "0.25rem",
             paddingBottom: "0.25rem",
           }),

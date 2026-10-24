@@ -3,6 +3,7 @@
 import { useState } from "react";
 import * as z from "zod";
 import * as Toast from "@radix-ui/react-toast";
+import { PageHeader } from "@/app/components/PageHeader";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm, SubmitHandler } from "react-hook-form";
 
@@ -74,8 +75,8 @@ const StepsPage = () => {
 
   return (
     <Toast.Provider swipeDirection="right" duration={5000}>
-      <div className="flex flex-col gap-8 p-10">
-        <h1 className="font-title text-2xl">Etapas de projeto</h1>
+      <div className="flex flex-col gap-8">
+        <PageHeader title="Etapas de projeto" />
 
         <InfoCard
           title="O que são etapas de projetos?"

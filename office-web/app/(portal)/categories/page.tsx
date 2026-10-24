@@ -12,6 +12,7 @@ import LoadingPage from "@/app/(portal)/loading";
 import useOfficeData from "@/app/hooks/useOfficeData";
 import { CornerToast } from "@/app/components/Toast/Toast";
 import * as Toast from "@radix-ui/react-toast";
+import { PageHeader } from "@/app/components/PageHeader";
 import { deleteCategory } from "@/app/lib/api/office-api/categories/delete-category";
 import RoundedLabel from "@/app/components/RoundedLabel";
 import WarningCard from "@/app/components/WarningCard";
@@ -83,8 +84,8 @@ const CategoriesPage = () => {
 
   return (
     <Toast.Provider swipeDirection="right" duration={5000}>
-      <div className="flex flex-col gap-8 p-10">
-        <h1 className="font-title text-2xl">Categorias</h1>
+      <div className="flex flex-col gap-8">
+        <PageHeader title="Categorias" />
 
         <InfoCard
           title="O que são categorias de arquivos de projetos?"
