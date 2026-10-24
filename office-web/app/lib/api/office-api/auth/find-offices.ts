@@ -1,4 +1,4 @@
-import { OfficeAPI } from "..";
+import { isNetworkError, OfficeAPI } from "..";
 
 export interface FindOfficesRequest {
   email: string;
@@ -10,7 +10,9 @@ export interface EmployeeOffice {
   name: string;
 }
 
-// Offices where these credentials are valid. Empty when they are invalid.
+// Offices where these credentials are valid. Empty when they are invalid;
+// throws when the API can't be reached, so that isn't shown as a wrong
+// password.
 export async function findOffices({
   email,
   password,
@@ -27,7 +29,7 @@ export async function findOffices({
 
     return response.data;
   } catch (err) {
-    console.log(err);
+    if (isNetworkError(err)) throw err;
     return [];
   }
 }

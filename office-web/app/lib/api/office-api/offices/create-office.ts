@@ -1,6 +1,6 @@
 // eslint-disable-next-line no-unused-vars
 import { AxiosError } from "axios";
-import { OfficeAPI } from "..";
+import { isNetworkError, OfficeAPI } from "..";
 
 export interface CreateOfficeRequest {
   name: string;
@@ -30,6 +30,9 @@ export async function createOffice(
 
     return response.data;
   } catch (err: AxiosError | any) {
-    throw new Error(err.response?.data.message);
+    if (isNetworkError(err)) throw err;
+    // Validation errors come as a list of messages
+    const message = err.response?.data.message;
+    throw new Error(Array.isArray(message) ? message.join(" ") : message);
   }
 }

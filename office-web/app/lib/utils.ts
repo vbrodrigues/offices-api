@@ -5,7 +5,7 @@ export function delay(ms: number) {
 }
 
 export const convertBase64 = (
-  file: File | null
+  file: File
 ): Promise<string | ArrayBuffer | null> =>
   new Promise((resolve, reject) => {
     const reader = new FileReader();
