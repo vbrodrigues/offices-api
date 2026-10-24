@@ -4,6 +4,7 @@ import { Header } from "@/app/components/Header";
 import { Sidebar } from "@/app/components/Sidebar/Sidebar";
 import { BottomNav } from "@/app/components/Navigation/BottomNav";
 import { MenuDrawer } from "@/app/components/Navigation/MenuDrawer";
+import { InstallBanner } from "@/app/components/Pwa/InstallBanner";
 import React, { useState } from "react";
 
 interface DashboardLayoutProps {
@@ -23,7 +24,10 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
         <Sidebar />
 
         {/* min-w-0 lets wide content shrink instead of widening the page */}
-        <main className="flex-1 min-w-0">{children}</main>
+        <main className="flex-1 min-w-0">
+          <InstallBanner />
+          {children}
+        </main>
       </div>
 
       <BottomNav onOpenMenu={() => setMenuOpen(true)} />
