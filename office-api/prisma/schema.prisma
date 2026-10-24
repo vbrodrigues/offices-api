@@ -20,6 +20,7 @@ model Office {
 
   clients    Client[]
   employees  Employee[]
+  roles      Role[]
   categories Category[]
   steps      Step[]
 }
@@ -40,29 +41,45 @@ model Client {
   projects Project[]
 }
 
+// Job title of an office's employees ("Arquiteta", "Estagiário"). It only
+// describes the person; what they can do comes from Employee.access_level.
 model Role {
   id         String   @id @default(uuid())
+  office_id  String
   label      String
   created_at DateTime @default(now())
 
+  office    Office     @relation(fields: [office_id], references: [id])
   employees Employee[]
+
+  @@unique([office_id, label])
+}
+
+// What an employee can do in the office; see auth/employee/permissions.ts.
+// Each office has exactly one OWNER.
+enum AccessLevel {
+  OWNER
+  PARTNER
+  MEMBER
 }
 
 model Employee {
-  id           String    @id @default(uuid())
+  id           String      @id @default(uuid())
   office_id    String
-  role_id      String
+  // Job title; optional
+  role_id      String?
+  access_level AccessLevel @default(MEMBER)
   name         String
   email        String
   password     String
   phone_number String?
-  avatar       String?   @db.VarChar(4096)
-  is_active    Boolean   @default(true)
-  created_at   DateTime  @default(now())
+  avatar       String?     @db.VarChar(4096)
+  is_active    Boolean     @default(true)
+  created_at   DateTime    @default(now())
   updated_at   DateTime?
 
   office          Office          @relation(fields: [office_id], references: [id])
-  role            Role            @relation(fields: [role_id], references: [id])
+  role            Role?           @relation(fields: [role_id], references: [id], onDelete: SetNull)
   project_files   ProjectFile[]
   ProjectStep     ProjectStep[]
   project_folders ProjectFolder[]

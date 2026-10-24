@@ -1,4 +1,10 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import {
+  ForbiddenException,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
+import { OfficeRequest } from 'src/auth/employee/auth.dtos';
+import { can, Permission } from 'src/auth/employee/permissions';
 import { folderWithDescendants } from 'src/app/common/utils/folder-tree';
 import { ProjectsRepository } from 'src/app/project/project.repository';
 import { StorageService } from 'src/providers/storage/storage';
@@ -23,9 +29,10 @@ export class RemoveProjectFolderUsecase {
 
   // Deletes the folder with all its subfolders and files
   async execute(
-    office_id: string,
+    caller: OfficeRequest['user'],
     project_folder_id: string,
   ): Promise<RemovedFolderSummary> {
+    const { office_id } = caller;
     const folder = await this.projectFoldersRepository.findById(
       project_folder_id,
     );
@@ -45,6 +52,16 @@ export class RemoveProjectFolderUsecase {
     );
     const folderIds = new Set(folderWithDescendants(folders, folder.id));
     const files = project.files.filter((file) => folderIds.has(file.folder_id));
+
+    // Deleting a folder deletes its files, so the same rule as for files
+    if (
+      files.some((file) => file.created_by_id !== caller.employee_id) &&
+      !can(caller.access_level, Permission.DELETE_ANY_FILE)
+    ) {
+      throw new ForbiddenException(
+        'The folder has files uploaded by others; only partners can delete it.',
+      );
+    }
 
     // Rows go away even if some objects can't be deleted: a leftover object
     // only costs storage, while a row without its object is a broken file.

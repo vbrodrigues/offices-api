@@ -3,6 +3,11 @@ import { Body, Get, Param, Post, Put } from '@nestjs/common/decorators';
 import { UseGuards } from '@nestjs/common/decorators/core/use-guards.decorator';
 import { Office } from '@prisma/client';
 import { JwtAuthGuard } from 'src/auth/employee/jwt-auth.guard';
+import { Permission } from 'src/auth/employee/permissions';
+import {
+  PermissionsGuard,
+  RequirePermission,
+} from 'src/auth/employee/permissions.guard';
 import { BaseResponse } from '../common/dtos/responses';
 import { CreateOfficeDTO } from './dtos/create-office.dto';
 import { UpdateOfficeDTO } from './dtos/update-office.dto';
@@ -26,12 +31,15 @@ export class OfficeController {
     return office;
   }
 
+  // JwtStrategy rejects an office_id param other than the caller's
+  @UseGuards(JwtAuthGuard)
   @Get(':office_id')
   async index(@Param('office_id') office_id: string): Promise<Office | null> {
     return await this.findOffice.execute(office_id);
   }
 
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, PermissionsGuard)
+  @RequirePermission(Permission.MANAGE_OFFICE)
   @Put(':office_id')
   async update(
     @Param('office_id') office_id: string,

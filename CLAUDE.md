@@ -21,7 +21,7 @@ Infrastructure (Kafka in KRaft mode, MySQL, Redis, MongoDB) from the repo root:
 docker compose up -d
 ```
 
-Each backend app reads a `.env` in its own folder; copy it from the `.env.example` next to it. AWS and email values are only needed for uploads and email notifications. A fresh database needs a `Role` row with label `owner` before an office can sign up (no seed exists).
+Each backend app reads a `.env` in its own folder; copy it from the `.env.example` next to it. AWS and email values are only needed for uploads and email notifications. No seed is needed: signing up an office creates its default job titles and its OWNER.
 
 Per NestJS service (`cd office-api`, etc.):
 
@@ -76,10 +76,20 @@ Mutation endpoints return `BaseResponse` (`{ success, message }`) from `src/app/
 
 Everything is scoped to an **office**. There are two separate Passport JWT flows in `src/auth/`, both signed with `SECRET` and told apart by the token `aud` claim:
 
-- `auth/employee/`: `JwtAuthGuard` (`aud: 'employee'`), `req.user = { employee_id, office_id, email }` (type `OfficeRequest`).
+- `auth/employee/`: `JwtAuthGuard` (`aud: 'employee'`), `req.user = { employee_id, office_id, email, access_level }` (type `OfficeRequest`).
+  - `JwtStrategy` reloads the employee's `access_level` and `is_active` on each request, with a 30s Redis cache under `auth-employee-<id>`. Inactivation and access-level changes apply immediately; call `invalidateEmployeeAuth` after changing either.
+  - `GET /auth/me` returns the employee, their office and their permission list.
 - `auth/client/`: `ClientJwtAuthGuard` (strategy name `client-jwt`, `aud: 'client'`), `req.user = { client_id, office_id, email }`. It also **injects `client_id` into `request.query`**, so client-facing list endpoints filter by the caller automatically.
 
-Both strategies reject requests whose `office_id` in body or params differs from the token's. Client-facing routes are usually separate endpoints (e.g. `GET /projects/clients`) rather than shared ones.
+Both strategies reject requests whose `office_id` in body or params differs from the token's.
+
+**Permissions.** Each employee has an `access_level`: `OWNER` (exactly one per office), `PARTNER` or `MEMBER`. `Role` is only a job title and grants nothing.
+- Endpoints check named permissions, never levels: `@UseGuards(JwtAuthGuard, PermissionsGuard)` plus `@RequirePermission(Permission.X)` (`auth/employee/permissions*.ts`). A failed check returns 403.
+- The level → permission map is `ACCESS_LEVEL_PERMISSIONS`:
+  - PARTNER can manage the office, employees, job titles, step templates and file categories, inactivate clients and delete anyone's files;
+  - OWNER can do all of that and also grant or revoke PARTNER;
+  - MEMBER works on clients, projects, steps and their own files.
+- Rules that depend on the target live in the use cases (`app/employee/employee-rules.ts`): nobody acts on themselves (that's `/employees/me`) or on the OWNER, and only the OWNER acts on a PARTNER. Client-facing routes are usually separate endpoints (e.g. `GET /projects/clients`) rather than shared ones.
 
 ### Caching
 
@@ -87,7 +97,7 @@ The global Redis `CacheModule` is used by hand in controllers: `cacheManager.get
 
 ### Data model
 
-Prisma models in `prisma/schema.prisma`: Office → Clients, Employees (with Role), Categories, Steps; Client → Projects; Project → ProjectFiles (with Category), ProjectFolders and ProjectSteps (unique on `project_id` + `step_id`). `ProjectFolder` is a per-project tree of any depth (`parent_id` null = root). A file's `folder_id` places it in the tree, while its category and step are only tags. A folder's own category and step are the default tags for files uploaded into it. `Step` is an office-level template; `ProjectStep` is that step's instance/status on a project. IDs are UUID strings.
+Prisma models in `prisma/schema.prisma`: Office → Clients, Employees (with an optional Role and an `access_level`), Roles (unique label per office), Categories, Steps; Client → Projects; Project → ProjectFiles (with Category), ProjectFolders and ProjectSteps (unique on `project_id` + `step_id`). `ProjectFolder` is a per-project tree of any depth (`parent_id` null = root). A file's `folder_id` places it in the tree, while its category and step are only tags. A folder's own category and step are the default tags for files uploaded into it. `Step` is an office-level template; `ProjectStep` is that step's instance/status on a project. IDs are UUID strings.
 
 ## Inter-service communication
 
