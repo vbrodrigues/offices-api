@@ -1,25 +1,24 @@
-import {
-  BadRequestException,
-  Injectable,
-  UnauthorizedException,
-} from '@nestjs/common';
-import { decodeBase64 } from 'src/app/common/utils/base64';
+import { BadRequestException, Injectable } from '@nestjs/common';
+import { OfficeRequest } from 'src/auth/employee/auth.dtos';
+import { RolesRepository } from 'src/app/role/role.repository';
 import { StorageService } from 'src/providers/storage/storage';
-import { UpdateEmployeeDTO } from '../dtos/update-employee.dto';
+import { EditEmployeeDTO } from '../dtos/update-employee.dto';
 import { EmployeesRepository } from '../employee.repository';
-import { v4 as uuid } from 'uuid';
+import { assertCanManageEmployee, assertRoleOfOffice } from '../employee-rules';
+import { uploadAvatar } from '../employee-view';
 
 @Injectable()
 export class EditEmployeeUsecase {
   constructor(
     private employeesRepository: EmployeesRepository,
+    private rolesRepository: RolesRepository,
     private storageService: StorageService,
   ) {}
 
   async execute(
+    caller: OfficeRequest['user'],
     employee_id: string,
-    office_id: string,
-    request: UpdateEmployeeDTO,
+    request: EditEmployeeDTO,
   ): Promise<void> {
     const employee = await this.employeesRepository.findById(employee_id);
 
@@ -27,22 +26,41 @@ export class EditEmployeeUsecase {
       throw new BadRequestException('Employee not found.');
     }
 
-    if (employee.office_id !== office_id) {
-      throw new UnauthorizedException();
-    }
+    assertCanManageEmployee(caller, employee);
+    await assertRoleOfOffice(
+      this.rolesRepository,
+      employee.office_id,
+      request.role_id,
+    );
 
-    if (request.avatar) {
-      const logoFile = decodeBase64(request.avatar);
-      const logoFilepath = `employees/${uuid()}.png`;
-
-      const logoStoragePath = await this.storageService.uploadFile(
-        logoFile,
-        logoFilepath,
+    if (request.email && request.email !== employee.email) {
+      const sameEmail = await this.employeesRepository.findByEmail(
+        request.email,
+        employee.office_id,
       );
 
-      request.avatar = logoStoragePath;
+      if (sameEmail) {
+        throw new BadRequestException('Employee already exists.');
+      }
     }
 
-    await this.employeesRepository.update(employee_id, request);
+    // Only fields present in the request change; null clears them
+    await this.employeesRepository.update(employee.id, {
+      ...(request.name !== undefined && { name: request.name.trim() }),
+      ...(request.email !== undefined && { email: request.email }),
+      ...(request.phone_number !== undefined && {
+        phone_number: request.phone_number,
+      }),
+      ...(request.role_id !== undefined && {
+        role_id: request.role_id || null,
+      }),
+      ...(request.avatar && {
+        avatar: await uploadAvatar(
+          this.storageService,
+          employee,
+          request.avatar,
+        ),
+      }),
+    });
   }
 }

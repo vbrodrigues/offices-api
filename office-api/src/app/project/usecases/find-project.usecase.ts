@@ -1,6 +1,7 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { StorageService } from 'src/providers/storage/storage';
 import { FullProject, ProjectsRepository } from '../project.repository';
+import { signProject } from '../sign-project';
 
 @Injectable()
 export class FindProjectUsecase {
@@ -23,17 +24,6 @@ export class FindProjectUsecase {
       throw new UnauthorizedException();
     }
 
-    if (project.files) {
-      project.files = await Promise.all(
-        project.files.map(async (file) => {
-          file.path = file.path
-            ? await this.storageService.signFile(file.path)
-            : file.path;
-          return file;
-        }),
-      );
-    }
-
-    return project;
+    return await signProject(project, this.storageService);
   }
 }

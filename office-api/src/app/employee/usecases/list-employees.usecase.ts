@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
-import { Employee } from '@prisma/client';
 import { StorageService } from 'src/providers/storage/storage';
-import { EmployeesRepository } from '../employee.repository';
+import { EmployeesRepository, EmployeeWithRole } from '../employee.repository';
+import { toPublicEmployee } from '../employee-view';
 
 @Injectable()
 export class ListEmployeesUsecase {
@@ -10,22 +10,15 @@ export class ListEmployeesUsecase {
     private storageService: StorageService,
   ) {}
 
-  async execute(office_id: string): Promise<Employee[]> {
+  async execute(
+    office_id: string,
+  ): Promise<Omit<EmployeeWithRole, 'password'>[]> {
     const employees = await this.employeesRepository.findByOfficeId(office_id);
 
-    const signedEmployees = Promise.all(
-      employees.map(async (employee) => {
-        delete employee.password;
-
-        return {
-          ...employee,
-          avatar: employee.avatar
-            ? await this.storageService.signFile(employee.avatar)
-            : employee.avatar,
-        };
-      }),
+    return await Promise.all(
+      employees.map((employee) =>
+        toPublicEmployee(employee, this.storageService),
+      ),
     );
-
-    return signedEmployees;
   }
 }

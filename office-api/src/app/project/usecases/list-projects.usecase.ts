@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { StorageService } from 'src/providers/storage/storage';
 import { ProjectFilters } from '../dtos/find-project-filters.dto';
 import { FullProject, ProjectsRepository } from '../project.repository';
+import { signProject } from '../sign-project';
 
 @Injectable()
 export class ListProjectsUsecase {
@@ -16,23 +17,8 @@ export class ListProjectsUsecase {
   ): Promise<FullProject[]> {
     const projects = await this.projectsRepository.findBy(office_id, filters);
 
-    const response = await Promise.all(
-      projects.map(async (project) => {
-        if (project.files) {
-          project.files = await Promise.all(
-            project.files.map(async (file) => {
-              file.path = file.path
-                ? await this.storageService.signFile(file.path)
-                : file.path;
-              return file;
-            }),
-          );
-        }
-
-        return project;
-      }),
+    return await Promise.all(
+      projects.map((project) => signProject(project, this.storageService)),
     );
-
-    return response;
   }
 }

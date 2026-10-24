@@ -22,6 +22,11 @@ import { BaseResponse } from '../common/dtos/responses';
 import { InactivateClientUsecase } from './usecases/inactivate-client.usecase';
 import { OfficeRequest } from 'src/auth/employee/auth.dtos';
 import { JwtAuthGuard } from 'src/auth/employee/jwt-auth.guard';
+import { Permission } from 'src/auth/employee/permissions';
+import {
+  PermissionsGuard,
+  RequirePermission,
+} from 'src/auth/employee/permissions.guard';
 import { Cache } from 'cache-manager';
 
 @Controller('/clients')
@@ -83,7 +88,8 @@ export class ClientController {
     return { success: true, message: 'Client edited.' };
   }
 
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, PermissionsGuard)
+  @RequirePermission(Permission.DELETE_CLIENTS)
   @Delete(':client_id')
   async delete(
     @Param('client_id') client_id: string,
