@@ -1,4 +1,7 @@
-version: "3"
+# Fixed project name: `docker compose up` gives the same containers from any
+# checkout or worktree of the repo, instead of one project per folder (whose
+# container names clash).
+name: offices-api
 
 services:
   kafka:
@@ -55,7 +58,7 @@ services:
       MYSQL_USER: my_user
       MYSQL_PASSWORD: my_password
     volumes:
-      - ./mysql/data:/var/lib/mysql
+      - mysql-data:/var/lib/mysql
     ports:
       - "3306:3306"
   redis:
@@ -67,6 +70,15 @@ services:
     image: mongo:7.0
     container_name: office-nosql
     volumes:
-      - ./mongo/data:/data/db
+      - mongo-data:/data/db
     ports:
       - "27017:27017"
+
+# Docker-managed volumes, so the data doesn't depend on the folder compose
+# runs from. Fixed names keep them the same whatever the project is called.
+# Wipe the databases with: docker compose down -v
+volumes:
+  mysql-data:
+    name: offices-api-mysql-data
+  mongo-data:
+    name: offices-api-mongo-data

@@ -21,6 +21,8 @@ Infrastructure (Kafka in KRaft mode, MySQL, Redis, MongoDB) from the repo root:
 docker compose up -d
 ```
 
+The compose project name is pinned (`name: offices-api`), so this works from any checkout or worktree and always reaches the same containers. MySQL and Mongo data live in the Docker volumes `offices-api-mysql-data` and `offices-api-mongo-data`, not in the repo folder, so they survive `docker compose down`. `docker compose down -v` wipes them.
+
 Each backend app reads a `.env` in its own folder; copy it from the `.env.example` next to it. AWS and email values are only needed for uploads and email notifications. No seed is needed: signing up an office creates its default job titles and its OWNER.
 
 Per NestJS service (`cd office-api`, etc.):
