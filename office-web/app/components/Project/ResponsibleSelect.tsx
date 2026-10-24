@@ -38,7 +38,7 @@ export default function ResponsibleSelect({
     >
       <Select.Trigger
         aria-label="Responsável pela etapa"
-        className="flex gap-2 items-center rounded-full px-2 py-1 text-sm hover:bg-gray-200 focus:outline-blue-500 disabled:opacity-50 data-[placeholder]:text-gray-400"
+        className="flex gap-2 items-center min-h-[44px] md:min-h-0 rounded-full px-2 py-1 text-sm hover:bg-gray-200 focus:outline-blue-500 disabled:opacity-50 data-[placeholder]:text-gray-400"
       >
         {responsible ? (
           <>

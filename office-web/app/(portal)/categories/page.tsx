@@ -104,7 +104,7 @@ const CategoriesPage = () => {
         </p>
 
         <div className="">
-          <div className="flex gap-4 flex-wrap ">
+          <div className="flex gap-3 sm:gap-4 flex-wrap">
             {categories.map((category) => (
               <RoundedLabel
                 key={category.id}
@@ -116,13 +116,13 @@ const CategoriesPage = () => {
           </div>
         </div>
 
-        <div className="bg-gray-100 p-8 rounded-lg shadow-md">
+        <div className="bg-gray-100 p-5 sm:p-8 rounded-lg shadow-md">
           <form
             onSubmit={handleSubmit(onSubmit)}
             className=" flex flex-col gap-4"
           >
             <h3 className="text-lg font-semibold">Cadastrar nova categoria</h3>
-            <div className="flex gap-4">
+            <div className="grid gap-3 sm:gap-4 sm:grid-cols-[minmax(0,24rem)_auto] sm:items-center">
               <div className="">
                 <TextInput
                   label="Categoria"

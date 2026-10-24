@@ -25,7 +25,7 @@ const Button = ({
         }
         ${
           size === "small"
-            ? "px-4 w-32 py-2"
+            ? "px-4 w-32 py-2 min-h-[44px] sm:min-h-0"
             : size === "medium"
             ? "px-6 w-52 py-3 "
             : "w-full py-3 "

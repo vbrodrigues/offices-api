@@ -117,10 +117,10 @@ const SignUpForm = () => {
   return (
     <Toast.Provider swipeDirection="right" duration={5000}>
       <form
-        className="grid grid-cols-2 gap-y-8 gap-x-4"
+        className="grid grid-cols-1 sm:grid-cols-2 gap-y-6 sm:gap-y-8 gap-x-4"
         onSubmit={handleSubmit(onSubmit)}
       >
-        <div className="flex flex-col gap-1 col-span-2">
+        <div className="flex flex-col gap-1 sm:col-span-2">
           <div className="flex justify-between items-center">
             <p className="font-title text-gray-500">{"Nome do escritório"}</p>
           </div>
@@ -220,7 +220,7 @@ const SignUpForm = () => {
           )}
         </div>
 
-        <div className="col-span-2 w-full">
+        <div className="sm:col-span-2 w-full">
           <Dropzone
             label="Logomarca de sua empresa"
             description="Arraste a imagem aqui ou clique para carregar a imagem de seu computador"
@@ -230,7 +230,7 @@ const SignUpForm = () => {
 
         <button
           type="submit"
-          className="col-span-2 mt-4 w-full bg-blue-500 py-3 rounded-lg text-gray-100 font-title tracking-wide hover:opacity-90 transition-opacity"
+          className="sm:col-span-2 mt-4 w-full bg-blue-500 py-3 rounded-lg text-gray-100 font-title tracking-wide hover:opacity-90 transition-opacity"
         >
           CADASTRAR
         </button>

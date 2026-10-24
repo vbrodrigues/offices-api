@@ -267,11 +267,11 @@ const ProjectDetailsPage = ({
     <Toast.Provider swipeDirection="right" duration={5000}>
       <div>
         <div className="flex flex-col gap-4">
-          <h1 className="text-2xl font-bold">{project?.name}</h1>
+          <h1 className="text-2xl font-bold break-words">{project?.name}</h1>
           <div className="max-w-md">
             <ProgressBar steps={project.project_steps} />
           </div>
-          <div className="flex gap-4 items-center text-blue-500 text-sm">
+          <div className="flex flex-wrap gap-x-4 gap-y-2 items-center text-blue-500 text-sm">
             <div>
               <p className="flex gap-2  items-center justify-center">
                 Cliente:{" "}
@@ -316,10 +316,10 @@ const ProjectDetailsPage = ({
           </div>
         </div>
 
-        <div className="flex gap-16 flex-col mt-8">
+        <div className="flex gap-12 md:gap-16 flex-col mt-8">
           <div className="">
             <h2 className="text-xl font-semibold">Etapas</h2>
-            <div className="flex flex-col gap-6 mt-4 ml-12 max-w-5xl">
+            <div className="flex flex-col gap-6 mt-4 md:ml-12 max-w-5xl">
               {project.project_steps.length === 0 ? (
                 <p className="text-gray-500">Esse projeto não tem etapas.</p>
               ) : (
@@ -328,8 +328,11 @@ const ProjectDetailsPage = ({
                   onReorder={handleReorder}
                   disabled={isReordering}
                   renderItem={(step) => (
-                    <>
-                      <ProjectStepInfo step={step} />
+                    // Phones: step name on its own line, controls wrap below
+                    <div className="flex flex-1 min-w-0 flex-wrap items-center gap-x-3 gap-y-2">
+                      <div className="basis-full md:basis-auto min-w-0">
+                        <ProjectStepInfo step={step} />
+                      </div>
                       <ResponsibleSelect
                         responsible={step.assigned}
                         employees={employees}
@@ -341,7 +344,7 @@ const ProjectDetailsPage = ({
                       <button
                         type="button"
                         onClick={() => showStepFiles(step.id)}
-                        className="flex gap-1 items-center text-sm text-blue-500 hover:opacity-80 transition-opacity"
+                        className="flex gap-1 items-center min-h-[44px] md:min-h-0 text-sm text-blue-500 hover:opacity-80 transition-opacity"
                       >
                         <MdFolderOpen size={18} />
                         Ver arquivos ({fileCountByStep[step.id] ?? 0})
@@ -361,7 +364,7 @@ const ProjectDetailsPage = ({
                         trigger={
                           <span
                             aria-label={`Remover etapa ${step.step.name}`}
-                            className="flex items-center text-gray-400 hover:text-red-400 transition-colors"
+                            className="flex items-center p-2 -m-2 text-gray-400 hover:text-red-400 transition-colors"
                           >
                             <MdDelete size={20} />
                           </span>
@@ -380,13 +383,13 @@ const ProjectDetailsPage = ({
                           />
                         }
                       />
-                    </>
+                    </div>
                   )}
                 />
               )}
 
-              <div className="flex gap-4 items-end">
-                <div className="w-72">
+              <div className="flex flex-col sm:flex-row gap-3 sm:items-end">
+                <div className="w-full sm:w-72">
                   <SelectInput
                     label="Adicionar etapa"
                     onChange={(option) => setStepToAdd(option?.value ?? null)}
