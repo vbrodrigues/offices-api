@@ -10,6 +10,11 @@ import {
 } from '@nestjs/common';
 import { CreateStepUsecase } from './usecases/create-step.usecase';
 import { JwtAuthGuard } from 'src/auth/employee/jwt-auth.guard';
+import { Permission } from 'src/auth/employee/permissions';
+import {
+  PermissionsGuard,
+  RequirePermission,
+} from 'src/auth/employee/permissions.guard';
 import { OfficeRequest } from 'src/auth/employee/auth.dtos';
 import { CreateStepDTO } from './dtos/create-step.dto';
 import { Step } from '@prisma/client';
@@ -25,7 +30,8 @@ export class StepController {
     private removeStep: RemoveStepUsecase,
   ) {}
 
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, PermissionsGuard)
+  @RequirePermission(Permission.MANAGE_TEMPLATES)
   @Post()
   async create(
     @Request() { user: { office_id } }: OfficeRequest,
@@ -42,7 +48,8 @@ export class StepController {
     return await this.listSteps.execute(office_id);
   }
 
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, PermissionsGuard)
+  @RequirePermission(Permission.MANAGE_TEMPLATES)
   @Delete('/:step_id')
   async delete(
     @Request() { user: { office_id } }: OfficeRequest,

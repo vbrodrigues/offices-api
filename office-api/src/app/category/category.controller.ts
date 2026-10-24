@@ -8,6 +8,11 @@ import { CreateCategoryDTO } from './dtos/create-category.dto';
 import { CreateCategoryUsecase } from './usecases/create-category.usecase';
 import { ListCategoriesUsecase } from './usecases/list-categories.usecase';
 import { JwtAuthGuard } from 'src/auth/employee/jwt-auth.guard';
+import { Permission } from 'src/auth/employee/permissions';
+import {
+  PermissionsGuard,
+  RequirePermission,
+} from 'src/auth/employee/permissions.guard';
 import { OfficeRequest } from 'src/auth/employee/auth.dtos';
 import { RemoveCategoryUsecase } from './usecases/remove-category.usecase';
 import { BaseResponse } from '../common/dtos/responses';
@@ -20,7 +25,8 @@ export class CategoryController {
     private removeCategory: RemoveCategoryUsecase,
   ) {}
 
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, PermissionsGuard)
+  @RequirePermission(Permission.MANAGE_TEMPLATES)
   @Post()
   async create(
     @Request() { user: { office_id } }: OfficeRequest,
@@ -37,7 +43,8 @@ export class CategoryController {
     return await this.listCategories.execute(office_id);
   }
 
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, PermissionsGuard)
+  @RequirePermission(Permission.MANAGE_TEMPLATES)
   @Delete('/:category_id')
   async remove(
     @Request() { user: { office_id } }: OfficeRequest,
