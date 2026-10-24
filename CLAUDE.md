@@ -115,7 +115,7 @@ These use Kafka request/response (`ClientKafka.send` + `subscribeToResponseOf`),
 
 ## office-web architecture
 
-Next.js 13.3 with the `app/` directory, Tailwind, Radix UI and Mantine, with zod for form validation. The UI is in Brazilian Portuguese. Commands: `npm run dev` (port 3333, `--turbo`), `npm run build`, `npm run lint`.
+Next.js 13.3 with the `app/` directory, Tailwind and Radix UI, with zod for form validation. The UI is in Brazilian Portuguese. Commands: `npm run dev` (port 3333; not `--turbo`, which in 13.3.4 breaks client components imported by the root layout), `npm run build`, `npm run lint`.
 
 - Routes: `app/page.tsx` is sign-in/sign-up (create an office). `app/(portal)/` holds the logged-in pages (projects, `projects/[project_id]`, clients, employees, roles, categories, steps) and shares a Header + Sidebar layout.
 - Project files: `app/components/Project/Files/FileExplorer.tsx` is a Drive-like explorer (the open folder is in `?folder=`).
