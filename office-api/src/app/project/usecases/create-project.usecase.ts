@@ -7,7 +7,7 @@ import { Project } from '@prisma/client';
 import { ClientsRepository } from 'src/app/client/client.repository';
 import { EmployeesRepository } from 'src/app/employee/employee.repository';
 import { CreateProjectStepUsecase } from 'src/app/project-step/usecases/create-project-step.usecase';
-import { NotificationsService } from 'src/events/notifications/notifications.service';
+import { NotificationsService } from 'src/providers/notifications/notifications.service';
 import { CreateProjectDTO } from '../dtos/create-project.dto';
 import { ProjectsRepository } from '../project.repository';
 import { StepsRepository } from 'src/app/step/step.repository';

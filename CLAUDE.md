@@ -4,28 +4,28 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Repository layout
 
-This monorepo holds four independent apps, each with its own `package.json`, `node_modules` and lint config. There is no root `package.json`: run npm commands from inside the app folder.
+This monorepo holds two independent apps, each with its own `package.json`, `node_modules` and lint config. There is no root `package.json`: run npm commands from inside the app folder.
 
-- `office-api/`: the main NestJS 9 HTTP API (port 3000, Swagger at `/api`). MySQL via Prisma, Redis cache, AWS S3 + CloudFront for files, Kafka producer.
-- `office-project-posts/`: NestJS project posts/likes/feed service (HTTP on port 3001 plus a Kafka consumer). MongoDB via Mongoose.
-- `office-notifications/`: NestJS Kafka-only microservice (no HTTP) that sends notifications (console or email via Nodemailer).
+- `office-api/`: the NestJS 9 HTTP API (port 3000, Swagger at `/api`). MySQL via Prisma, an in-memory cache, AWS S3 + CloudFront for files, e-mail notifications via Nodemailer.
 - `office-web/`: Next.js 13 (App Router) front-end, dev server on port 3333. See the `office-web` section below.
+
+There used to be two more NestJS services (`office-project-posts` on MongoDB and `office-notifications`) talking to the API over Kafka. They became modules of `office-api` (`app/project-post/`, `providers/notifications/`), so there is no Kafka, MongoDB or Redis anymore.
 
 The standalone `office-web` repository (Vite + React) is an older prototype; the current front-end is the `office-web/` folder here.
 
 ## Commands
 
-Infrastructure (Kafka in KRaft mode, MySQL, Redis, MongoDB) from the repo root:
+The only infrastructure is MySQL, from the repo root:
 
 ```bash
 docker compose up -d
 ```
 
-The compose project name is pinned (`name: offices-api`), so this works from any checkout or worktree and always reaches the same containers. MySQL and Mongo data live in the Docker volumes `offices-api-mysql-data` and `offices-api-mongo-data`, not in the repo folder, so they survive `docker compose down`. `docker compose down -v` wipes them.
+The compose project name is pinned (`name: offices-api`), so this works from any checkout or worktree and always reaches the same containers. MySQL data lives in the Docker volume `offices-api-mysql-data`, not in the repo folder, so it survives `docker compose down`. `docker compose down -v` wipes it.
 
-Each backend app reads a `.env` in its own folder; copy it from the `.env.example` next to it. AWS and email values are only needed for uploads and email notifications. No seed is needed: signing up an office creates its default job titles and its OWNER.
+`office-api` reads a `.env` in its folder; copy it from `office-api/.env.example`. AWS and email values are only needed for uploads and email notifications. No seed is needed: signing up an office creates its default job titles and its OWNER.
 
-Per NestJS service (`cd office-api`, etc.):
+Inside `office-api/`:
 
 ```bash
 npm install
@@ -49,14 +49,14 @@ npx prisma generate
 
 ## Environment variables
 
-No `.env` is committed (see each app's `.env.example`). `office-api` has no config loader of its own: its `.env` reaches `process.env` only because importing `@prisma/client` loads it. Variables read via `process.env`: `MYSQL_URI`, `MONGO_URI`, `REDIS_HOST`, `REDIS_PORT`, `SECRET` (JWT), `PROJECT_POSTS_SERVICE_URL` (office-api → project-posts HTTP), `AWS_BUCKET`, `AWS_CLOUDFRONT_DNS`, `AWS_CLOUDFRONT_KEYPAIR_ID`, `AWS_CLOUDFRONT_KEY_GROUP_ID`, `AWS_CLOUDFRONT_KEY_PATH`, `EMAIL`, `EMAIL_PASSWORD`, `EMAIL_PROVIDER`. Kafka brokers are hard-coded to `localhost:9092`.
+No `.env` is committed (see each app's `.env.example`). `office-api` has no config loader of its own: its `.env` reaches `process.env` only because importing `@prisma/client` loads it. Variables read via `process.env`: `PORT` (default 3000), `MYSQL_URI`, `SECRET` (JWT), `AWS_BUCKET`, `AWS_CLOUDFRONT_DNS`, `AWS_CLOUDFRONT_KEYPAIR_ID`, `AWS_CLOUDFRONT_KEY_GROUP_ID`, `AWS_CLOUDFRONT_KEY_PATH`, `EMAIL`, `EMAIL_PASSWORD`, `EMAIL_PROVIDER`. Without `EMAIL`/`EMAIL_PASSWORD`, e-mail notifications are only logged.
 
 ## office-api architecture
 
 Feature modules live in `src/app/<feature>/` and follow a fixed layout:
 
 - `<feature>.controller.ts`: thin; pulls `office_id`/`employee_id` from `req.user` and delegates to one use case per endpoint.
-- `usecases/<verb>-<noun>.usecase.ts`: one `@Injectable()` class per action with a single `execute(...)` method holding the business logic and authorization checks (e.g. verifying a project's `client.office_id` matches the caller's `office_id`, throwing `UnauthorizedException` otherwise). Sub-areas get subfolders (`project/usecases/posts/`, `project/usecases/steps/`).
+- `usecases/<verb>-<noun>.usecase.ts`: one `@Injectable()` class per action with a single `execute(...)` method holding the business logic and authorization checks (e.g. verifying a project's `client.office_id` matches the caller's `office_id`, throwing `UnauthorizedException` otherwise). Sub-areas get subfolders (`project/usecases/steps/`).
 - `<feature>.repository.ts`: an `abstract class XRepository` (used as the DI token) plus an `XRepositorySQL` Prisma implementation in the same file.
 - `dtos/`: `class-validator` DTOs; the global `ValidationPipe` runs with `transform: true`.
 
@@ -79,7 +79,7 @@ Mutation endpoints return `BaseResponse` (`{ success, message }`) from `src/app/
 Everything is scoped to an **office**. There are two separate Passport JWT flows in `src/auth/`, both signed with `SECRET` and told apart by the token `aud` claim:
 
 - `auth/employee/`: `JwtAuthGuard` (`aud: 'employee'`), `req.user = { employee_id, office_id, email, access_level }` (type `OfficeRequest`).
-  - `JwtStrategy` reloads the employee's `access_level` and `is_active` on each request, with a 30s Redis cache under `auth-employee-<id>`. Inactivation and access-level changes apply immediately; call `invalidateEmployeeAuth` after changing either.
+  - `JwtStrategy` reloads the employee's `access_level` and `is_active` on each request, with a 30s cache under `auth-employee-<id>`. Inactivation and access-level changes apply immediately; call `invalidateEmployeeAuth` after changing either.
   - `GET /auth/me` returns the employee, their office and their permission list.
 - `auth/client/`: `ClientJwtAuthGuard` (strategy name `client-jwt`, `aud: 'client'`), `req.user = { client_id, office_id, email }`. It also **injects `client_id` into `request.query`**, so client-facing list endpoints filter by the caller automatically.
 
@@ -95,23 +95,18 @@ Both strategies reject requests whose `office_id` in body or params differs from
 
 ### Caching
 
-The global Redis `CacheModule` is used by hand in controllers: `cacheManager.get` then `set` with keys like `project-${office_id}-${project_id}` and short TTLs (5–15s). Nothing invalidates these keys on writes, so reads can be stale for the TTL.
+The global `CacheModule` keeps entries in memory, per process. It is used by hand in controllers: `cacheManager.get` then `set` with keys like `project-${office_id}-${project_id}` and short TTLs. **Pass the TTL as `{ ttl: seconds }`**: a bare number is also read as seconds, so `5000` would mean 83 minutes. Few keys are invalidated on writes (`invalidateProjectsCache`, `invalidateEmployeeAuth`), so reads can be stale for the TTL. Being in memory, the cache only works with a single API instance.
 
 ### Data model
 
-Prisma models in `prisma/schema.prisma`: Office → Clients, Employees (with an optional Role and an `access_level`), Roles (unique label per office), Categories, Steps; Client → Projects; Project → ProjectFiles (with Category), ProjectFolders and ProjectSteps (unique on `project_id` + `step_id`). `ProjectFolder` is a per-project tree of any depth (`parent_id` null = root). A file's `folder_id` places it in the tree, while its category and step are only tags. A folder's own category and step are the default tags for files uploaded into it. `Step` is an office-level template; `ProjectStep` is that step's instance/status on a project. IDs are UUID strings.
+Prisma models in `prisma/schema.prisma`: Office → Clients, Employees (with an optional Role and an `access_level`), Roles (unique label per office), Categories, Steps; Client → Projects; Project → ProjectFiles (with Category), ProjectFolders, ProjectSteps (unique on `project_id` + `step_id`) and ProjectPosts → ProjectPostLikes (one per client and post). `ProjectFolder` is a per-project tree of any depth (`parent_id` null = root). A file's `folder_id` places it in the tree, while its category and step are only tags. A folder's own category and step are the default tags for files uploaded into it. `Step` is an office-level template; `ProjectStep` is that step's instance/status on a project. IDs are UUID strings.
 
-## Inter-service communication
+## Notifications and the project feed
 
-`office-api` talks to the other services through `src/events/`:
+Both used to be separate services reached over Kafka; they are now plain modules of `office-api`.
 
-- `events/notifications/`: `NotificationsService.notify()` sends to Kafka topic `office-notifications`. `office-notifications` handles it in `AppController` via `@MessagePattern`, and `NotificationServiceFactory` picks a sender (and message converter) by `data.type` (`CONSOLE` | `EMAIL`; `SMS` is declared but not implemented).
-- `events/project-posts/`: `ProjectPostsService` sends `office-create-project-post`, `office-like-project-post` and `office-unlike-project-post`, handled by `@MessagePattern`s in `office-project-posts/src/project-post/project-post.controller.ts`.
-- Reads go over **HTTP**, not Kafka: `GetProjectFeedUsecase` calls `GET /project-posts/feed/:project_id` on `office-project-posts` through the axios client in `src/app/common/utils/http-client.ts` (`PROJECT_POSTS_SERVICE_URL`).
-
-These use Kafka request/response (`ClientKafka.send` + `subscribeToResponseOf`), so the consumer must return a value. Adding a topic means updating `subscribeToResponseOf` on the producer and adding the `@MessagePattern` on the consumer. DTOs for these messages are duplicated by hand in each service (e.g. `office-api/src/events/*/…dto.ts` and `office-project-posts/src/**/dtos`); keep them in sync.
-
-`office-project-posts` uses the same use case / repository layout, with Mongoose models in `src/database/nosql/models.ts` reached through `MongoDBService`.
+- `providers/notifications/`: `NotificationsService.notify({ type, receiver, content })`, with `type` `CONSOLE` (only logs) or `EMAIL` (Nodemailer). It never throws, and callers don't await it, so a failed notification never fails the action that triggered it.
+- `app/project-post/`: the project feed. Employees post (`POST /projects/posts`, text and/or one base64 media stored under `.../projects/<id>/posts/<post_id>/media.<ext>`); the project's client reads it (`GET /projects/feed/:project_id`, with signed media URLs, like counts and `liked`) and likes it (`POST /projects/posts/like` and `/unlike`). The caller always comes from the token. Creating a post e-mails the client, and a like e-mails the post's author. The feed is not cached. Nothing in `office-web` uses it yet.
 
 ## office-web architecture
 

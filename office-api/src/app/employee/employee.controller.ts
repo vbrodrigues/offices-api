@@ -167,7 +167,7 @@ export class EmployeeController {
       await this.cacheManager.set<PublicEmployee[]>(
         `employees:${office_id}`,
         employees,
-        5000,
+        { ttl: 5 },
       );
     }
 

@@ -14,7 +14,7 @@ import { CreateProjectFolderInternalDTO } from 'src/app/project-folder/dtos/proj
 import { validateTags } from 'src/app/project-folder/folder-tags';
 import { ProjectFoldersRepository } from 'src/app/project-folder/project-folder.repository';
 import { ProjectsRepository } from 'src/app/project/project.repository';
-import { NotificationsService } from 'src/events/notifications/notifications.service';
+import { NotificationsService } from 'src/providers/notifications/notifications.service';
 import { StorageService } from 'src/providers/storage/storage';
 import { CreateProjectFilesBatchDTO } from '../dtos/batch-project-files.dto';
 import { CreateProjectFileInternalDTO } from '../dtos/create-project-file.dto';

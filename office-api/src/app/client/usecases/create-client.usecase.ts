@@ -5,7 +5,7 @@ import { StorageService } from 'src/providers/storage/storage';
 import { ClientsRepository } from '../client.repository';
 import { CreateClientDTO } from '../dtos/create-client.dto';
 import { decodeBase64 } from 'src/app/common/utils/base64';
-import { NotificationsService } from 'src/events/notifications/notifications.service';
+import { NotificationsService } from 'src/providers/notifications/notifications.service';
 
 @Injectable()
 export class CreateClientUsecase {

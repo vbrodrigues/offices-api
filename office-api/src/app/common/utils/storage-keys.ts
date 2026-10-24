@@ -26,3 +26,17 @@ export function extensionOf(name: string): string {
   const dot = name.lastIndexOf('.');
   return dot > 0 ? name.slice(dot + 1) : '';
 }
+
+// Storage key of the media attached to a project post
+export function projectPostMediaKey(
+  project: ProjectWithClient,
+  project_post_id: string,
+  extension?: string | null,
+): string {
+  const format = (extension || '').replace(/[^a-zA-Z0-9]/g, '').slice(0, 16);
+  return `offices/${project.client.office_id}/clients/${
+    project.client.id
+  }/projects/${project.id}/posts/${project_post_id}/media${
+    format ? `.${format}` : ''
+  }`;
+}

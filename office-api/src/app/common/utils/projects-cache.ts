@@ -8,8 +8,10 @@ export async function invalidateProjectsCache(
   office_id: string,
   project_id?: string,
 ) {
-  const listKeys: string[] = await cacheManager.store.keys(
-    `projects-${office_id}-*`,
+  // The in-memory store's keys() takes no pattern: it lists every key
+  const prefix = `projects-${office_id}-`;
+  const listKeys = ((await cacheManager.store.keys()) as string[]).filter(
+    (key) => key.startsWith(prefix),
   );
 
   await Promise.all(listKeys.map((key) => cacheManager.del(key)));
