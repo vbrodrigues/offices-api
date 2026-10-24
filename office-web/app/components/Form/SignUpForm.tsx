@@ -7,6 +7,7 @@ import { TextInput } from "./TextInput";
 import { Dropzone } from "./Dropzone";
 import { useRouter } from "next/navigation";
 import { createOffice } from "@/app/lib/api/office-api/offices/create-office";
+import { isNetworkError } from "@/app/lib/api/office-api";
 import { login } from "@/app/lib/api/office-api/auth/login";
 import { useState } from "react";
 import { convertBase64 } from "@/app/lib/utils";
@@ -22,11 +23,17 @@ const signUpSchema = z
       .max(100, "O nome deve conter no máximo 100 caracteres."),
     email: z.string().email("Pro favor, preencha um e-mail válido."),
     phone: z.string(),
-    password: z.string().min(6, "A senha deve conter no mínimo 6 caracteres."),
+    // Same rule as the API (class-validator IsStrongPassword)
+    password: z
+      .string()
+      .min(8, "A senha deve ter pelo menos 8 caracteres.")
+      .regex(/[a-z]/, "Inclua pelo menos uma letra minúscula.")
+      .regex(/[A-Z]/, "Inclua pelo menos uma letra maiúscula.")
+      .regex(/[0-9]/, "Inclua pelo menos um número.")
+      .regex(/[^a-zA-Z0-9]/, "Inclua pelo menos um símbolo (ex.: ! @ # $)."),
     passwordConfirmation: z.string().min(6).max(100),
   })
   .superRefine(({ passwordConfirmation, password }, ctx) => {
-    console.log("super refine", passwordConfirmation, password);
     if (passwordConfirmation !== password) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
@@ -69,8 +76,6 @@ const SignUpForm = () => {
         logo: logoFile,
       });
 
-      console.log(createOfficeResponse);
-
       const loginResponse = await login({
         email,
         password,
@@ -91,8 +96,14 @@ const SignUpForm = () => {
         setToastOpen(true);
       }
     } catch (err: Error | any) {
-      console.log(err);
-      if (err.message.includes("already exists")) {
+      if (isNetworkError(err)) {
+        setToastMessage(
+          "Não foi possível conectar ao servidor. Verifique sua conexão e tente novamente."
+        );
+        setToastOpen(true);
+        return;
+      }
+      if (err.message?.includes("already exists")) {
         setToastMessage("Já existe um escritório com esse e-mail.");
         setToastOpen(true);
         setError("name", {
@@ -101,7 +112,6 @@ const SignUpForm = () => {
         });
         return;
       }
-      console.log("Error creating office. Error:", err);
       setToastMessage(
         "Erro ao criar escritório. Verifique os dados e tente novamente."
       );

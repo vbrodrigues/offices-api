@@ -25,12 +25,18 @@ const signInSchema = z.object({
 
 type SignInFormData = z.infer<typeof signInSchema>;
 
+const WRONG_CREDENTIALS =
+  "E-mail ou senha incorretos. Verifique os dados e tente novamente.";
+const UNREACHABLE =
+  "Não foi possível conectar ao servidor. Verifique sua conexão e tente novamente.";
+
 const SignInForm = () => {
   const { register, handleSubmit, formState } = useForm<SignInFormData>({
     resolver: zodResolver(signInSchema),
   });
 
   const [toastOpen, setToastOpen] = useState(false);
+  const [toastText, setToastText] = useState(WRONG_CREDENTIALS);
 
   // Filled when the same e-mail and password are valid in more than one office
   const [offices, setOffices] = useState<EmployeeOffice[]>([]);
@@ -40,13 +46,18 @@ const SignInForm = () => {
 
   const { loginUser } = useUser();
 
+  const showError = (text: string) => {
+    setToastText(text);
+    setToastOpen(true);
+  };
+
   const login = async (email: string, password: string, office_id: string) => {
     const user = await loginUser(email, password, office_id);
 
     if (user) {
       router.push("/projects");
     } else {
-      setToastOpen(true);
+      showError(WRONG_CREDENTIALS);
     }
   };
 
@@ -61,10 +72,16 @@ const SignInForm = () => {
       return;
     }
 
-    const foundOffices = await findOffices({ email, password });
+    let foundOffices: EmployeeOffice[];
+    try {
+      foundOffices = await findOffices({ email, password });
+    } catch (err) {
+      showError(UNREACHABLE);
+      return;
+    }
 
     if (foundOffices.length === 0) {
-      setToastOpen(true);
+      showError(WRONG_CREDENTIALS);
     } else if (foundOffices.length === 1) {
       await login(email, password, foundOffices[0].id);
     } else {
@@ -156,7 +173,7 @@ const SignInForm = () => {
           open={toastOpen}
           setOpen={setToastOpen}
           title="Oops"
-          text="E-mail ou senha incorretos. Verifique os dados e tente novamente."
+          text={toastText}
         />
       </form>
     </Toast.Provider>
